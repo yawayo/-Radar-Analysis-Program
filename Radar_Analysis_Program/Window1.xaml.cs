@@ -53,8 +53,8 @@ namespace Radar_Analysis_Program
 
         private MySqlConnection conn;
 
-        private float[] Lane_width = new float[6] { 3.3f, 3.3f, 3.3f, 3.3f, 3.3f, 3.3f };
-        private float[] Lane_shift = new float[6] { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+        private float[] Lane_width = new float[6] { -9.9f, -6.6f, -3.3f, 3.3f, 6.6f, 9.9f };
+        private float[] Lane_shift = new float[9] { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
         private float Dist_Lane_gap = 25.0f;
 
         public class MyDataModel
@@ -70,6 +70,7 @@ namespace Radar_Analysis_Program
         {
             conn = connection;
             InitializeComponent();
+            draw_map();
 
             //db_connect(conn, firsttime, secondtime);
         }
@@ -78,97 +79,36 @@ namespace Radar_Analysis_Program
         {
             #region Lane
             int point_num = (int)(max_long / Dist_Lane_gap) + 1;
-            for (int p = 0; p < point_num - 1; p ++)
+
+            //중앙선 
+            for (int p = 0; p < point_num - 1; p++)
             {
                 Polyline lane = new Polyline();
+                lane.Stroke = Brushes.Yellow;
+                lane.StrokeThickness = 3;
                 lane.Points = new PointCollection()
                 {
-                    new Point((Data_Draw.Height / 2), Data_Draw.Height - (Data_Draw.Height / max_long) * Dist_Lane_gap * p),
-                    new Point((Data_Draw.Height / 2), Data_Draw.Height - (Data_Draw.Height / max_long) * Dist_Lane_gap * (p + 1))
+                    new Point((Data_Draw.Width / 2) + (Data_Draw.Width / (max_lat * 2)) * Lane_shift[p], Data_Draw.Height - (Data_Draw.Height / max_long) * Dist_Lane_gap * p),
+                    new Point((Data_Draw.Width / 2) + (Data_Draw.Width / (max_lat * 2)) * Lane_shift[p + 1], Data_Draw.Height - (Data_Draw.Height / max_long) * Dist_Lane_gap * (p + 1))
                 };
-                lane.Stroke = Brushes.Yellow;
-                lane.StrokeThickness = 1;
-                lane.StrokeDashArray = new DoubleCollection() { 15, 15 };
                 Data_Draw.Children.Add(lane);
             }
 
-            //중앙선   
-            Polyline polyline = new Polyline();
-            polyline.Points = new PointCollection()
+            for (int l = 0; l < 6; l++)
             {
-                new Point(Data_Draw.Width / 2, (Data_Draw.Height / max_long)),
-                new Point(Data_Draw.Width / 2, 100 * (Data_Draw.Height / max_long))
-            };
-            polyline.Stroke = Brushes.Yellow;
-            polyline.StrokeThickness = 3;
-            Data_Draw.Children.Add(polyline);
-
-            //왼쪽선
-            Polyline leftline = new Polyline();
-            leftline.Points = new PointCollection()  { new Point(0, (Data_Draw.Height/max_long)),
-                new Point( 0,  10*(Data_Draw.Height/max_long)),    // 600/100 6 
-                new Point(  0,  50*(Data_Draw.Height/max_long)),
-                new Point(  0,  100*(Data_Draw.Height/max_long)) };
-            leftline.Stroke = Brushes.White;
-            leftline.StrokeThickness = 3;
-            Data_Draw.Children.Add(leftline);
-
-
-            //왼쪽 1선
-            Polyline leftline1 = new Polyline();
-            leftline1.Points = new PointCollection()  { new Point(Data_Draw.Width/6, (Data_Draw.Height/max_long)),
-                new Point(Data_Draw.Width/6,  10*(Data_Draw.Height/max_long)),    // 600/100 6 
-                new Point(  Data_Draw.Width/6,  50*(Data_Draw.Height/max_long)),
-                new Point( Data_Draw.Width/6,  100*(Data_Draw.Height/max_long)) };
-            leftline1.Stroke = Brushes.White;
-            leftline1.StrokeThickness = 2;
-            leftline1.StrokeDashArray = new DoubleCollection() { 15, 10 };
-            Data_Draw.Children.Add(leftline1);
-
-
-            //왼쪽 2선
-            Polyline leftline2 = new Polyline();
-            leftline2.Points = new PointCollection()  { new Point(2*(Data_Draw.Width/6), (Data_Draw.Height/max_long)),
-                new Point( 2*(Data_Draw.Width/6),  10*(Data_Draw.Height/max_long)),    // 600/100 6 
-                new Point(  2*(Data_Draw.Width/6),  50*(Data_Draw.Height/max_long)),
-                new Point(  2*(Data_Draw.Width/6),  100*(Data_Draw.Height/max_long)) };
-            leftline2.Stroke = Brushes.White;
-            leftline2.StrokeThickness = 2;
-            leftline2.StrokeDashArray = new DoubleCollection() { 15, 10 };
-            Data_Draw.Children.Add(leftline2);
-
-            //오른선
-            Polyline rightline = new Polyline();
-            rightline.Points = new PointCollection()  { new Point(Data_Draw.Width , (Data_Draw.Height/max_long)),
-                new Point(Data_Draw.Width ,  10*(Data_Draw.Height/max_long)),    // 600/100 6 
-                new Point(  Data_Draw.Width ,  50*(Data_Draw.Height/max_long)),
-                new Point(  Data_Draw.Width ,  100*(Data_Draw.Height/max_long)) };
-            rightline.Stroke = Brushes.White;
-            rightline.StrokeThickness = 3;
-            Data_Draw.Children.Add(rightline);
-
-            //오른 1선
-            Polyline rightline1 = new Polyline();
-            rightline1.Points = new PointCollection()  { new Point(4*(Data_Draw.Width/6) , (Data_Draw.Height/max_long)),
-                new Point(4*(Data_Draw.Width/6),  10*(Data_Draw.Height/max_long)),    // 600/100 6 
-                new Point(  4*(Data_Draw.Width/6) ,  50*(Data_Draw.Height/max_long)),
-                new Point( 4*(Data_Draw.Width/6),  100*(Data_Draw.Height/max_long)) };
-            rightline1.Stroke = Brushes.White;
-            rightline1.StrokeThickness = 2;
-            rightline1.StrokeDashArray = new DoubleCollection() { 15, 10 };
-            Data_Draw.Children.Add(rightline1);
-
-
-            //오른 2선
-            Polyline rightline2 = new Polyline();
-            rightline2.Points = new PointCollection()  { new Point(5*(Data_Draw.Width/6) , (Data_Draw.Height/max_long)),
-                new Point(5*(Data_Draw.Width/6),  10*(Data_Draw.Height/max_long)),    // 600/100 6 
-                new Point(  5*(Data_Draw.Width/6) ,  50*(Data_Draw.Height/max_long)),
-                new Point( 5*(Data_Draw.Width/6),  100*(Data_Draw.Height/max_long)) };
-            rightline2.Stroke = Brushes.White;
-            rightline2.StrokeThickness = 2;
-            rightline2.StrokeDashArray = new DoubleCollection() { 15, 10 };
-            Data_Draw.Children.Add(rightline2);
+                for (int p = 0; p < point_num - 1; p++)
+                {
+                    Polyline lane = new Polyline();
+                    lane.Points = new PointCollection()
+                    {
+                        new Point((Data_Draw.Width / 2) + (Data_Draw.Width / (max_lat * 2)) * (Lane_width[l] + Lane_shift[p]), Data_Draw.Height - (Data_Draw.Height / max_long) * Dist_Lane_gap * p),
+                        new Point((Data_Draw.Width / 2) + (Data_Draw.Width / (max_lat * 2)) * (Lane_width[l] + Lane_shift[p + 1]), Data_Draw.Height - (Data_Draw.Height / max_long) * Dist_Lane_gap * (p + 1))
+                    };
+                    lane.Stroke = Brushes.White;
+                    lane.StrokeThickness = 3;
+                    Data_Draw.Children.Add(lane);
+                }
+            }
             #endregion
 
             #region Dist Line
@@ -199,12 +139,12 @@ namespace Radar_Analysis_Program
         }
         private void draw()
         {
-            draw_map();
+            //draw_map();
             double X;
             double Y;
             /*if (number == 0)
-            {  
-                if (rectangles[dataList[number].id] == null && _starttime <=dbcompareDT)     //생성 
+            {
+                if (rectangles[dataList[number].id] == null && _starttime <= dbcompareDT)     //생성 
                 {
                     textblock2 = dataList[number].DistLat.ToString("0.0");
                     textblock3 = dataList[number].DistLong.ToString("0.0");
@@ -252,12 +192,12 @@ namespace Radar_Analysis_Program
                     number++;
                 }
             }
-            else if (dataList[number-1].time < dbcompareDT && dataList[number].time <= dbcompareDT)   // DB 안의 time == 지금 작동중인 시간(dbcomapretime)
+            else if (dataList[number - 1].time < dbcompareDT && dataList[number].time <= dbcompareDT)   // DB 안의 time == 지금 작동중인 시간(dbcomapretime)
             {
 
                 for (int i = 0; i < 41; i++)
                 {
-                   
+
                     if (rectangles[dataList[number].id] != null && dataList[number - 1].time < dbcompareDT && dataList[number].time <= dbcompareDT)  // 이미 존재한
                     {
                         if (rectangles[i] != null && dataList[number].time <= dbcompareDT)
@@ -349,7 +289,7 @@ namespace Radar_Analysis_Program
                 }
                 textblock4 = number.ToString();
 
-            }*/
+            }
 
             for (int i = 0; i < 41; i++)
             {
@@ -360,7 +300,7 @@ namespace Radar_Analysis_Program
                     Data_Draw.Children.Remove(textBoxes[i]);
                 }
             }
-            textblock1 = dbcomparetime;
+            textblock1 = dbcomparetime;*/
 
         }
         void TimerTickHandler(object sender, EventArgs e)
