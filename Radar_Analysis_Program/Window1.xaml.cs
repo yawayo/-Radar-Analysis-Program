@@ -20,6 +20,7 @@ namespace Radar_Analysis_Program
 
         TextBox[] textBoxes = new TextBox[41];
         Rectangle[] rectangles = new Rectangle[41];
+       
         DateTime[] dates = new DateTime[41];
 
         DateTime _starttime;
@@ -51,12 +52,19 @@ namespace Radar_Analysis_Program
         string firsttime;
         string secondtime;
 
-        double test_a=0;
+        double duration= 0;
         private MySqlConnection conn;
 
+<<<<<<< HEAD
         private float[] Lane_width = new float[6] { -9.9f, -6.6f, -3.3f, 3.3f, 6.6f, 9.9f };
         private float[] Lane_shift = new float[9] { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
         private float Dist_Lane_gap = 25.0f;
+=======
+
+        public CheckBox[] checkBoxes;
+        public String[] checkbox_name;
+        
+>>>>>>> origin/jw_0307
 
         public class MyDataModel
         {
@@ -64,16 +72,31 @@ namespace Radar_Analysis_Program
             public int id { get; set; }
             public double DistLat { get; set; }
             public double DistLong { get; set; }
+            public double VrelLat { get; set; }
+            public double VrelLong { get; set; }
+            public double Velocity { get; set; }
+            public double RCS { get; set; }
+            public int ProbOfExist { get; set; }
+            public int Class { get; set; }
+            public int Zone { get; set; }
+            public int Lane { get; set; }
             public DateTime Timestamp;
         }
+        //dataList[number].id.ToString()
 
         public Window1(MySqlConnection connection)
         {
             conn = connection;
             InitializeComponent();
+<<<<<<< HEAD
             draw_map();
 
             //db_connect(conn, firsttime, secondtime);
+=======
+            CheckBox_setting();
+            map_setting();
+
+>>>>>>> origin/jw_0307
         }
 
         private void draw_map()
@@ -145,12 +168,118 @@ namespace Radar_Analysis_Program
             double Y;
             /*if (number == 0)
             {
+<<<<<<< HEAD
                 if (rectangles[dataList[number].id] == null && _starttime <= dbcompareDT)     //생성 
                 {
                     textblock2 = dataList[number].DistLat.ToString("0.0");
                     textblock3 = dataList[number].DistLong.ToString("0.0");
                     //textblock3.Text = dataList[number].DistLat.ToString("0.0");
                     //textblock2.Text = dataList[number].DistLong.ToString("0.0");
+=======
+                if (number == 0 && rectangles[dataList[number].id] == null)
+                {                 
+                    if (rectangles[dataList[number].id] == null && _starttime <= dbcompareDT)     //생성 
+                    {
+                        textblock2 = dataList[number].DistLat.ToString("0.0");
+                        textblock3 = dataList[number].DistLong.ToString("0.0");
+                        //textblock3.Text = dataList[number].DistLat.ToString("0.0");
+                        //textblock2.Text = dataList[number].DistLong.ToString("0.0");
+
+                        X = shift_pos.X + ((-1 * dataList[number].DistLat) * (Data_Draw.ActualWidth / max_lat)) + (Data_Draw.ActualWidth / 2);
+                        Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
+
+                        Rectangle rect = new Rectangle
+                        {
+                            Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61)),
+                            StrokeThickness = 15
+                        };
+
+                        rect.Tag = dataList[number].id;
+                        rectangles[dataList[number].id] = rect;
+
+                        DateTime rect_date = DateTime.Now;
+                        dates[dataList[number].id] = rect_date;
+
+
+
+                        TextBox textBox = new TextBox();
+                        textBoxes[dataList[number].id] = textBox;
+                        //textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                        textBoxes[dataList[number].id].Text = CheckBox_print();
+                        textBoxes[dataList[number].id].VerticalAlignment = VerticalAlignment.Center;
+                        textBoxes[dataList[number].id].Margin = new Thickness(10, 0, 0, 0);
+
+                        Canvas.SetLeft(rectangles[dataList[number].id], X);
+                        Canvas.SetTop(rectangles[dataList[number].id], Data_Draw.ActualHeight - Y);
+
+                        Canvas.SetLeft(textBox, Canvas.GetLeft(rect) + 10);
+                        Canvas.SetTop(textBox, Data_Draw.ActualHeight - Y - 3);
+
+                        Data_Draw.Children.Add(rectangles[dataList[number].id]);
+                        Data_Draw.Children.Add(textBoxes[dataList[number].id]);
+
+                        if (dataList[number].DistLong < 10)
+                        {
+                            Data_Draw.Children.Remove(rectangles[dataList[number].id]);
+                            Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+                        }
+                        //textblock4.Text = number.ToString();
+                        number++;
+                    }
+                }
+                else if (number == 0 && rectangles[dataList[number].id] != null )   //드래그 시 number가 0일 때 ,   
+                {
+                    for (int i = 0; i < 41; i++)
+                    {
+                        if (rectangles[dataList[number].id] != null &&  dataList[number].time <= dbcompareDT )  // 이미 존재한
+                        {
+                            if (rectangles[i] != null && dataList[number].time <= dbcompareDT)
+                            {
+                                textblock2 = dataList[number].DistLat.ToString("0.0");
+                                textblock3 = dataList[number].DistLong.ToString("0.0");
+
+
+                                X = shift_pos.X + ((-1 * dataList[number].DistLat) * (Data_Draw.ActualWidth / max_lat)) + (Data_Draw.ActualWidth / 2);
+                                Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
+
+                                //textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                                textBoxes[dataList[number].id].Text = CheckBox_print();
+                                textBoxes[dataList[number].id].VerticalAlignment = VerticalAlignment.Center;
+                                textBoxes[dataList[number].id].Margin = new Thickness(10, 0, 0, 0);
+
+                                Canvas.SetLeft(rectangles[dataList[number].id], X);
+                                Canvas.SetTop(rectangles[dataList[number].id], Data_Draw.ActualHeight - Y);
+
+                                Canvas.SetLeft(textBoxes[dataList[number].id], Canvas.GetLeft(rectangles[dataList[number].id]) + 10);
+                                Canvas.SetTop(textBoxes[dataList[number].id], Data_Draw.ActualHeight - Y - 3);
+
+                                if (Data_Draw.Children.Contains(rectangles[dataList[number].id]) == false)
+                                {
+                                    Data_Draw.Children.Add(rectangles[dataList[number].id]);
+                                    Data_Draw.Children.Add(textBoxes[dataList[number].id]);
+                                }
+
+                                if (dataList[number].DistLong < 10)
+                                {
+                                    Data_Draw.Children.Remove(rectangles[dataList[number].id]);
+                                    Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+                                }
+
+                                DateTime rect_date = DateTime.Now;
+                                dates[dataList[number].id] = rect_date;
+
+                                number++;
+
+                            }
+
+                        }
+                        else if (rectangles[dataList[number].id] == null && dataList[number - 1].time < dbcompareDT && dataList[number].time <= dbcompareDT)     //생성 
+                        {
+                            textblock2 = dataList[number].DistLat.ToString("0.0");
+                            textblock3 = dataList[number].DistLong.ToString("0.0");
+                            //textblock3.Text = dataList[number].DistLat.ToString("0.0");
+                            //textblock2.Text = dataList[number].DistLong.ToString("0.0");
+>>>>>>> origin/jw_0307
 
                             X = shift_pos.X + ((-1 * dataList[number].DistLat) * (Data_Draw.ActualWidth / max_lat)) + (Data_Draw.ActualWidth / 2);
                             Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
@@ -171,7 +300,8 @@ namespace Radar_Analysis_Program
 
                             TextBox textBox = new TextBox();
                             textBoxes[dataList[number].id] = textBox;
-                            textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                            //textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                            textBoxes[dataList[number].id].Text = CheckBox_print();
                             textBoxes[dataList[number].id].VerticalAlignment = VerticalAlignment.Center;
                             textBoxes[dataList[number].id].Margin = new Thickness(10, 0, 0, 0);
 
@@ -210,7 +340,8 @@ namespace Radar_Analysis_Program
                                 X = shift_pos.X + ((-1 * dataList[number].DistLat) * (Data_Draw.ActualWidth / max_lat)) + (Data_Draw.ActualWidth / 2);
                                 Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
 
-                                textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                                //textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                                textBoxes[dataList[number].id].Text = CheckBox_print();
                                 textBoxes[dataList[number].id].VerticalAlignment = VerticalAlignment.Center;
                                 textBoxes[dataList[number].id].Margin = new Thickness(10, 0, 0, 0);
 
@@ -266,7 +397,9 @@ namespace Radar_Analysis_Program
 
                             TextBox textBox = new TextBox();
                             textBoxes[dataList[number].id] = textBox;
-                            textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                           
+                            //textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                            textBoxes[dataList[number].id].Text = CheckBox_print();
                             textBoxes[dataList[number].id].VerticalAlignment = VerticalAlignment.Center;
                             textBoxes[dataList[number].id].Margin = new Thickness(10, 0, 0, 0);
 
@@ -403,13 +536,16 @@ namespace Radar_Analysis_Program
             text_str = textblock1 + "\n" + textblock2 + "\n" + textblock3 + "\n" + textblock4;
             Data_Text.Text = text_str;
         }
+<<<<<<< HEAD
 
 
 
+=======
+       
+>>>>>>> origin/jw_0307
         #region setting
         private void db_connect(MySqlConnection connection, string first, string second)
         {
-
             //first = firsttime;
             //second = secondtime;
 
@@ -436,7 +572,15 @@ namespace Radar_Analysis_Program
                             data.id = reader.GetInt32(1);
                             data.DistLat = reader.GetDouble(2);
                             data.DistLong = reader.GetDouble(3);
-                           
+                            data.VrelLat = reader.GetDouble(4);
+                            data.VrelLong = reader.GetDouble(5);
+                            data.Velocity = reader.GetDouble(6);
+                            data.RCS = reader.GetDouble(7);
+                            data.ProbOfExist = reader.GetInt32(8);
+                            data.Class = reader.GetInt32(11);
+                            data.Zone = reader.GetInt32(14);
+                            data.Lane = reader.GetInt32(15);
+                            System.Console.WriteLine("{0}", data.Zone);
                             dataList.Add(data);
                            
                             //if (dataList.Count > 1000)
@@ -445,7 +589,9 @@ namespace Radar_Analysis_Program
                             //}
                         }
                     }
+                  
                 }
+               
                
             }
             catch (Exception)
@@ -453,6 +599,123 @@ namespace Radar_Analysis_Program
                 MessageBox.Show("접속 실패, 다시 시도");
             }
         }
+<<<<<<< HEAD
+=======
+        private void map_setting()
+        {
+            //중앙선   
+            Polyline polyline = new Polyline();
+            polyline.Points = new PointCollection()  { new Point((Data_Draw.Width/2), (Data_Draw.Height/max_long)),
+                new Point( (Data_Draw.Width / 2),  10*(Data_Draw.Height/max_long)),    // 600/100 6 
+                new Point(  (Data_Draw.Width / 2),  50*(Data_Draw.Height/max_long)),
+                new Point(  (Data_Draw.Width / 2),  100*(Data_Draw.Height/max_long)) };
+            polyline.Stroke = Brushes.Yellow;
+            polyline.StrokeThickness = 3;
+            Data_Draw.Children.Add(polyline);
+
+            //왼쪽선
+            Polyline leftline = new Polyline();
+            leftline.Points = new PointCollection()  { new Point(0, (Data_Draw.Height/max_long)),
+                new Point( 0,  10*(Data_Draw.Height/max_long)),    // 600/100 6 
+                new Point(  0,  50*(Data_Draw.Height/max_long)),
+                new Point(  0,  100*(Data_Draw.Height/max_long)) };
+            leftline.Stroke = Brushes.White;
+            leftline.StrokeThickness = 3;
+            Data_Draw.Children.Add(leftline);
+
+
+            //왼쪽 1선
+            Polyline leftline1 = new Polyline();
+            leftline1.Points = new PointCollection()  { new Point(Data_Draw.Width/6, (Data_Draw.Height/max_long)),
+                new Point(Data_Draw.Width/6,  10*(Data_Draw.Height/max_long)),    // 600/100 6 
+                new Point(  Data_Draw.Width/6,  50*(Data_Draw.Height/max_long)),
+                new Point( Data_Draw.Width/6,  100*(Data_Draw.Height/max_long)) };
+            leftline1.Stroke = Brushes.White;
+            leftline1.StrokeThickness = 2;
+            leftline1.StrokeDashArray = new DoubleCollection() { 15, 10 };
+            Data_Draw.Children.Add(leftline1);
+
+
+            //왼쪽 2선
+            Polyline leftline2 = new Polyline();
+            leftline2.Points = new PointCollection()  { new Point(2*(Data_Draw.Width/6), (Data_Draw.Height/max_long)),
+                new Point( 2*(Data_Draw.Width/6),  10*(Data_Draw.Height/max_long)),    // 600/100 6 
+                new Point(  2*(Data_Draw.Width/6),  50*(Data_Draw.Height/max_long)),
+                new Point(  2*(Data_Draw.Width/6),  100*(Data_Draw.Height/max_long)) };
+            leftline2.Stroke = Brushes.White;
+            leftline2.StrokeThickness = 2;
+            leftline2.StrokeDashArray = new DoubleCollection() { 15, 10 };
+            Data_Draw.Children.Add(leftline2);
+
+            //오른선
+            Polyline rightline = new Polyline();
+            rightline.Points = new PointCollection()  { new Point(Data_Draw.Width , (Data_Draw.Height/max_long)),
+                new Point(Data_Draw.Width ,  10*(Data_Draw.Height/max_long)),    // 600/100 6 
+                new Point(  Data_Draw.Width ,  50*(Data_Draw.Height/max_long)),
+                new Point(  Data_Draw.Width ,  100*(Data_Draw.Height/max_long)) };
+            rightline.Stroke = Brushes.White;
+            rightline.StrokeThickness = 3;
+            Data_Draw.Children.Add(rightline);
+
+            //오른 1선
+            Polyline rightline1 = new Polyline();
+            rightline1.Points = new PointCollection()  { new Point(4*(Data_Draw.Width/6) , (Data_Draw.Height/max_long)),
+                new Point(4*(Data_Draw.Width/6),  10*(Data_Draw.Height/max_long)),    // 600/100 6 
+                new Point(  4*(Data_Draw.Width/6) ,  50*(Data_Draw.Height/max_long)),
+                new Point( 4*(Data_Draw.Width/6),  100*(Data_Draw.Height/max_long)) };
+            rightline1.Stroke = Brushes.White;
+            rightline1.StrokeThickness = 2;
+            rightline1.StrokeDashArray = new DoubleCollection() { 15, 10 };
+            Data_Draw.Children.Add(rightline1);
+
+
+            //오른 2선
+            Polyline rightline2 = new Polyline();
+            rightline2.Points = new PointCollection()  { new Point(5*(Data_Draw.Width/6) , (Data_Draw.Height/max_long)),
+                new Point(5*(Data_Draw.Width/6),  10*(Data_Draw.Height/max_long)),    // 600/100 6 
+                new Point(  5*(Data_Draw.Width/6) ,  50*(Data_Draw.Height/max_long)),
+                new Point( 5*(Data_Draw.Width/6),  100*(Data_Draw.Height/max_long)) };
+            rightline2.Stroke = Brushes.White;
+            rightline2.StrokeThickness = 2;
+            rightline2.StrokeDashArray = new DoubleCollection() { 15, 10 };
+            Data_Draw.Children.Add(rightline2);
+
+
+
+
+            ////
+            //Polyline rightline2 = new Polyline();
+            //rightline2.Points = new PointCollection()  { new Point(5*(Data_Draw.Width/6) , (Data_Draw.Height/max_long)),
+            //    new Point(5*(Data_Draw.Width/6),  10*(Data_Draw.Height/max_long)),    // 600/100 6 
+            //    new Point(  5*(Data_Draw.Width/6) ,  50*(Data_Draw.Height/max_long)),
+            //    new Point( 5*(Data_Draw.Width/6),  100*(Data_Draw.Height/max_long)) };
+            //rightline2.Stroke = Brushes.White;
+            //rightline2.StrokeThickness = 3;
+            //rightline2.StrokeDashArray = new DoubleCollection() { 10, 5 };
+            //Data_Draw.Children.Add(rightline2);
+
+
+        }
+        private void CheckBox_setting()
+        {
+
+            checkBoxes = new CheckBox[] { text_time, text_id, text_distlat, text_distlong, text_vrellat, text_vrellong, text_velocity, text_rsc, text_probofexist, text_class, text_zone, text_lane };
+            checkbox_name = new String[] { "Time", "ID", "DistLat", "DistLong", "VrelLat", "VrelLong", "Velocity", "RCS", "ProbOfExist", "Class", "Zone", "Lane" };
+            //checkBoxes[0] = text_time;
+            //checkBoxes[1] = text_id;
+            //checkBoxes[2] = text_distlat;
+            //checkBoxes[3] = text_distlong;
+            //checkBoxes[4] = text_vrellat;
+            //checkBoxes[5] = text_vrellong;
+            //checkBoxes[6] = text_velocity;
+            //checkBoxes[7] = text_rsc;
+            //checkBoxes[8] = text_probofexist;
+            //checkBoxes[9] = text_class;
+            //checkBoxes[10] = text_zone;
+            //checkBoxes[11] = text_lane;
+        }
+   
+>>>>>>> origin/jw_0307
         #endregion
 
         #region form_Click
@@ -494,6 +757,32 @@ namespace Radar_Analysis_Program
                 else textBoxes[i].Visibility = Visibility.Collapsed;
             }
         }
+        private string CheckBox_print()
+        {
+            string pprint = "";
+            string db_data = "";
+            for (int i = 0; i < 12; i++)
+            {
+                if (i == 0) db_data = dataList[number].time.ToString();
+                else if (i == 1) db_data = dataList[number].id.ToString();
+                else if (i == 2) db_data = dataList[number].DistLat.ToString("0.0");
+                else if (i == 3) db_data = dataList[number].DistLong.ToString("0.0");
+                else if (i == 4) db_data = dataList[number].VrelLat.ToString("0.0");
+                else if (i == 5) db_data = dataList[number].VrelLong.ToString("0.0");
+                else if (i == 6) db_data = dataList[number].Velocity.ToString("0.0");
+                else if (i == 7) db_data = dataList[number].RCS.ToString();
+                else if (i == 8) db_data = dataList[number].ProbOfExist.ToString();
+                else if (i == 9) db_data = dataList[number].Class.ToString();
+                else if (i == 10) db_data = dataList[number].Zone.ToString();
+                else if (i == 11) db_data = dataList[number].Lane.ToString();
+
+                if (checkBoxes[i].IsChecked == true)
+                {
+                    pprint += checkbox_name[i] + " = " + db_data + "\n";
+                }
+            }
+            return pprint;
+        }
         #endregion
 
         #region mediaElement
@@ -503,8 +792,8 @@ namespace Radar_Analysis_Program
             mediaElement.LoadedBehavior = MediaState.Pause;
             double durationMs = mediaElement.NaturalDuration.TimeSpan.TotalMilliseconds;  // 영상 길이를 tick으로 가져옴. 
 
-            test_a = durationMs;
-            total_time = _starttime.AddMilliseconds(test_a);
+            duration = durationMs;
+            total_time = _starttime.AddMilliseconds(duration);
             secondtime = total_time.ToString("yyyy-MM-dd HH:mm:ss.fff");
             //
             //System.Console.WriteLine(secondtime);
@@ -586,7 +875,7 @@ namespace Radar_Analysis_Program
 
             firsttime = _starttime.ToString("yyyy-MM-dd HH:mm:ss.fff");
             secondtime = total_time.ToString("yyyy-MM-dd HH:mm:ss.fff");
-            System.Console.WriteLine(firsttime);
+           // System.Console.WriteLine(firsttime);
            // System.Console.WriteLine(secondtime);
             // System.Console.WriteLine(total_time);
 
@@ -638,6 +927,11 @@ namespace Radar_Analysis_Program
 
         }
         #endregion
+
+
+      
+
+
     }
 
 
