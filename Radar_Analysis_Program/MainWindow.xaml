@@ -1,4 +1,4 @@
-﻿<Window x:Class="UI_test_01.MainWindow"
+﻿<Window x:Class="Radar_Analysis_Program.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -18,19 +18,19 @@
         </Grid.ColumnDefinitions>
 
         <Label Content="Server.Name:" Grid.Column="0" Margin="5,19,15,240" Height="30"/>
-        <TextBox Name="ServerNameTextBox" Grid.Column="1" Margin="5,19,15,240" Height="30" Text="183.99.41.239"/>
+        <TextBox Name="ServerNameTextBox" Grid.Column="1" Margin="5,19,15,240" Height="30" Text="127.0.0.1"/>
 
         <Label Content="Server.Port:" Grid.Column="0" Margin="5,65,15,194" Height="30"/>
-        <TextBox Name="ServerPortTextBox" Grid.Column="1" Margin="5,65,15,194" Height="30" Text="23306"/>
+        <TextBox Name="ServerPortTextBox" Grid.Column="1" Margin="5,65,15,194" Height="30" Text="9591"/>
 
         <Label Content="DB.name:" Grid.Column="0" Margin="5,109,15,150" Height="30"/>
-        <TextBox Name="DBnameTextBox" Grid.Column="1" Margin="5,109,15,150" Height="30" Text="hbrain_vds"/>
+        <TextBox Name="DBnameTextBox" Grid.Column="1" Margin="5,109,15,150" Height="30" Text="RADAR"/>
 
         <Label Content="User.ID:" Grid.Column="0" Margin="5,155,15,104" Height="30" />
         <TextBox Name="IDTextBox"  Grid.Column="1" Margin="5,155,15,104" Height="30" Text="root"/>
 
         <Label Content="Password:" Grid.Column="0" Margin="5,199,15,60" Height="30"/>
-        <PasswordBox Name="PasswordBox" Grid.Column="1" Margin="5,199,15,60" Height="30" Password="hbrain0372!"/>
+        <PasswordBox Name="PasswordBox" Grid.Column="1" Margin="5,199,15,60" Height="30" Password="cody0901"/>
 
         <Button Content="Login" Click="Button_Click" Margin="10,245,82,2" Grid.Column="1"/>
     </Grid>

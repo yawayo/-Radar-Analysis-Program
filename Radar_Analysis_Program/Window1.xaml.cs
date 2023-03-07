@@ -17,7 +17,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 
-namespace UI_test_01
+namespace Radar_Analysis_Program
 {
     /// <summary>
     /// Window1.xaml에 대한 상호 작용 논리
@@ -69,7 +69,6 @@ namespace UI_test_01
             public double DistLat { get; set; }
             public double DistLong { get; set; }
             public DateTime Timestamp;
-
         }
 
         public Window1(MySqlConnection connection)

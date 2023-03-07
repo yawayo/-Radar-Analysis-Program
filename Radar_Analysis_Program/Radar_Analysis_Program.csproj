@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{60490126-8E65-47FF-A0C6-A4E26DFAA144}</ProjectGuid>
+    <ProjectGuid>{34C1A8D8-C762-4A75-AF08-21E96DF4F571}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>Radar_Analysis_Program</RootNamespace>
     <AssemblyName>Radar_Analysis_Program</AssemblyName>

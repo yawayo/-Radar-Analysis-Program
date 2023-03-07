@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace UI_test_01
+namespace Radar_Analysis_Program
 {
     /// <summary>
     /// MainWindow.xaml에 대한 상호 작용 논리
