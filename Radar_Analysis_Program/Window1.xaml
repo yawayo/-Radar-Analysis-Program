@@ -60,13 +60,11 @@
                     <RowDefinition/>
                 </Grid.RowDefinitions>
                 <Label x:Name="test_label" Grid.Row="0" Content="Radar" Foreground="#FFF48F3D" FontSize="25" FontFamily="KoPub바탕체_Pro Medium"/>
-
-                <Canvas x:Name="Data_Draw" Grid.Row="1" Width="500" Height="600"  VerticalAlignment="Center">
                 
+                <Canvas x:Name="Data_Draw" Grid.Row="1" Width="500" Height="600"  VerticalAlignment="Center">
                 </Canvas>
             </Grid>
         </Border>
-
         <Border Grid.Row="2" Grid.Column="2" BorderBrush="White" BorderThickness="1">
             <Grid>
                 <Grid.RowDefinitions>
