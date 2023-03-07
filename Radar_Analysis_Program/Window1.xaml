@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UI_test_01"
         mc:Ignorable="d"
-        Title="Window1" Height="900" Width="1600" Visibility="Visible" BorderBrush="Black">
+        Title="Window1" Height="900" Width="1600" WindowStyle="None" Visibility="Visible" BorderBrush="Black" WindowStartupLocation="CenterScreen" >
     <Grid x:Name="Main_grid" Background="#FF212528" OpacityMask="#FF212528">
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>

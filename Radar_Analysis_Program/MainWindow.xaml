@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UI_test_01"
         mc:Ignorable="d"
-        Title="MainWindow" Height="320" Width="407">
+        Title="MainWindow" Height="320" Width="407" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
 
@@ -18,19 +18,19 @@
         </Grid.ColumnDefinitions>
 
         <Label Content="Server.Name:" Grid.Column="0" Margin="5,19,15,240" Height="30"/>
-        <TextBox Name="ServerNameTextBox" Grid.Column="1" Margin="5,19,15,240" Height="30" Text="127.0.0.1"/>
+        <TextBox Name="ServerNameTextBox" Grid.Column="1" Margin="5,19,15,240" Height="30" Text="183.99.41.239"/>
 
         <Label Content="Server.Port:" Grid.Column="0" Margin="5,65,15,194" Height="30"/>
-        <TextBox Name="ServerPortTextBox" Grid.Column="1" Margin="5,65,15,194" Height="30" Text="9591"/>
+        <TextBox Name="ServerPortTextBox" Grid.Column="1" Margin="5,65,15,194" Height="30" Text="23306"/>
 
         <Label Content="DB.name:" Grid.Column="0" Margin="5,109,15,150" Height="30"/>
-        <TextBox Name="DBnameTextBox" Grid.Column="1" Margin="5,109,15,150" Height="30" Text="RADAR"/>
+        <TextBox Name="DBnameTextBox" Grid.Column="1" Margin="5,109,15,150" Height="30" Text="hbrain_vds"/>
 
         <Label Content="User.ID:" Grid.Column="0" Margin="5,155,15,104" Height="30" />
         <TextBox Name="IDTextBox"  Grid.Column="1" Margin="5,155,15,104" Height="30" Text="root"/>
 
         <Label Content="Password:" Grid.Column="0" Margin="5,199,15,60" Height="30"/>
-        <PasswordBox Name="PasswordBox" Grid.Column="1" Margin="5,199,15,60" Height="30" Password="cody0901"/>
+        <PasswordBox Name="PasswordBox" Grid.Column="1" Margin="5,199,15,60" Height="30" Password="hbrain0372!"/>
 
         <Button Content="Login" Click="Button_Click" Margin="10,245,82,2" Grid.Column="1"/>
     </Grid>

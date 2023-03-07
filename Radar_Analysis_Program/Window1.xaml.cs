@@ -60,6 +60,7 @@ namespace Radar_Analysis_Program
         string firsttime;
         string secondtime;
 
+        double test_a=0;
         private MySqlConnection conn;
 
         public class MyDataModel
@@ -76,6 +77,7 @@ namespace Radar_Analysis_Program
             conn = connection;
             InitializeComponent();
 
+            
             map_setting();
 
 
@@ -86,104 +88,11 @@ namespace Radar_Analysis_Program
         {
             double X;
             double Y;
-            if (number == 0)
-            {  
-                if (rectangles[dataList[number].id] == null && _starttime <=dbcompareDT)     //생성 
-                {
-                    textblock2 = dataList[number].DistLat.ToString("0.0");
-                    textblock3 = dataList[number].DistLong.ToString("0.0");
-                    //textblock3.Text = dataList[number].DistLat.ToString("0.0");
-                    //textblock2.Text = dataList[number].DistLong.ToString("0.0");
-
-                    X = shift_pos.X + ((-1 * dataList[number].DistLat) * (Data_Draw.ActualWidth / max_lat)) + (Data_Draw.ActualWidth / 2);
-                    Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
-
-                    Rectangle rect = new Rectangle
-                    {
-                        Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61)),
-                        StrokeThickness = 15
-                    };
-
-                    rect.Tag = dataList[number].id;
-                    rectangles[dataList[number].id] = rect;
-
-                    DateTime rect_date = DateTime.Now;
-                    dates[dataList[number].id] = rect_date;
-
-
-
-                    TextBox textBox = new TextBox();
-                    textBoxes[dataList[number].id] = textBox;
-                    textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
-                    textBoxes[dataList[number].id].VerticalAlignment = VerticalAlignment.Center;
-                    textBoxes[dataList[number].id].Margin = new Thickness(10, 0, 0, 0);
-
-                    Canvas.SetLeft(rectangles[dataList[number].id], X);
-                    Canvas.SetTop(rectangles[dataList[number].id], Data_Draw.ActualHeight - Y);
-
-                    Canvas.SetLeft(textBox, Canvas.GetLeft(rect) + 10);
-                    Canvas.SetTop(textBox, Data_Draw.ActualHeight - Y - 3);
-
-                    Data_Draw.Children.Add(rectangles[dataList[number].id]);
-                    Data_Draw.Children.Add(textBoxes[dataList[number].id]);
-
-                    if (dataList[number].DistLong < 10)
-                    {
-                        Data_Draw.Children.Remove(rectangles[dataList[number].id]);
-                        Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
-                    }
-                    //textblock4.Text = number.ToString();
-                    number++;
-                }
-            }
-            else if (dataList[number-1].time < dbcompareDT && dataList[number].time <= dbcompareDT)   // DB 안의 time == 지금 작동중인 시간(dbcomapretime)
+            try
             {
-
-                for (int i = 0; i < 41; i++)
-                {
-                   
-                    if (rectangles[dataList[number].id] != null && dataList[number - 1].time < dbcompareDT && dataList[number].time <= dbcompareDT)  // 이미 존재한
-                    {
-                        if (rectangles[i] != null && dataList[number].time <= dbcompareDT)
-                        {
-                            textblock2 = dataList[number].DistLat.ToString("0.0");
-                            textblock3 = dataList[number].DistLong.ToString("0.0");
-
-
-                            X = shift_pos.X + ((-1 * dataList[number].DistLat) * (Data_Draw.ActualWidth / max_lat)) + (Data_Draw.ActualWidth / 2);
-                            Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
-
-                            textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
-                            textBoxes[dataList[number].id].VerticalAlignment = VerticalAlignment.Center;
-                            textBoxes[dataList[number].id].Margin = new Thickness(10, 0, 0, 0);
-
-                            Canvas.SetLeft(rectangles[dataList[number].id], X);
-                            Canvas.SetTop(rectangles[dataList[number].id], Data_Draw.ActualHeight - Y);
-
-                            Canvas.SetLeft(textBoxes[dataList[number].id], Canvas.GetLeft(rectangles[dataList[number].id]) + 10);
-                            Canvas.SetTop(textBoxes[dataList[number].id], Data_Draw.ActualHeight - Y - 3);
-
-                            if (Data_Draw.Children.Contains(rectangles[dataList[number].id]) == false)
-                            {
-                                Data_Draw.Children.Add(rectangles[dataList[number].id]);
-                                Data_Draw.Children.Add(textBoxes[dataList[number].id]);
-                            }
-
-                            if (dataList[number].DistLong < 10)
-                            {
-                                Data_Draw.Children.Remove(rectangles[dataList[number].id]);
-                                Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
-                            }
-
-                            DateTime rect_date = DateTime.Now;
-                            dates[dataList[number].id] = rect_date;
-
-                            number++;
-
-                        }
-
-                    }
-                    else if (rectangles[dataList[number].id] == null && dataList[number - 1].time < dbcompareDT && dataList[number].time <= dbcompareDT)     //생성 
+                if (number == 0 && rectangles[dataList[number].id] == null)
+                {                 
+                    if (rectangles[dataList[number].id] == null && _starttime <= dbcompareDT)     //생성 
                     {
                         textblock2 = dataList[number].DistLat.ToString("0.0");
                         textblock3 = dataList[number].DistLong.ToString("0.0");
@@ -231,9 +140,208 @@ namespace Radar_Analysis_Program
                         number++;
                     }
                 }
-                textblock4 = number.ToString();
+                else if (number == 0 && rectangles[dataList[number].id] != null )   //드래그 시 number가 0일 때 ,   
+                {
+                    for (int i = 0; i < 41; i++)
+                    {
+                        if (rectangles[dataList[number].id] != null &&  dataList[number].time <= dbcompareDT )  // 이미 존재한
+                        {
+                            if (rectangles[i] != null && dataList[number].time <= dbcompareDT)
+                            {
+                                textblock2 = dataList[number].DistLat.ToString("0.0");
+                                textblock3 = dataList[number].DistLong.ToString("0.0");
+
+
+                                X = shift_pos.X + ((-1 * dataList[number].DistLat) * (Data_Draw.ActualWidth / max_lat)) + (Data_Draw.ActualWidth / 2);
+                                Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
+
+                                textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                                textBoxes[dataList[number].id].VerticalAlignment = VerticalAlignment.Center;
+                                textBoxes[dataList[number].id].Margin = new Thickness(10, 0, 0, 0);
+
+                                Canvas.SetLeft(rectangles[dataList[number].id], X);
+                                Canvas.SetTop(rectangles[dataList[number].id], Data_Draw.ActualHeight - Y);
+
+                                Canvas.SetLeft(textBoxes[dataList[number].id], Canvas.GetLeft(rectangles[dataList[number].id]) + 10);
+                                Canvas.SetTop(textBoxes[dataList[number].id], Data_Draw.ActualHeight - Y - 3);
+
+                                if (Data_Draw.Children.Contains(rectangles[dataList[number].id]) == false)
+                                {
+                                    Data_Draw.Children.Add(rectangles[dataList[number].id]);
+                                    Data_Draw.Children.Add(textBoxes[dataList[number].id]);
+                                }
+
+                                if (dataList[number].DistLong < 10)
+                                {
+                                    Data_Draw.Children.Remove(rectangles[dataList[number].id]);
+                                    Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+                                }
+
+                                DateTime rect_date = DateTime.Now;
+                                dates[dataList[number].id] = rect_date;
+
+                                number++;
+
+                            }
+
+                        }
+                        else if (rectangles[dataList[number].id] == null && dataList[number - 1].time < dbcompareDT && dataList[number].time <= dbcompareDT)     //생성 
+                        {
+                            textblock2 = dataList[number].DistLat.ToString("0.0");
+                            textblock3 = dataList[number].DistLong.ToString("0.0");
+                            //textblock3.Text = dataList[number].DistLat.ToString("0.0");
+                            //textblock2.Text = dataList[number].DistLong.ToString("0.0");
+
+                            X = shift_pos.X + ((-1 * dataList[number].DistLat) * (Data_Draw.ActualWidth / max_lat)) + (Data_Draw.ActualWidth / 2);
+                            Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
+
+                            Rectangle rect = new Rectangle
+                            {
+                                Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61)),
+                                StrokeThickness = 15
+                            };
+
+                            rect.Tag = dataList[number].id;
+                            rectangles[dataList[number].id] = rect;
+
+                            DateTime rect_date = DateTime.Now;
+                            dates[dataList[number].id] = rect_date;
+
+
+
+                            TextBox textBox = new TextBox();
+                            textBoxes[dataList[number].id] = textBox;
+                            textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                            textBoxes[dataList[number].id].VerticalAlignment = VerticalAlignment.Center;
+                            textBoxes[dataList[number].id].Margin = new Thickness(10, 0, 0, 0);
+
+                            Canvas.SetLeft(rectangles[dataList[number].id], X);
+                            Canvas.SetTop(rectangles[dataList[number].id], Data_Draw.ActualHeight - Y);
+
+                            Canvas.SetLeft(textBox, Canvas.GetLeft(rect) + 10);
+                            Canvas.SetTop(textBox, Data_Draw.ActualHeight - Y - 3);
+
+                            Data_Draw.Children.Add(rectangles[dataList[number].id]);
+                            Data_Draw.Children.Add(textBoxes[dataList[number].id]);
+
+                            if (dataList[number].DistLong < 10)
+                            {
+                                Data_Draw.Children.Remove(rectangles[dataList[number].id]);
+                                Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+                            }
+                            //textblock4.Text = number.ToString();
+                            number++;
+                        }
+                    }
+                    textblock4 = number.ToString();
+
+                }
+                else if (dataList[number - 1].time < dbcompareDT && dataList[number].time <= dbcompareDT)   // DB 안의 time == 지금 작동중인 시간(dbcomapretime)
+                {
+
+                    for (int i = 0; i < 41; i++)
+                    {
+
+                        if (rectangles[dataList[number].id] != null && dataList[number - 1].time < dbcompareDT && dataList[number].time <= dbcompareDT)  // 이미 존재한
+                        {
+                            if (rectangles[i] != null && dataList[number].time <= dbcompareDT)
+                            {
+                                textblock2 = dataList[number].DistLat.ToString("0.0");
+                                textblock3 = dataList[number].DistLong.ToString("0.0");
+
+
+                                X = shift_pos.X + ((-1 * dataList[number].DistLat) * (Data_Draw.ActualWidth / max_lat)) + (Data_Draw.ActualWidth / 2);
+                                Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
+
+                                textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                                textBoxes[dataList[number].id].VerticalAlignment = VerticalAlignment.Center;
+                                textBoxes[dataList[number].id].Margin = new Thickness(10, 0, 0, 0);
+
+                                Canvas.SetLeft(rectangles[dataList[number].id], X);
+                                Canvas.SetTop(rectangles[dataList[number].id], Data_Draw.ActualHeight - Y);
+
+                                Canvas.SetLeft(textBoxes[dataList[number].id], Canvas.GetLeft(rectangles[dataList[number].id]) + 10);
+                                Canvas.SetTop(textBoxes[dataList[number].id], Data_Draw.ActualHeight - Y - 3);
+
+                                if (Data_Draw.Children.Contains(rectangles[dataList[number].id]) == false)
+                                {
+                                    Data_Draw.Children.Add(rectangles[dataList[number].id]);
+                                    Data_Draw.Children.Add(textBoxes[dataList[number].id]);
+                                }
+
+                                if (dataList[number].DistLong < 10)
+                                {
+                                    Data_Draw.Children.Remove(rectangles[dataList[number].id]);
+                                    Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+                                }
+
+                                DateTime rect_date = DateTime.Now;
+                                dates[dataList[number].id] = rect_date;
+
+                                number++;
+
+                            }
+
+                        }
+                        else if (rectangles[dataList[number].id] == null && dataList[number - 1].time < dbcompareDT && dataList[number].time <= dbcompareDT)     //생성 
+                        {
+                            textblock2 = dataList[number].DistLat.ToString("0.0");
+                            textblock3 = dataList[number].DistLong.ToString("0.0");
+                            //textblock3.Text = dataList[number].DistLat.ToString("0.0");
+                            //textblock2.Text = dataList[number].DistLong.ToString("0.0");
+
+                            X = shift_pos.X + ((-1 * dataList[number].DistLat) * (Data_Draw.ActualWidth / max_lat)) + (Data_Draw.ActualWidth / 2);
+                            Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
+
+                            Rectangle rect = new Rectangle
+                            {
+                                Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61)),
+                                StrokeThickness = 15
+                            };
+
+                            rect.Tag = dataList[number].id;
+                            rectangles[dataList[number].id] = rect;
+
+                            DateTime rect_date = DateTime.Now;
+                            dates[dataList[number].id] = rect_date;
+
+
+
+                            TextBox textBox = new TextBox();
+                            textBoxes[dataList[number].id] = textBox;
+                            textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                            textBoxes[dataList[number].id].VerticalAlignment = VerticalAlignment.Center;
+                            textBoxes[dataList[number].id].Margin = new Thickness(10, 0, 0, 0);
+
+                            Canvas.SetLeft(rectangles[dataList[number].id], X);
+                            Canvas.SetTop(rectangles[dataList[number].id], Data_Draw.ActualHeight - Y);
+
+                            Canvas.SetLeft(textBox, Canvas.GetLeft(rect) + 10);
+                            Canvas.SetTop(textBox, Data_Draw.ActualHeight - Y - 3);
+
+                            Data_Draw.Children.Add(rectangles[dataList[number].id]);
+                            Data_Draw.Children.Add(textBoxes[dataList[number].id]);
+
+                            if (dataList[number].DistLong < 10)
+                            {
+                                Data_Draw.Children.Remove(rectangles[dataList[number].id]);
+                                Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+                            }
+                            //textblock4.Text = number.ToString();
+                            number++;
+                        }
+                    }
+                    textblock4 = number.ToString();
+
+                }
 
             }
+            catch
+            {
+
+            }
+            
+
 
             for (int i = 0; i < 41; i++)
             {
@@ -257,22 +365,31 @@ namespace Radar_Analysis_Program
             diff2 += diff;
 
             TimeSpan value_time = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum);
-
+         
             if (drag_check == 1)    // 드래그 했을 때 
             {
                 if (drag_move_check == 2)   //앞으로 갔을 때 
                 {
                     int a = 0;
-                    while (a < 900)
-                    {
-                        _checktime = Convert.ToDateTime(dataList[number].time);
-                        if (_starttime.Add(value_time) < _checktime)    //  _starttime.add(value_time) = 현재 시간  
+                    while (a < dataList.Count)
+                    {                  
+                        try  // number 값이 없을 때 
+                        {
+                            _checktime = dataList[number].time;
+                        }
+                        catch
+                        {
+                            number = 0;
+                            break;
+                        }
+
+                        if (_starttime.Add(value_time) <= _checktime)    //  _starttime.add(value_time) = 현재 시간  
                         {                                               //   _check_time = db 데이터의 시간 값
                             break;
                         }
                         else
                         {
-                            number++;   // ++할수록 checktime 도 앞으로 커짐 
+                            number++;   // ++할수록 checktime 도 앞으로 커짐   
                         }
                         a++;
                     }
@@ -280,12 +397,25 @@ namespace Radar_Analysis_Program
                 else if (drag_move_check == 1)    // 뒤로 갔을 때
                 {
                     int a = 0;
-                    while (a < 1000)
-                    {
-                        _checktime = Convert.ToDateTime(dataList[number].time);
-                        if (_starttime.Add(value_time) >= _checktime)
+                    while (a < dataList.Count)
+                    {                   
+                        try   // number 값이 없을 때 
                         {
-                            if (number != 0) number++;
+                            _checktime = dataList[number].time;
+                        }
+                        catch
+                        {
+                            number = 0;
+                            break;
+                        }
+                        if (_starttime.Add(value_time) > _checktime)  //  _starttime.add(value_time) = 현재 시간  
+                        {                                                //   _check_time = db 데이터의 시간 값
+                           
+                            number++;
+                            if (number == 1)
+                            {
+                                number = 0;
+                            }
                             break;
                         }
                         else
@@ -329,13 +459,13 @@ namespace Radar_Analysis_Program
             try
             {
                  connection.Open();
-                string query = "SELECT * FROM obj_info where DATETIME(time) BETWEEN" + "'" + first + "'" + "AND" + "'" + second + ";";
-
+                string query = "SELECT * FROM obj_info where time BETWEEN" + "'" + first + "'" + "AND" + "'" + second + "'"+";";
+                
                 using (MySqlCommand cmd = new MySqlCommand(query, connection))
                 {
                     using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
-                         List<MyDataModel> dataList = new List<MyDataModel>();
+                         //List<MyDataModel> dataList = new List<MyDataModel>();
 
                         while (reader.Read())
                         {
@@ -349,16 +479,17 @@ namespace Radar_Analysis_Program
                             data.id = reader.GetInt32(1);
                             data.DistLat = reader.GetDouble(2);
                             data.DistLong = reader.GetDouble(3);
-
+                           
                             dataList.Add(data);
-
-                            if (dataList.Count > 1000)
-                            {
-                                break;
-                            }
+                           
+                            //if (dataList.Count > 1000)
+                            //{
+                            //    break;
+                            //}
                         }
                     }
                 }
+               
             }
             catch (Exception)
             {
@@ -507,13 +638,16 @@ namespace Radar_Analysis_Program
         private void mediaElement_MediaOpened(object sender, RoutedEventArgs e)
         {
             //총 재생시간 가져옴  
-           
-          
+            mediaElement.LoadedBehavior = MediaState.Pause;
             double durationMs = mediaElement.NaturalDuration.TimeSpan.TotalMilliseconds;  // 영상 길이를 tick으로 가져옴. 
 
-            total_time = _starttime.AddMilliseconds(durationMs);
-       
-            System.Console.WriteLine(total_time);
+            test_a = durationMs;
+            total_time = _starttime.AddMilliseconds(test_a);
+            secondtime = total_time.ToString("yyyy-MM-dd HH:mm:ss.fff");
+            //
+            //System.Console.WriteLine(secondtime);
+
+            db_connect(conn, firsttime, secondtime);
 
             slider.Maximum = slider.Minimum + durationMs;
         }
@@ -538,8 +672,8 @@ namespace Radar_Analysis_Program
                 timer.Tick += TimerTickHandler;
                 speed_check++;
             }
-       
 
+            mediaElement.LoadedBehavior = MediaState.Manual;
             mediaElement.Play();
             timer.Start();
         }
@@ -565,6 +699,9 @@ namespace Radar_Analysis_Program
                 // MediaElement에 선택한 파일 설정
                 mediaElement.Source = new Uri(filePath);
             }
+            //double totalDuration;
+            mediaElement.Pause();
+            //totalDuration = mediaElement.NaturalDuration.TimeSpan.TotalMilliseconds;
 
             string filepp = dlg.FileName;
 
@@ -583,16 +720,17 @@ namespace Radar_Analysis_Program
 
             slider.Minimum = _starttime.Ticks;
 
+            //total_time = _starttime.AddMilliseconds(totalDuration);
+
             firsttime = _starttime.ToString("yyyy-MM-dd HH:mm:ss.fff");
             secondtime = total_time.ToString("yyyy-MM-dd HH:mm:ss.fff");
-            //System.Console.WriteLine(firsttime);
-            //System.Console.WriteLine(secondtime);
+            System.Console.WriteLine(firsttime);
+           // System.Console.WriteLine(secondtime);
             // System.Console.WriteLine(total_time);
-
-            
 
         }
         #endregion
+       
 
         #region slider
         private void slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -636,6 +774,7 @@ namespace Radar_Analysis_Program
 
         }
         #endregion
-
     }
+
+
 }
