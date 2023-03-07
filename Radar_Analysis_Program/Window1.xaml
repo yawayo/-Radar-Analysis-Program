@@ -58,12 +58,35 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="40"/>
                     <RowDefinition/>
+                    <RowDefinition Height="80"/>  
+                 
                 </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="80"/>
+                 
+                </Grid.ColumnDefinitions>
                 <Label x:Name="test_label" Grid.Row="0" Content="Radar" Foreground="#FFF48F3D" FontSize="25" FontFamily="KoPub바탕체_Pro Medium"/>
+                <Canvas x:Name="Data_Draw" Grid.Row="1" Width="500" Height="600"  VerticalAlignment="Center"></Canvas>
+                <StackPanel Orientation="Horizontal"  Grid.Row="2">
+                    <!-- 여기 패널입니다.   -->
+                    <!--    차선 간격   -->
+                    <Button Content="Button 1" Margin="0 0 50 0"/>
+                    <Button Content="Button 2" Margin="0 0 50 0"/>
+                    <Button Content="Button 3" Margin="0 0 50 0"/>
+                    <CheckBox x:Name="aa"  />
+                    <!-- 여기 패널입니다.   -->
+                </StackPanel>
 
-                <Canvas x:Name="Data_Draw" Grid.Row="1" Width="500" Height="600"  VerticalAlignment="Center">
-                
-                </Canvas>
+                <StackPanel Orientation="Vertical"  Grid.Row="1" Grid.Column="1">
+                    <!-- 여기 패널입니다.   -->
+                    <!--    차선 위치   -->
+                    <Button Content="Button 1" Margin="0 0 0 50"/>
+                    <Button Content="Button 2" Margin="0 0 0 50"/>
+                    <Button Content="Button 3" Margin="0 0 0 50"/>
+                    <CheckBox x:Name="aa1"  />
+                    <!-- 여기 패널입니다.   -->
+                </StackPanel>
             </Grid>
         </Border>
 
@@ -80,7 +103,7 @@
 
                 <MediaElement Grid.Row ="1" Name="mediaElement"  LoadedBehavior="Manual" Unloaded="btnStop_Click" MediaOpened="mediaElement_MediaOpened"
                       MediaEnded="mediaElement_MediaEnded" MediaFailed="mediaElement_MediaFailed" ScrubbingEnabled="True"  />
-                
+
                 <Slider  Grid.Row="2" Name="slider" HorizontalAlignment="Center" TickFrequency="1" Thumb.DragStarted="slider_DragStarted" Thumb.DragCompleted="slider_DragCompleted" VerticalAlignment="Center" Height="50" Width="300" ValueChanged="slider_ValueChanged" />
 
                 <WrapPanel HorizontalAlignment="Center"  Grid.Row="3">
@@ -103,9 +126,7 @@
                     </Button>
                     <CheckBox Name="CheckBox"  Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"  IsChecked="True"/>
                 </WrapPanel>
-
             </Grid>
-
         </Border>
 
 
@@ -126,9 +147,26 @@
                 <Border Grid.Column="1" Grid.Row="0" BorderBrush="White" BorderThickness="1"></Border>
                 
                 
-                <Label Grid.Row="0" Grid.Column="0" Content="Setting" FontFamily="KoPub바탕체_Pro Medium" Foreground="#FFF48F3D" FontSize="25"></Label>
+                <Label Grid.Row="0" Grid.Column="0" Content="Setting"  FontFamily="KoPub바탕체_Pro Medium" Foreground="#FFF48F3D" FontSize="25"></Label>
                 <Label Grid.Row="0" Grid.Column="1" Content="Data" FontFamily="KoPub바탕체_Pro Medium" Foreground="#FFF48F3D" FontSize="25"></Label>
-        
+
+                <WrapPanel  Grid.Row="1" ItemWidth="100" ItemHeight="60" Grid.ColumnSpan="2" Margin="1,30,449,-30">
+                    <CheckBox  x:Name ="text_time" Content="Time" FontSize="12" Grid.Row="1"  IsChecked="False" Foreground="White"/>
+                    <CheckBox  x:Name ="text_id" Content ="ID"  FontSize="12" Grid.Row="1"   IsChecked="False" Foreground="White"/>
+                    <CheckBox  x:Name ="text_distlat" Content ="DistLat"  FontSize="12"    IsChecked="False" Foreground="White"/>
+                    <CheckBox  x:Name ="text_distlong" Content ="DistLong"  FontSize="12"    IsChecked="False" Foreground="White"/>
+                    <CheckBox  x:Name ="text_vrellat" Content ="VrelLat"  FontSize="12"    IsChecked="False" Foreground="White"/>
+                    <CheckBox  x:Name ="text_vrellong" Content ="VrelLong"  FontSize="12"    IsChecked="False" Foreground="White"/>
+                    <CheckBox  x:Name ="text_velocity" Content ="Velocity"  FontSize="12"    IsChecked="False" Foreground="White"/>
+                    <CheckBox  x:Name ="text_rsc" Content ="RCS"  FontSize="12"    IsChecked="False" Foreground="White"/>
+                    <CheckBox  x:Name ="text_probofexist" Content ="ProbOfExist"  FontSize="12"    IsChecked="False" Foreground="White"/>
+                    <CheckBox  x:Name ="text_class" Content ="Class"  FontSize="12"    IsChecked="False" Foreground="White"/>
+                    <CheckBox  x:Name ="text_zone" Content ="Zone"  FontSize="12"    IsChecked="False" Foreground="White"/>
+                    <CheckBox  x:Name ="text_lane" Content ="Lane"  FontSize="12"    IsChecked="False" Foreground="White"/>
+                </WrapPanel>
+               
+             
+
                 <Button x:Name="Clear_btn" Grid.Row="0" Width="40" HorizontalAlignment="Right" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="{x:Null}" />
                 <ScrollViewer x:Name="Text_scroll" Grid.Row="1" Grid.Column="2">
                     <TextBlock x:Name="Data_Text" Background="Black" Foreground="#FFF48F3D"/>

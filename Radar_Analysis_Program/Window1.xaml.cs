@@ -29,6 +29,7 @@ namespace Radar_Analysis_Program
 
         TextBox[] textBoxes = new TextBox[41];
         Rectangle[] rectangles = new Rectangle[41];
+       
         DateTime[] dates = new DateTime[41];
 
         DateTime _starttime;
@@ -60,8 +61,13 @@ namespace Radar_Analysis_Program
         string firsttime;
         string secondtime;
 
-        double test_a=0;
+        double duration= 0;
         private MySqlConnection conn;
+
+
+        public CheckBox[] checkBoxes;
+        public String[] checkbox_name;
+        
 
         public class MyDataModel
         {
@@ -69,19 +75,25 @@ namespace Radar_Analysis_Program
             public int id { get; set; }
             public double DistLat { get; set; }
             public double DistLong { get; set; }
+            public double VrelLat { get; set; }
+            public double VrelLong { get; set; }
+            public double Velocity { get; set; }
+            public double RCS { get; set; }
+            public int ProbOfExist { get; set; }
+            public int Class { get; set; }
+            public int Zone { get; set; }
+            public int Lane { get; set; }
             public DateTime Timestamp;
         }
+        //dataList[number].id.ToString()
 
         public Window1(MySqlConnection connection)
         {
             conn = connection;
             InitializeComponent();
-
-            
+            CheckBox_setting();
             map_setting();
 
-
-            //db_connect(conn, firsttime, secondtime);
         }
 
         private void draw()
@@ -118,7 +130,8 @@ namespace Radar_Analysis_Program
 
                         TextBox textBox = new TextBox();
                         textBoxes[dataList[number].id] = textBox;
-                        textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                        //textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                        textBoxes[dataList[number].id].Text = CheckBox_print();
                         textBoxes[dataList[number].id].VerticalAlignment = VerticalAlignment.Center;
                         textBoxes[dataList[number].id].Margin = new Thickness(10, 0, 0, 0);
 
@@ -155,7 +168,8 @@ namespace Radar_Analysis_Program
                                 X = shift_pos.X + ((-1 * dataList[number].DistLat) * (Data_Draw.ActualWidth / max_lat)) + (Data_Draw.ActualWidth / 2);
                                 Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
 
-                                textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                                //textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                                textBoxes[dataList[number].id].Text = CheckBox_print();
                                 textBoxes[dataList[number].id].VerticalAlignment = VerticalAlignment.Center;
                                 textBoxes[dataList[number].id].Margin = new Thickness(10, 0, 0, 0);
 
@@ -211,7 +225,8 @@ namespace Radar_Analysis_Program
 
                             TextBox textBox = new TextBox();
                             textBoxes[dataList[number].id] = textBox;
-                            textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                            //textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                            textBoxes[dataList[number].id].Text = CheckBox_print();
                             textBoxes[dataList[number].id].VerticalAlignment = VerticalAlignment.Center;
                             textBoxes[dataList[number].id].Margin = new Thickness(10, 0, 0, 0);
 
@@ -253,7 +268,8 @@ namespace Radar_Analysis_Program
                                 X = shift_pos.X + ((-1 * dataList[number].DistLat) * (Data_Draw.ActualWidth / max_lat)) + (Data_Draw.ActualWidth / 2);
                                 Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
 
-                                textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                                //textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                                textBoxes[dataList[number].id].Text = CheckBox_print();
                                 textBoxes[dataList[number].id].VerticalAlignment = VerticalAlignment.Center;
                                 textBoxes[dataList[number].id].Margin = new Thickness(10, 0, 0, 0);
 
@@ -309,7 +325,9 @@ namespace Radar_Analysis_Program
 
                             TextBox textBox = new TextBox();
                             textBoxes[dataList[number].id] = textBox;
-                            textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                           
+                            //textBoxes[dataList[number].id].Text = "ID = " + dataList[number].id.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
+                            textBoxes[dataList[number].id].Text = CheckBox_print();
                             textBoxes[dataList[number].id].VerticalAlignment = VerticalAlignment.Center;
                             textBoxes[dataList[number].id].Margin = new Thickness(10, 0, 0, 0);
 
@@ -446,13 +464,10 @@ namespace Radar_Analysis_Program
             text_str = textblock1 + "\n" + textblock2 + "\n" + textblock3 + "\n" + textblock4;
             Data_Text.Text = text_str;
         }
-
-
        
         #region setting
         private void db_connect(MySqlConnection connection ,string first, string second)
         {
-
             //first = firsttime;
             //second = secondtime;
 
@@ -479,7 +494,15 @@ namespace Radar_Analysis_Program
                             data.id = reader.GetInt32(1);
                             data.DistLat = reader.GetDouble(2);
                             data.DistLong = reader.GetDouble(3);
-                           
+                            data.VrelLat = reader.GetDouble(4);
+                            data.VrelLong = reader.GetDouble(5);
+                            data.Velocity = reader.GetDouble(6);
+                            data.RCS = reader.GetDouble(7);
+                            data.ProbOfExist = reader.GetInt32(8);
+                            data.Class = reader.GetInt32(11);
+                            data.Zone = reader.GetInt32(14);
+                            data.Lane = reader.GetInt32(15);
+                            System.Console.WriteLine("{0}", data.Zone);
                             dataList.Add(data);
                            
                             //if (dataList.Count > 1000)
@@ -488,7 +511,9 @@ namespace Radar_Analysis_Program
                             //}
                         }
                     }
+                  
                 }
+               
                
             }
             catch (Exception)
@@ -591,6 +616,25 @@ namespace Radar_Analysis_Program
 
 
         }
+        private void CheckBox_setting()
+        {
+
+            checkBoxes = new CheckBox[] { text_time, text_id, text_distlat, text_distlong, text_vrellat, text_vrellong, text_velocity, text_rsc, text_probofexist, text_class, text_zone, text_lane };
+            checkbox_name = new String[] { "Time", "ID", "DistLat", "DistLong", "VrelLat", "VrelLong", "Velocity", "RCS", "ProbOfExist", "Class", "Zone", "Lane" };
+            //checkBoxes[0] = text_time;
+            //checkBoxes[1] = text_id;
+            //checkBoxes[2] = text_distlat;
+            //checkBoxes[3] = text_distlong;
+            //checkBoxes[4] = text_vrellat;
+            //checkBoxes[5] = text_vrellong;
+            //checkBoxes[6] = text_velocity;
+            //checkBoxes[7] = text_rsc;
+            //checkBoxes[8] = text_probofexist;
+            //checkBoxes[9] = text_class;
+            //checkBoxes[10] = text_zone;
+            //checkBoxes[11] = text_lane;
+        }
+   
         #endregion
 
         #region form_Click
@@ -632,6 +676,32 @@ namespace Radar_Analysis_Program
                 else textBoxes[i].Visibility = Visibility.Collapsed;
             }
         }
+        private string CheckBox_print()
+        {
+            string pprint = "";
+            string db_data = "";
+            for (int i = 0; i < 12; i++)
+            {
+                if (i == 0) db_data = dataList[number].time.ToString();
+                else if (i == 1) db_data = dataList[number].id.ToString();
+                else if (i == 2) db_data = dataList[number].DistLat.ToString("0.0");
+                else if (i == 3) db_data = dataList[number].DistLong.ToString("0.0");
+                else if (i == 4) db_data = dataList[number].VrelLat.ToString("0.0");
+                else if (i == 5) db_data = dataList[number].VrelLong.ToString("0.0");
+                else if (i == 6) db_data = dataList[number].Velocity.ToString("0.0");
+                else if (i == 7) db_data = dataList[number].RCS.ToString();
+                else if (i == 8) db_data = dataList[number].ProbOfExist.ToString();
+                else if (i == 9) db_data = dataList[number].Class.ToString();
+                else if (i == 10) db_data = dataList[number].Zone.ToString();
+                else if (i == 11) db_data = dataList[number].Lane.ToString();
+
+                if (checkBoxes[i].IsChecked == true)
+                {
+                    pprint += checkbox_name[i] + " = " + db_data + "\n";
+                }
+            }
+            return pprint;
+        }
         #endregion
 
         #region mediaElement
@@ -641,8 +711,8 @@ namespace Radar_Analysis_Program
             mediaElement.LoadedBehavior = MediaState.Pause;
             double durationMs = mediaElement.NaturalDuration.TimeSpan.TotalMilliseconds;  // 영상 길이를 tick으로 가져옴. 
 
-            test_a = durationMs;
-            total_time = _starttime.AddMilliseconds(test_a);
+            duration = durationMs;
+            total_time = _starttime.AddMilliseconds(duration);
             secondtime = total_time.ToString("yyyy-MM-dd HH:mm:ss.fff");
             //
             //System.Console.WriteLine(secondtime);
@@ -724,7 +794,7 @@ namespace Radar_Analysis_Program
 
             firsttime = _starttime.ToString("yyyy-MM-dd HH:mm:ss.fff");
             secondtime = total_time.ToString("yyyy-MM-dd HH:mm:ss.fff");
-            System.Console.WriteLine(firsttime);
+           // System.Console.WriteLine(firsttime);
            // System.Console.WriteLine(secondtime);
             // System.Console.WriteLine(total_time);
 
@@ -774,6 +844,11 @@ namespace Radar_Analysis_Program
 
         }
         #endregion
+
+
+      
+
+
     }
 
 
