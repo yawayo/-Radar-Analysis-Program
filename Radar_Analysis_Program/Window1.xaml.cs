@@ -1,21 +1,12 @@
-﻿using Microsoft.Win32;
-using MySql.Data.MySqlClient;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using Microsoft.Win32;
+using MySql.Data.MySqlClient;
 
 namespace Radar_Analysis_Program
 {
@@ -38,8 +29,8 @@ namespace Radar_Analysis_Program
         TimeSpan diff;
         TimeSpan diff2;
 
-        private double max_lat = 10;
-        private double max_long = 100;
+        private double max_lat = 20;
+        private double max_long = 200;
         private Point shift_pos;
 
         int number = 0; // DB  n 번째 
@@ -62,6 +53,9 @@ namespace Radar_Analysis_Program
 
         private MySqlConnection conn;
 
+        private float[] Lane_width = new float[6] { 3.3f, 3.3f, 3.3f, 3.3f, 3.3f, 3.3f };
+        private float Dist_Lane_gap = 25.0f;
+
         public class MyDataModel
         {
             public DateTime time { get; set; }
@@ -76,17 +70,128 @@ namespace Radar_Analysis_Program
             conn = connection;
             InitializeComponent();
 
-            map_setting();
-
-
             //db_connect(conn, firsttime, secondtime);
         }
 
+        private void draw_map()
+        {
+            #region Lane
+            //중앙선   
+            Polyline polyline = new Polyline();
+            polyline.Points = new PointCollection()
+            {
+                new Point(Data_Draw.Width / 2, (Data_Draw.Height / max_long)),
+                new Point(Data_Draw.Width / 2, 100 * (Data_Draw.Height / max_long))
+            };
+            polyline.Stroke = Brushes.Yellow;
+            polyline.StrokeThickness = 3;
+            Data_Draw.Children.Add(polyline);
+
+            //왼쪽선
+            Polyline leftline = new Polyline();
+            leftline.Points = new PointCollection()  { new Point(0, (Data_Draw.Height/max_long)),
+                new Point( 0,  10*(Data_Draw.Height/max_long)),    // 600/100 6 
+                new Point(  0,  50*(Data_Draw.Height/max_long)),
+                new Point(  0,  100*(Data_Draw.Height/max_long)) };
+            leftline.Stroke = Brushes.White;
+            leftline.StrokeThickness = 3;
+            Data_Draw.Children.Add(leftline);
+
+
+            //왼쪽 1선
+            Polyline leftline1 = new Polyline();
+            leftline1.Points = new PointCollection()  { new Point(Data_Draw.Width/6, (Data_Draw.Height/max_long)),
+                new Point(Data_Draw.Width/6,  10*(Data_Draw.Height/max_long)),    // 600/100 6 
+                new Point(  Data_Draw.Width/6,  50*(Data_Draw.Height/max_long)),
+                new Point( Data_Draw.Width/6,  100*(Data_Draw.Height/max_long)) };
+            leftline1.Stroke = Brushes.White;
+            leftline1.StrokeThickness = 2;
+            leftline1.StrokeDashArray = new DoubleCollection() { 15, 10 };
+            Data_Draw.Children.Add(leftline1);
+
+
+            //왼쪽 2선
+            Polyline leftline2 = new Polyline();
+            leftline2.Points = new PointCollection()  { new Point(2*(Data_Draw.Width/6), (Data_Draw.Height/max_long)),
+                new Point( 2*(Data_Draw.Width/6),  10*(Data_Draw.Height/max_long)),    // 600/100 6 
+                new Point(  2*(Data_Draw.Width/6),  50*(Data_Draw.Height/max_long)),
+                new Point(  2*(Data_Draw.Width/6),  100*(Data_Draw.Height/max_long)) };
+            leftline2.Stroke = Brushes.White;
+            leftline2.StrokeThickness = 2;
+            leftline2.StrokeDashArray = new DoubleCollection() { 15, 10 };
+            Data_Draw.Children.Add(leftline2);
+
+            //오른선
+            Polyline rightline = new Polyline();
+            rightline.Points = new PointCollection()  { new Point(Data_Draw.Width , (Data_Draw.Height/max_long)),
+                new Point(Data_Draw.Width ,  10*(Data_Draw.Height/max_long)),    // 600/100 6 
+                new Point(  Data_Draw.Width ,  50*(Data_Draw.Height/max_long)),
+                new Point(  Data_Draw.Width ,  100*(Data_Draw.Height/max_long)) };
+            rightline.Stroke = Brushes.White;
+            rightline.StrokeThickness = 3;
+            Data_Draw.Children.Add(rightline);
+
+            //오른 1선
+            Polyline rightline1 = new Polyline();
+            rightline1.Points = new PointCollection()  { new Point(4*(Data_Draw.Width/6) , (Data_Draw.Height/max_long)),
+                new Point(4*(Data_Draw.Width/6),  10*(Data_Draw.Height/max_long)),    // 600/100 6 
+                new Point(  4*(Data_Draw.Width/6) ,  50*(Data_Draw.Height/max_long)),
+                new Point( 4*(Data_Draw.Width/6),  100*(Data_Draw.Height/max_long)) };
+            rightline1.Stroke = Brushes.White;
+            rightline1.StrokeThickness = 2;
+            rightline1.StrokeDashArray = new DoubleCollection() { 15, 10 };
+            Data_Draw.Children.Add(rightline1);
+
+
+            //오른 2선
+            Polyline rightline2 = new Polyline();
+            rightline2.Points = new PointCollection()  { new Point(5*(Data_Draw.Width/6) , (Data_Draw.Height/max_long)),
+                new Point(5*(Data_Draw.Width/6),  10*(Data_Draw.Height/max_long)),    // 600/100 6 
+                new Point(  5*(Data_Draw.Width/6) ,  50*(Data_Draw.Height/max_long)),
+                new Point( 5*(Data_Draw.Width/6),  100*(Data_Draw.Height/max_long)) };
+            rightline2.Stroke = Brushes.White;
+            rightline2.StrokeThickness = 2;
+            rightline2.StrokeDashArray = new DoubleCollection() { 15, 10 };
+            Data_Draw.Children.Add(rightline2);
+            #endregion
+
+            #region Dist Line
+            int line_num = (int)(max_long / Dist_Lane_gap) + 1;
+            for (int line_n = 0; line_n < line_num; line_n++)
+            {
+                Polyline distline = new Polyline();
+                distline.Points = new PointCollection()
+                {
+                    new Point(5, Data_Draw.Height - (Data_Draw.Height / max_long) * Dist_Lane_gap * line_n),
+                    new Point(Data_Draw.Width - 5, Data_Draw.Height - (Data_Draw.Height / max_long) * Dist_Lane_gap * line_n)
+                };
+                distline.Stroke = Brushes.Yellow;
+                distline.StrokeThickness = 1;
+                distline.StrokeDashArray = new DoubleCollection() { 15, 15 };
+                Data_Draw.Children.Add(distline);
+
+
+                Grid panel = new Grid(); //사각형을 감싸줄 Panel 생성
+
+                TextBlock textBlock = new TextBlock();//Text 생성
+                textBlock.Text = ((int)(Dist_Lane_gap * line_n)).ToString() + "m";
+                textBlock.Foreground = Brushes.White;
+
+                panel.Children.Add(textBlock);//Panel에 Text 추가
+
+                Canvas.SetLeft(panel, Data_Draw.Width - 4);//Panel 위치 조정
+                Canvas.SetTop(panel, Data_Draw.Height - (Data_Draw.Height / max_long) * Dist_Lane_gap * line_n - 9);
+
+                Data_Draw.Children.Add(panel);//Panel 등록
+            }
+            #endregion
+        }
         private void draw()
         {
+            draw_map();
             double X;
             double Y;
-            if (number == 0)
+            /*if (number == 0)
             {  
                 if (rectangles[dataList[number].id] == null && _starttime <=dbcompareDT)     //생성 
                 {
@@ -233,7 +338,7 @@ namespace Radar_Analysis_Program
                 }
                 textblock4 = number.ToString();
 
-            }
+            }*/
 
             for (int i = 0; i < 41; i++)
             {
@@ -318,9 +423,9 @@ namespace Radar_Analysis_Program
         }
 
 
-       
+
         #region setting
-        private void db_connect(MySqlConnection connection ,string first, string second)
+        private void db_connect(MySqlConnection connection, string first, string second)
         {
 
             //first = firsttime;
@@ -328,14 +433,14 @@ namespace Radar_Analysis_Program
 
             try
             {
-                 connection.Open();
+                connection.Open();
                 string query = "SELECT * FROM obj_info where DATETIME(time) BETWEEN" + "'" + first + "'" + "AND" + "'" + second + ";";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, connection))
                 {
                     using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
-                         List<MyDataModel> dataList = new List<MyDataModel>();
+                        List<MyDataModel> dataList = new List<MyDataModel>();
 
                         while (reader.Read())
                         {
@@ -364,101 +469,6 @@ namespace Radar_Analysis_Program
             {
                 MessageBox.Show("접속 실패, 다시 시도");
             }
-        }
-        private void map_setting()
-        {
-            //중앙선   
-            Polyline polyline = new Polyline();
-            polyline.Points = new PointCollection()  { new Point((Data_Draw.Width/2), (Data_Draw.Height/max_long)),
-                new Point( (Data_Draw.Width / 2),  10*(Data_Draw.Height/max_long)),    // 600/100 6 
-                new Point(  (Data_Draw.Width / 2),  50*(Data_Draw.Height/max_long)),
-                new Point(  (Data_Draw.Width / 2),  100*(Data_Draw.Height/max_long)) };
-            polyline.Stroke = Brushes.Yellow;
-            polyline.StrokeThickness = 3;
-            Data_Draw.Children.Add(polyline);
-
-            //왼쪽선
-            Polyline leftline = new Polyline();
-            leftline.Points = new PointCollection()  { new Point(0, (Data_Draw.Height/max_long)),
-                new Point( 0,  10*(Data_Draw.Height/max_long)),    // 600/100 6 
-                new Point(  0,  50*(Data_Draw.Height/max_long)),
-                new Point(  0,  100*(Data_Draw.Height/max_long)) };
-            leftline.Stroke = Brushes.White;
-            leftline.StrokeThickness = 3;
-            Data_Draw.Children.Add(leftline);
-
-
-            //왼쪽 1선
-            Polyline leftline1 = new Polyline();
-            leftline1.Points = new PointCollection()  { new Point(Data_Draw.Width/6, (Data_Draw.Height/max_long)),
-                new Point(Data_Draw.Width/6,  10*(Data_Draw.Height/max_long)),    // 600/100 6 
-                new Point(  Data_Draw.Width/6,  50*(Data_Draw.Height/max_long)),
-                new Point( Data_Draw.Width/6,  100*(Data_Draw.Height/max_long)) };
-            leftline1.Stroke = Brushes.White;
-            leftline1.StrokeThickness = 2;
-            leftline1.StrokeDashArray = new DoubleCollection() { 15, 10 };
-            Data_Draw.Children.Add(leftline1);
-
-
-            //왼쪽 2선
-            Polyline leftline2 = new Polyline();
-            leftline2.Points = new PointCollection()  { new Point(2*(Data_Draw.Width/6), (Data_Draw.Height/max_long)),
-                new Point( 2*(Data_Draw.Width/6),  10*(Data_Draw.Height/max_long)),    // 600/100 6 
-                new Point(  2*(Data_Draw.Width/6),  50*(Data_Draw.Height/max_long)),
-                new Point(  2*(Data_Draw.Width/6),  100*(Data_Draw.Height/max_long)) };
-            leftline2.Stroke = Brushes.White;
-            leftline2.StrokeThickness = 2;
-            leftline2.StrokeDashArray = new DoubleCollection() { 15, 10 };
-            Data_Draw.Children.Add(leftline2);
-
-            //오른선
-            Polyline rightline = new Polyline();
-            rightline.Points = new PointCollection()  { new Point(Data_Draw.Width , (Data_Draw.Height/max_long)),
-                new Point(Data_Draw.Width ,  10*(Data_Draw.Height/max_long)),    // 600/100 6 
-                new Point(  Data_Draw.Width ,  50*(Data_Draw.Height/max_long)),
-                new Point(  Data_Draw.Width ,  100*(Data_Draw.Height/max_long)) };
-            rightline.Stroke = Brushes.White;
-            rightline.StrokeThickness = 3;
-            Data_Draw.Children.Add(rightline);
-
-            //오른 1선
-            Polyline rightline1 = new Polyline();
-            rightline1.Points = new PointCollection()  { new Point(4*(Data_Draw.Width/6) , (Data_Draw.Height/max_long)),
-                new Point(4*(Data_Draw.Width/6),  10*(Data_Draw.Height/max_long)),    // 600/100 6 
-                new Point(  4*(Data_Draw.Width/6) ,  50*(Data_Draw.Height/max_long)),
-                new Point( 4*(Data_Draw.Width/6),  100*(Data_Draw.Height/max_long)) };
-            rightline1.Stroke = Brushes.White;
-            rightline1.StrokeThickness = 2;
-            rightline1.StrokeDashArray = new DoubleCollection() { 15, 10 };
-            Data_Draw.Children.Add(rightline1);
-
-
-            //오른 2선
-            Polyline rightline2 = new Polyline();
-            rightline2.Points = new PointCollection()  { new Point(5*(Data_Draw.Width/6) , (Data_Draw.Height/max_long)),
-                new Point(5*(Data_Draw.Width/6),  10*(Data_Draw.Height/max_long)),    // 600/100 6 
-                new Point(  5*(Data_Draw.Width/6) ,  50*(Data_Draw.Height/max_long)),
-                new Point( 5*(Data_Draw.Width/6),  100*(Data_Draw.Height/max_long)) };
-            rightline2.Stroke = Brushes.White;
-            rightline2.StrokeThickness = 2;
-            rightline2.StrokeDashArray = new DoubleCollection() { 15, 10 };
-            Data_Draw.Children.Add(rightline2);
-
-
-
-
-            ////
-            //Polyline rightline2 = new Polyline();
-            //rightline2.Points = new PointCollection()  { new Point(5*(Data_Draw.Width/6) , (Data_Draw.Height/max_long)),
-            //    new Point(5*(Data_Draw.Width/6),  10*(Data_Draw.Height/max_long)),    // 600/100 6 
-            //    new Point(  5*(Data_Draw.Width/6) ,  50*(Data_Draw.Height/max_long)),
-            //    new Point( 5*(Data_Draw.Width/6),  100*(Data_Draw.Height/max_long)) };
-            //rightline2.Stroke = Brushes.White;
-            //rightline2.StrokeThickness = 3;
-            //rightline2.StrokeDashArray = new DoubleCollection() { 10, 5 };
-            //Data_Draw.Children.Add(rightline2);
-
-
         }
         #endregion
 
@@ -507,12 +517,12 @@ namespace Radar_Analysis_Program
         private void mediaElement_MediaOpened(object sender, RoutedEventArgs e)
         {
             //총 재생시간 가져옴  
-           
-          
+
+
             double durationMs = mediaElement.NaturalDuration.TimeSpan.TotalMilliseconds;  // 영상 길이를 tick으로 가져옴. 
 
             total_time = _starttime.AddMilliseconds(durationMs);
-       
+
             System.Console.WriteLine(total_time);
 
             slider.Maximum = slider.Minimum + durationMs;
@@ -538,7 +548,7 @@ namespace Radar_Analysis_Program
                 timer.Tick += TimerTickHandler;
                 speed_check++;
             }
-       
+
 
             mediaElement.Play();
             timer.Start();
@@ -589,7 +599,7 @@ namespace Radar_Analysis_Program
             //System.Console.WriteLine(secondtime);
             // System.Console.WriteLine(total_time);
 
-            
+
 
         }
         #endregion
