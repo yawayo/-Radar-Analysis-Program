@@ -54,6 +54,7 @@ namespace Radar_Analysis_Program
         private MySqlConnection conn;
 
         private float[] Lane_width = new float[6] { 3.3f, 3.3f, 3.3f, 3.3f, 3.3f, 3.3f };
+        private float[] Lane_shift = new float[6] { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
         private float Dist_Lane_gap = 25.0f;
 
         public class MyDataModel
@@ -76,6 +77,21 @@ namespace Radar_Analysis_Program
         private void draw_map()
         {
             #region Lane
+            int point_num = (int)(max_long / Dist_Lane_gap) + 1;
+            for (int p = 0; p < point_num - 1; p ++)
+            {
+                Polyline lane = new Polyline();
+                lane.Points = new PointCollection()
+                {
+                    new Point((Data_Draw.Height / 2), Data_Draw.Height - (Data_Draw.Height / max_long) * Dist_Lane_gap * p),
+                    new Point((Data_Draw.Height / 2), Data_Draw.Height - (Data_Draw.Height / max_long) * Dist_Lane_gap * (p + 1))
+                };
+                lane.Stroke = Brushes.Yellow;
+                lane.StrokeThickness = 1;
+                lane.StrokeDashArray = new DoubleCollection() { 15, 15 };
+                Data_Draw.Children.Add(lane);
+            }
+
             //중앙선   
             Polyline polyline = new Polyline();
             polyline.Points = new PointCollection()
@@ -156,8 +172,7 @@ namespace Radar_Analysis_Program
             #endregion
 
             #region Dist Line
-            int line_num = (int)(max_long / Dist_Lane_gap) + 1;
-            for (int line_n = 0; line_n < line_num; line_n++)
+            for (int line_n = 0; line_n < point_num; line_n++)
             {
                 Polyline distline = new Polyline();
                 distline.Points = new PointCollection()
@@ -172,16 +187,12 @@ namespace Radar_Analysis_Program
 
 
                 Grid panel = new Grid(); //사각형을 감싸줄 Panel 생성
-
                 TextBlock textBlock = new TextBlock();//Text 생성
                 textBlock.Text = ((int)(Dist_Lane_gap * line_n)).ToString() + "m";
                 textBlock.Foreground = Brushes.White;
-
                 panel.Children.Add(textBlock);//Panel에 Text 추가
-
                 Canvas.SetLeft(panel, Data_Draw.Width - 4);//Panel 위치 조정
                 Canvas.SetTop(panel, Data_Draw.Height - (Data_Draw.Height / max_long) * Dist_Lane_gap * line_n - 9);
-
                 Data_Draw.Children.Add(panel);//Panel 등록
             }
             #endregion
