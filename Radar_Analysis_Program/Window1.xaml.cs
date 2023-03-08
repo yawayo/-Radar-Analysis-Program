@@ -533,7 +533,6 @@ namespace Radar_Analysis_Program
                 }
 
                 diff2 = value_time;
-                draw_map();
                 dbcomparetime = _starttime.Add(diff2).ToString("yyyy-MM-dd HH:mm:ss.fff");
                 dbcompareDT = _starttime.Add(diff2);
                 drag_move_check = 0;   //움직인 다음 무브체크, 다시 0으로 초기화
@@ -680,10 +679,8 @@ namespace Radar_Analysis_Program
         }
         private void LaneWidth6Up_Click(object sender, RoutedEventArgs e)
         {
-            Data_Draw.Children.Clear();
             Lane_width[5] += 0.1f;
             Update_LaneWidthText();
-            draw_map();
         }
         private void LaneWidth6Down_Click(object sender, RoutedEventArgs e)
         {
@@ -987,7 +984,6 @@ namespace Radar_Analysis_Program
         }
         private void slider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
         {
-            draw_map();
             mediaElement.Play();
             timer.Start();
 
