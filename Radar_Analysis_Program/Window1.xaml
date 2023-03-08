@@ -54,39 +54,125 @@
 
 
         <Border Grid.Row="2" Grid.Column="1" Grid.RowSpan="2" BorderBrush="White" BorderThickness="1">
-            <Grid Background="#00000000" >
+            <Grid x:Name="grid" Background="#00000000" >
                 <Grid.RowDefinitions>
                     <RowDefinition Height="40"/>
-                    <RowDefinition/>
-                    <RowDefinition Height="80"/>  
-                 
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="25"/>
+
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
+                    <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="80"/>
-                 
-                </Grid.ColumnDefinitions>
-                <Label x:Name="test_label" Grid.Row="0" Content="Radar" Foreground="#FFF48F3D" FontSize="25" FontFamily="KoPub바탕체_Pro Medium"/>
-                <Canvas x:Name="Data_Draw" Grid.Row="1" Width="500" Height="600"  VerticalAlignment="Center"></Canvas>
-                <StackPanel Orientation="Horizontal"  Grid.Row="2">
-                    <!-- 여기 패널입니다.   -->
-                    <!--    차선 간격   -->
-                    <Button Content="Button 1" Margin="0 0 50 0"/>
-                    <Button Content="Button 2" Margin="0 0 50 0"/>
-                    <Button Content="Button 3" Margin="0 0 50 0"/>
-                    <CheckBox x:Name="aa"  />
-                    <!-- 여기 패널입니다.   -->
-                </StackPanel>
 
-                <StackPanel Orientation="Vertical"  Grid.Row="1" Grid.Column="1">
-                    <!-- 여기 패널입니다.   -->
-                    <!--    차선 위치   -->
-                    <Button Content="Button 1" Margin="0 0 0 50"/>
-                    <Button Content="Button 2" Margin="0 0 0 50"/>
-                    <Button Content="Button 3" Margin="0 0 0 50"/>
-                    <CheckBox x:Name="aa1"  />
-                    <!-- 여기 패널입니다.   -->
-                </StackPanel>
+                </Grid.ColumnDefinitions>
+                <Label x:Name="Radar_label" Grid.Row="0" Content="Radar" Foreground="#FFF48F3D" FontSize="25" FontFamily="KoPub바탕체_Pro Medium"/>
+                <Canvas x:Name="Data_Draw" Grid.Row="1" Background="Black"/>
+                <Grid Grid.Row="2" Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Column="0" Width="50" Height="23" VerticalAlignment="Center">
+                        <TextBox x:Name="LaneWidth1" x:FieldModifier="private" Text="0" Margin="3,2,13,3" IsReadOnly="True"/>
+                        <Button x:Name="LaneWidth1Up" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▲" Width="10" Margin="33,2,1,13" Click="LaneWidth1Up_Click"/>
+                        <Button x:Name="LaneWidth1Down" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▼" Width="10" Margin="33,12,1,3" Click="LaneWidth1Down_Click"/>
+                    </Grid>
+                    <Grid Grid.Column="1" Width="50" Height="23" VerticalAlignment="Center">
+                        <TextBox x:Name="LaneWidth2" x:FieldModifier="private" Text="0" Margin="3,2,13,3" IsReadOnly="True"/>
+                        <Button x:Name="LaneWidth2Up" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▲" Width="10" Margin="33,2,1,13" Click="LaneWidth2Up_Click"/>
+                        <Button x:Name="LaneWidth2Down" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▼" Width="10" Margin="33,12,1,3" Click="LaneWidth2Down_Click"/>
+                    </Grid>
+                    <Grid Grid.Column="2" Width="50" Height="23" VerticalAlignment="Center">
+                        <TextBox x:Name="LaneWidth3" x:FieldModifier="private" Text="0" Margin="3,2,13,3" IsReadOnly="True"/>
+                        <Button x:Name="LaneWidth3Up" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▲" Width="10" Margin="33,2,1,13" Click="LaneWidth3Up_Click"/>
+                        <Button x:Name="LaneWidth3Down" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▼" Width="10" Margin="33,12,1,3" Click="LaneWidth3Down_Click"/>
+                    </Grid>
+                    <Grid Grid.Column="3" Width="50" Height="23" VerticalAlignment="Center">
+                        <TextBox x:Name="LaneWidth4" x:FieldModifier="private" Text="0" Margin="3,2,13,3" IsReadOnly="True"/>
+                        <Button x:Name="LaneWidth4Up" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▲" Width="10" Margin="33,2,1,13" Click="LaneWidth4Up_Click"/>
+                        <Button x:Name="LaneWidth4Down" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▼" Width="10" Margin="33,12,1,3" Click="LaneWidth4Down_Click"/>
+                    </Grid>
+                    <Grid Grid.Column="4" Width="50" Height="23" VerticalAlignment="Center">
+                        <TextBox x:Name="LaneWidth5" x:FieldModifier="private" Text="0" Margin="3,2,13,3" IsReadOnly="True"/>
+                        <Button x:Name="LaneWidth5Up" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▲" Width="10" Margin="33,2,1,13" Click="LaneWidth5Up_Click"/>
+                        <Button x:Name="LaneWidth5Down" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▼" Width="10" Margin="33,12,1,3" Click="LaneWidth5Down_Click"/>
+                    </Grid>
+                    <Grid Grid.Column="5" Width="50" Height="23" VerticalAlignment="Center">
+                        <TextBox x:Name="LaneWidth6" x:FieldModifier="private" Text="0" Margin="3,2,13,3" IsReadOnly="True"/>
+                        <Button x:Name="LaneWidth6Up" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▲" Width="10" Margin="33,2,1,13" Click="LaneWidth6Up_Click"/>
+                        <Button x:Name="LaneWidth6Down" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▼" Width="10" Margin="33,12,1,3" Click="LaneWidth6Down_Click"/>
+                    </Grid>
+                </Grid>
+
+                <Grid Grid.Row="1" Grid.Column="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="8" Width="50" Height="23" VerticalAlignment="Center">
+                        <TextBox x:Name="LaneDistPoint0" x:FieldModifier="private" Text="0" Margin="3,2,13,3" IsReadOnly="True"/>
+                        <Button x:Name="LaneDistPoint0Up" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▲" Width="10" Margin="33,2,1,13" Click="LanePoint0Up_Click"/>
+                        <Button x:Name="LaneDistPoint0Down" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▼" Width="10" Margin="33,12,1,3" Click="LanePoint0Down_Click"/>
+                    </Grid>
+                    <Grid Grid.Row="7" Width="50" Height="23" VerticalAlignment="Center">
+                        <TextBox x:Name="LaneDistPoint25" x:FieldModifier="private" Text="0" Margin="3,2,13,3" IsReadOnly="True"/>
+                        <Button x:Name="LaneDistPoint25Up" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▲" Width="10" Margin="33,2,1,13" Click="LanePoint25Up_Click"/>
+                        <Button x:Name="LaneDistPoint25Down" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▼" Width="10" Margin="33,12,1,3" Click="LanePoint25Down_Click"/>
+                    </Grid>
+                    <Grid Grid.Row="6" Width="50" Height="23" VerticalAlignment="Center">
+                        <TextBox x:Name="LaneDistPoint50" x:FieldModifier="private" Text="0" Margin="3,2,13,3" IsReadOnly="True"/>
+                        <Button x:Name="LaneDistPoint50Up" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▲" Width="10" Margin="33,2,1,13" Click="LanePoint50Up_Click"/>
+                        <Button x:Name="LaneDistPoint50Down" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▼" Width="10" Margin="33,12,1,3" Click="LanePoint50Down_Click"/>
+                    </Grid>
+                    <Grid Grid.Row="5" Width="50" Height="23" VerticalAlignment="Center">
+                        <TextBox x:Name="LaneDistPoint75" x:FieldModifier="private" Text="0" Margin="3,2,13,3" IsReadOnly="True"/>
+                        <Button x:Name="LaneDistPoint75Up" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▲" Width="10" Margin="33,2,1,13" Click="LanePoint75Up_Click"/>
+                        <Button x:Name="LaneDistPoint75Down" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▼" Width="10" Margin="33,12,1,3" Click="LanePoint75Down_Click"/>
+                    </Grid>
+                    <Grid Grid.Row="4" Width="50" Height="23" VerticalAlignment="Center">
+                        <TextBox x:Name="LaneDistPoint100" x:FieldModifier="private" Text="0" Margin="3,2,13,3" IsReadOnly="True"/>
+                        <Button x:Name="LaneDistPoint100Up" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▲" Width="10" Margin="33,2,1,13" Click="LanePoint100Up_Click"/>
+                        <Button x:Name="LaneDistPoint100Down" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▼" Width="10" Margin="33,12,1,3" Click="LanePoint100Down_Click"/>
+                    </Grid>
+                    <Grid Grid.Row="3" Width="50" Height="23" VerticalAlignment="Center">
+                        <TextBox x:Name="LaneDistPoint125" x:FieldModifier="private" Text="0" Margin="3,2,13,3" IsReadOnly="True"/>
+                        <Button x:Name="LaneDistPoint125Up" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▲" Width="10" Margin="33,2,1,13" Click="LanePoint125Up_Click"/>
+                        <Button x:Name="LaneDistPoint125Down" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▼" Width="10" Margin="33,12,1,3" Click="LanePoint125Down_Click"/>
+                    </Grid>
+                    <Grid Grid.Row="2" Width="50" Height="23" VerticalAlignment="Center">
+                        <TextBox x:Name="LaneDistPoint150" x:FieldModifier="private" Text="0" Margin="3,2,13,3" IsReadOnly="True"/>
+                        <Button x:Name="LaneDistPoint150Up" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▲" Width="10" Margin="33,2,1,13" Click="LanePoint150Up_Click"/>
+                        <Button x:Name="LaneDistPoint150Down" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▼" Width="10" Margin="33,12,1,3" Click="LanePoint150Down_Click"/>
+                    </Grid>
+                    <Grid Grid.Row="1" Width="50" Height="23" VerticalAlignment="Center">
+                        <TextBox x:Name="LaneDistPoint175" x:FieldModifier="private" Text="0" Margin="3,2,13,3" IsReadOnly="True"/>
+                        <Button x:Name="LaneDistPoint175Up" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▲" Width="10" Margin="33,2,1,13" Click="LanePoint175Up_Click"/>
+                        <Button x:Name="LaneDistPoint175Down" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▼" Width="10" Margin="33,12,1,3" Click="LanePoint175Down_Click"/>
+                    </Grid>
+                    <Grid Grid.Row="0" Width="50" Height="23" VerticalAlignment="Center">
+                        <TextBox x:Name="LaneDistPoint200" x:FieldModifier="private" Text="0" Margin="3,2,13,3" IsReadOnly="True"/>
+                        <Button x:Name="LaneDistPoint200Up" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▲" Width="10" Margin="33,2,1,13" Click="LanePoint200Up_Click"/>
+                        <Button x:Name="LaneDistPoint200Down" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▼" Width="10" Margin="33,12,1,3" Click="LanePoint200Down_Click"/>
+                    </Grid>
+                </Grid>
             </Grid>
         </Border>
         <Border Grid.Row="2" Grid.Column="2" BorderBrush="White" BorderThickness="1">
@@ -144,8 +230,8 @@
                 <Border Grid.Column="1" Grid.Row="2" BorderBrush="White" BorderThickness="1"></Border>
                 <Border Grid.Column="0" Grid.Row="0" BorderBrush="White" BorderThickness="1"></Border>
                 <Border Grid.Column="1" Grid.Row="0" BorderBrush="White" BorderThickness="1"></Border>
-                
-                
+
+
                 <Label Grid.Row="0" Grid.Column="0" Content="Setting"  FontFamily="KoPub바탕체_Pro Medium" Foreground="#FFF48F3D" FontSize="25"></Label>
                 <Label Grid.Row="0" Grid.Column="1" Content="Data" FontFamily="KoPub바탕체_Pro Medium" Foreground="#FFF48F3D" FontSize="25"></Label>
 
@@ -163,8 +249,8 @@
                     <CheckBox  x:Name ="text_zone" Content ="Zone"  FontSize="12"    IsChecked="False" Foreground="White"/>
                     <CheckBox  x:Name ="text_lane" Content ="Lane"  FontSize="12"    IsChecked="False" Foreground="White"/>
                 </WrapPanel>
-               
-             
+
+
 
                 <Button x:Name="Clear_btn" Grid.Row="0" Width="40" HorizontalAlignment="Right" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="{x:Null}" />
                 <ScrollViewer x:Name="Text_scroll" Grid.Row="1" Grid.Column="2">
