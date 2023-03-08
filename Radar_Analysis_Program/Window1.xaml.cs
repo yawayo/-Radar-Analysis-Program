@@ -68,7 +68,6 @@ namespace Radar_Analysis_Program
         public CheckBox[] checkBoxes;
         public String[] checkbox_name;
         
-
         public class MyDataModel
         {
             public DateTime time { get; set; }
@@ -85,7 +84,6 @@ namespace Radar_Analysis_Program
             public int Lane { get; set; }
             public DateTime Timestamp;
         }
-        //dataList[number].id.ToString()
 
         public Window1(MySqlConnection connection)
         {
@@ -95,6 +93,7 @@ namespace Radar_Analysis_Program
             map_setting();
 
         }
+
 
         private void draw()
         {
@@ -459,6 +458,7 @@ namespace Radar_Analysis_Program
                 dbcompareDT = _starttime.Add(diff2);
             }       // 드래그 안 했을 때
 
+
             draw();
 
             text_str = textblock1 + "\n" + textblock2 + "\n" + textblock3 + "\n" + textblock4;
@@ -657,6 +657,10 @@ namespace Radar_Analysis_Program
         {
             this.WindowState = System.Windows.WindowState.Minimized;
         }
+        private void Setting_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = System.Windows.WindowState.Minimized;
+        }
         #endregion
 
         #region checkBox
@@ -799,8 +803,7 @@ namespace Radar_Analysis_Program
             // System.Console.WriteLine(total_time);
 
         }
-        #endregion
-       
+        #endregion 
 
         #region slider
         private void slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -844,9 +847,6 @@ namespace Radar_Analysis_Program
 
         }
         #endregion
-
-
-      
 
 
     }

@@ -29,14 +29,15 @@
                 <ColumnDefinition Width="30"/>
                 <ColumnDefinition Width="30"/>
                 <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="30"/>
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="3" Width="30" Height="30" Click="Form_Close_Click" Background="#FF222528" BorderBrush="{x:Null}">
+            <Button Grid.Column="4" Width="30" Height="30" Click="Form_Close_Click" Background="#FF222528" BorderBrush="{x:Null}">
                 <Canvas Height="30" Width="30">
                     <Line X1="4" Y1="4" X2="16" Y2="16" Stroke="White"/>
                     <Line X1="4" Y1="16" X2="16" Y2="4" Stroke="White"/>
                 </Canvas>
             </Button>
-            <Button Grid.Column="2" Width="30" Height="30" Click="Form_Resize_Click" Background="#FF222528" BorderBrush="{x:Null}">
+            <Button Grid.Column="3" Width="30" Height="30" Click="Form_Resize_Click" Background="#FF222528" BorderBrush="{x:Null}">
                 <Canvas Height="30" Width="30">
                     <Line X1="4" Y1="4" X2="4" Y2="16" Stroke="White"/>
                     <Line X1="4" Y1="16" X2="16" Y2="16" Stroke="White"/>
@@ -44,9 +45,16 @@
                     <Line X1="16" Y1="4" X2="4" Y2="4" Stroke="White"/>
                 </Canvas>
             </Button>
-            <Button Grid.Column="1" Width="30" Height="30" Click="Form_Hide_Click" Background="#FF222528" BorderBrush="{x:Null}">
+            <Button Grid.Column="2" Width="30" Height="30" Click="Form_Hide_Click" Background="#FF222528" BorderBrush="{x:Null}">
                 <Canvas Height="30" Width="30">
                     <Line X1="4" Y1="10" X2="16" Y2="10" Stroke="White"/>
+                </Canvas>
+            </Button>
+            <Button Grid.Column="1" Width="30" Height="30" Click="Setting_Click" Background="#FF222528" BorderBrush="{x:Null}">
+                <Canvas Height="30" Width="30">
+                    <Line X1="4" Y1="10" X2="16" Y2="10" Stroke="White"/>
+                    <Line X1="4" Y1="4" X2="16" Y2= "16" Stroke="White"/>
+                    <Line X1="4" Y1="16" X2="16" Y2="4" Stroke="White"/>
                 </Canvas>
             </Button>
             <StackPanel Grid.Column="0"/>
@@ -67,7 +75,7 @@
                  
                 </Grid.ColumnDefinitions>
                 <Label x:Name="test_label" Grid.Row="0" Content="Radar" Foreground="#FFF48F3D" FontSize="25" FontFamily="KoPub바탕체_Pro Medium"/>
-                <Canvas x:Name="Data_Draw" Grid.Row="1" Width="500" Height="600"  VerticalAlignment="Center"></Canvas>
+                <Canvas x:Name="Data_Draw" Grid.Row="1"  Width="500" Height="600"  VerticalAlignment="Center"></Canvas>
                 <StackPanel Orientation="Horizontal"  Grid.Row="2">
                     <!-- 여기 패널입니다.   -->
                     <!--    차선 간격   -->
@@ -81,7 +89,7 @@
                 <StackPanel Orientation="Vertical"  Grid.Row="1" Grid.Column="1">
                     <!-- 여기 패널입니다.   -->
                     <!--    차선 위치   -->
-                    <Button Content="Button 1" Margin="0 0 0 50"/>
+                    <Button Content="Button 1" Margin="25 0 25 50"/>
                     <Button Content="Button 2" Margin="0 0 0 50"/>
                     <Button Content="Button 3" Margin="0 0 0 50"/>
                     <CheckBox x:Name="aa1"  />
