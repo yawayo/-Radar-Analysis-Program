@@ -95,7 +95,7 @@
                 <Label x:Name="Filter_VXDepart_MAX_value" Margin="5" Foreground="White" FontSize="18" FontFamily="Constantia" Width="90">0</Label>
             </WrapPanel>
 
-            <WrapPanel x:Name="Filter_change_panel" Grid.Row="1" Background="#FF191C1E" Grid.Column="1" Width="470" Height="670" Canvas.Left="450" Canvas.Top="40">
+            "<WrapPanel x:Name="Filter_change_panel" Grid.Row="1" Background="#FF191C1E" Grid.Column="1" Width="470" Height="670" Canvas.Left="450" Canvas.Top="40">
                 <Label Margin="5" Foreground="White" FontSize="20" FontFamily="Constantia" Width="200"></Label>
                 <Label Margin="5" Foreground="White" FontSize="18" FontFamily="Constantia" Width="80">Min</Label>
                 <Label Margin="5" Foreground="White" FontSize="18" FontFamily="Constantia" Width="80">Max</Label>
