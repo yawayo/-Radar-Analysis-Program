@@ -29,14 +29,15 @@
                 <ColumnDefinition Width="30"/>
                 <ColumnDefinition Width="30"/>
                 <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="30"/>
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="3" Width="30" Height="30" Click="Form_Close_Click" Background="#FF222528" BorderBrush="{x:Null}">
+            <Button Grid.Column="4" Width="30" Height="30" Click="Form_Close_Click" Background="#FF222528" BorderBrush="{x:Null}">
                 <Canvas Height="30" Width="30">
                     <Line X1="4" Y1="4" X2="16" Y2="16" Stroke="White"/>
                     <Line X1="4" Y1="16" X2="16" Y2="4" Stroke="White"/>
                 </Canvas>
             </Button>
-            <Button Grid.Column="2" Width="30" Height="30" Click="Form_Resize_Click" Background="#FF222528" BorderBrush="{x:Null}">
+            <Button Grid.Column="3" Width="30" Height="30" Click="Form_Resize_Click" Background="#FF222528" BorderBrush="{x:Null}">
                 <Canvas Height="30" Width="30">
                     <Line X1="4" Y1="4" X2="4" Y2="16" Stroke="White"/>
                     <Line X1="4" Y1="16" X2="16" Y2="16" Stroke="White"/>
@@ -44,9 +45,16 @@
                     <Line X1="16" Y1="4" X2="4" Y2="4" Stroke="White"/>
                 </Canvas>
             </Button>
-            <Button Grid.Column="1" Width="30" Height="30" Click="Form_Hide_Click" Background="#FF222528" BorderBrush="{x:Null}">
+            <Button Grid.Column="2" Width="30" Height="30" Click="Form_Hide_Click" Background="#FF222528" BorderBrush="{x:Null}">
                 <Canvas Height="30" Width="30">
                     <Line X1="4" Y1="10" X2="16" Y2="10" Stroke="White"/>
+                </Canvas>
+            </Button>
+            <Button Grid.Column="1" Width="30" Height="30" Click="Setting_Click" Background="#FF222528" BorderBrush="{x:Null}">
+                <Canvas Height="30" Width="30">
+                    <Line X1="4" Y1="10" X2="16" Y2="10" Stroke="White"/>
+                    <Line X1="4" Y1="4" X2="16" Y2= "16" Stroke="White"/>
+                    <Line X1="4" Y1="16" X2="16" Y2="4" Stroke="White"/>
                 </Canvas>
             </Button>
             <StackPanel Grid.Column="0"/>
