@@ -20,7 +20,9 @@ namespace Radar_Analysis_Program
 
         TextBox[] textBoxes = new TextBox[41];
         Rectangle[] rectangles = new Rectangle[41];
-        Polyline[] lines = new Polyline[41];
+        Polyline[] dist_lines = new Polyline[9];
+        Grid[] dist_line_texts = new Grid[9];
+        Polyline[] car_lanes = new Polyline[100];
 
         DateTime[] dates = new DateTime[41];
 
@@ -97,6 +99,7 @@ namespace Radar_Analysis_Program
             int point_num = (int)(max_long / Dist_Lane_gap) + 1;
 
             #region Lane
+            int car_lane_index = 0;
             //중앙선 
             for (int p = 0; p < point_num - 1; p++)
             {
@@ -113,24 +116,28 @@ namespace Radar_Analysis_Program
                     new Point(X1, Y1),
                     new Point(X2, Y2)
                 };
+                car_lanes[car_lane_index] = lane;
+                car_lane_index++;
                 Data_Draw.Children.Add(lane);
             }
 
             for (int l = 0; l < 6; l++)
             {
                 float d = 0.0f;
-                if(l == 0)
-                    d = -1.0f * (Lane_width[0] + Lane_width[1] + Lane_width[2]);
-                else if (l == 1)
-                    d = -1.0f * (Lane_width[1] + Lane_width[2]);
-                else if (l == 2)
-                    d = -1.0f * (Lane_width[2]);
-                else if (l == 3)
-                    d = (Lane_width[3] + Lane_width[4] + Lane_width[5]);
-                else if (l == 4)
-                    d = (Lane_width[3] + Lane_width[4]);
-                else
-                    d = (Lane_width[3]);
+                {
+                    if (l == 0)
+                        d = -1.0f * (Lane_width[0] + Lane_width[1] + Lane_width[2]);
+                    else if (l == 1)
+                        d = -1.0f * (Lane_width[1] + Lane_width[2]);
+                    else if (l == 2)
+                        d = -1.0f * (Lane_width[2]);
+                    else if (l == 3)
+                        d = (Lane_width[3] + Lane_width[4] + Lane_width[5]);
+                    else if (l == 4)
+                        d = (Lane_width[3] + Lane_width[4]);
+                    else
+                        d = (Lane_width[3]);
+                }
 
                 for (int p = 0; p < point_num - 1; p++)
                 {
@@ -147,12 +154,15 @@ namespace Radar_Analysis_Program
                     };
                     lane.Stroke = Brushes.White;
                     lane.StrokeThickness = 3;
+                    car_lanes[car_lane_index] = lane;
+                    car_lane_index++;
                     Data_Draw.Children.Add(lane);
                 }
             }
             #endregion
 
             #region Dist Line
+            int dist_line_index = 0;
             for (int line_n = 0; line_n < point_num; line_n++)
             {
                 int Y = (int)(Data_Draw.ActualHeight - ((Data_Draw.ActualHeight * Dist_Lane_gap * ((2 * line_n) + 1)) / (2 * (max_long + Dist_Lane_gap))));
@@ -165,7 +175,6 @@ namespace Radar_Analysis_Program
                 distline.Stroke = Brushes.Yellow;
                 distline.StrokeThickness = 1;
                 distline.StrokeDashArray = new DoubleCollection() { 15, 15 };
-                Data_Draw.Children.Add(distline);
 
 
                 Grid panel = new Grid(); //사각형을 감싸줄 Panel 생성
@@ -175,8 +184,12 @@ namespace Radar_Analysis_Program
                 panel.Children.Add(textBlock);//Panel에 Text 추가
                 Canvas.SetLeft(panel, Data_Draw.ActualWidth - (textBlock.Text.Length + 2) * 5);//Panel 위치 조정
                 Canvas.SetTop(panel, Y - 9);
+                dist_lines[dist_line_index] = distline;
+                dist_line_texts[dist_line_index] = panel;
+                Data_Draw.Children.Add(distline);
                 Data_Draw.Children.Add(panel);//Panel 등록
-                System.Console.WriteLine(textBlock.Text.Length);
+
+                dist_line_index++;
             }
             #endregion
         }
@@ -456,9 +469,6 @@ namespace Radar_Analysis_Program
                 }
             }
             textblock1 = dbcomparetime;
-
-
-            //draw_map();
         }
         void TimerTickHandler(object sender, EventArgs e)
         {
@@ -881,9 +891,9 @@ namespace Radar_Analysis_Program
         #region btn
         private void btnPlay_Click(object sender, RoutedEventArgs e)
         {
-            draw_map();
             if (speed_check == 0)
             {
+                draw_map();
                 timer.Interval = TimeSpan.FromMilliseconds(0.1);
                 timer.Tick += TimerTickHandler;
                 speed_check++;
