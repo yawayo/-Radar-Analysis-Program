@@ -65,15 +65,42 @@ namespace Radar_Analysis_Program
         public CheckBox[] checkBoxes;
         public String[] checkbox_name;
 
+    
 
-        public static string Change_Filter_NofObj_MIN_input = "A";
-        public static string Change_Filter_NofObj_MAX_input = "A";
+        #region Change_MIN
+        public static string Change_Filter_NofObj_MIN_input = "0";
         public static string Change_Filter_Distance_MIN_input = "0";
+        public static string Change_Filter_Azimuth_MIN_input = "-50";
+        public static string Change_Filter_VrelOncome_MIN_input = "0";
+        public static string Change_Filter_VrelDepart_MIN_input = "0";
+        public static string Change_Filter_RCS_MIN_input = "-50";
+        public static string Change_Filter_Lifetime_MIN_input = "0";
+        public static string Change_Filter_Size_MIN_input = "0";
+        public static string Change_Filter_ProbExists_MIN_input = "0";
+        public static string Change_Filter_Y_MIN_input = "-409.5";
+        public static string Change_Filter_X_MIN_input = "-500";
+        public static string Change_Filter_VYRightLeft_MIN_input = "0";
+        public static string Change_Filter_VXOncome_MIN_input = "0";
+        public static string Change_Filter_VYLeftRight_MIN_input = "0";
+        public static string Change_Filter_VXDepart_MIN_input = "0";
+        #endregion
+        #region Change_MAX
+        public static string Change_Filter_NofObj_MAX_input = "4095";
         public static string Change_Filter_Distance_MAX_input = "409.5";
-
-
-
-
+        public static string Change_Filter_Azimuth_MAX_input = "50.375";
+        public static string Change_Filter_VrelOncome_MAX_input = "128.993";
+        public static string Change_Filter_VrelDepart_MAX_input = "128.993";
+        public static string Change_Filter_RCS_MAX_input = "52.375";
+        public static string Change_Filter_Lifetime_MAX_input = "409.5";
+        public static string Change_Filter_Size_MAX_input = "102.375";
+        public static string Change_Filter_ProbExists_MAX_input = "7";
+        public static string Change_Filter_Y_MAX_input = "409.5";
+        public static string Change_Filter_X_MAX_input = "1138.2";
+        public static string Change_Filter_VYRightLeft_MAX_input = "128.993";
+        public static string Change_Filter_VXOncome_MAX_input = "128.993";
+        public static string Change_Filter_VYLeftRight_MAX_input = "128.993";
+        public static string Change_Filter_VXDepart_MAX_input = "128.993";
+        #endregion
 
 
 
@@ -193,7 +220,7 @@ namespace Radar_Analysis_Program
                 Canvas.SetLeft(panel, Data_Draw.ActualWidth - (textBlock.Text.Length + 2) * 5);//Panel 위치 조정
                 Canvas.SetTop(panel, Y - 9);
                 Data_Draw.Children.Add(panel);//Panel 등록
-                System.Console.WriteLine(textBlock.Text.Length);
+                //System.Console.WriteLine(textBlock.Text.Length);
             }
             #endregion
         }
@@ -247,22 +274,7 @@ namespace Radar_Analysis_Program
                         Data_Draw.Children.Add(rectangles[dataList[number].id]);
                         Data_Draw.Children.Add(textBoxes[dataList[number].id]);
 
-                        if (dataList[number].DistLong < 10)
-                        {
-                            Data_Draw.Children.Remove(rectangles[dataList[number].id]);
-                            Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
-                        }
-                        //textblock4.Text = number.ToString();
-                        if (Double.Parse(Change_Filter_Distance_MIN_input) < dataList[number].distance && dataList[number].distance < Double.Parse(Change_Filter_Distance_MAX_input))
-                        {
-                            System.Console.WriteLine("aa");
-                        }
-                        else
-                        {
-                            System.Console.WriteLine("bb");
-                            Data_Draw.Children.Remove(rectangles[dataList[number].id]);
-                            Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
-                        }
+                  
 
                         number++;
                     }
@@ -308,16 +320,7 @@ namespace Radar_Analysis_Program
                                 DateTime rect_date = DateTime.Now;
                                 dates[dataList[number].id] = rect_date;
 
-                                if (Double.Parse(Change_Filter_Distance_MIN_input) < dataList[number].distance && dataList[number].distance < Double.Parse(Change_Filter_Distance_MAX_input))
-                                {
-                                    System.Console.WriteLine("aa");
-                                }
-                                else
-                                {
-                                    System.Console.WriteLine("bb");
-                                    Data_Draw.Children.Remove(rectangles[dataList[number].id]);
-                                    Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
-                                }
+                         
 
 
                                 number++;
@@ -372,16 +375,7 @@ namespace Radar_Analysis_Program
                             }
                             //textblock4.Text = number.ToString();
 
-                            if (Double.Parse(Change_Filter_Distance_MIN_input) < dataList[number].distance && dataList[number].distance < Double.Parse(Change_Filter_Distance_MAX_input))
-                            {
-                                System.Console.WriteLine("aa");
-                            }
-                            else
-                            {
-                                System.Console.WriteLine("bb");
-                                Data_Draw.Children.Remove(rectangles[dataList[number].id]);
-                                Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
-                            }
+                        
 
                             number++;
                         }
@@ -432,17 +426,7 @@ namespace Radar_Analysis_Program
                                 DateTime rect_date = DateTime.Now;
                                 dates[dataList[number].id] = rect_date;
 
-                                if (Double.Parse(Change_Filter_Distance_MIN_input) < dataList[number].distance && dataList[number].distance < Double.Parse(Change_Filter_Distance_MAX_input))
-                                {
-                                    System.Console.WriteLine("aa");
-                                }
-                                else
-                                {
-                                    System.Console.WriteLine("bb");
-                                    Data_Draw.Children.Remove(rectangles[dataList[number].id]);
-                                    Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
-                                }
-
+                            
                                 number++;
 
                             }
@@ -496,16 +480,7 @@ namespace Radar_Analysis_Program
                             }
                             //textblock4.Text = number.ToString();
 
-                            if (Double.Parse(Change_Filter_Distance_MIN_input) < dataList[number].distance && dataList[number].distance < Double.Parse(Change_Filter_Distance_MAX_input))
-                            {
-                                System.Console.WriteLine("aa");
-                            }
-                            else
-                            {
-                                System.Console.WriteLine("bb");
-                                Data_Draw.Children.Remove(rectangles[dataList[number].id]);
-                                Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
-                            }
+                          
 
                             number++;
                         }
@@ -519,13 +494,6 @@ namespace Radar_Analysis_Program
             {
 
             }
-
-
-
-            double distt = Math.Sqrt(Math.Pow(3, 2) + Math.Pow(4, 2));
-
-          
-
 
 
             for (int i = 0; i < 41; i++)
@@ -630,7 +598,7 @@ namespace Radar_Analysis_Program
 
 
             draw();
-            System.Console.WriteLine(Change_Filter_Distance_MAX_input);
+           // System.Console.WriteLine(Change_Filter_Distance_MAX_input);
 
              text_str = textblock1 + "\n" + textblock2 + "\n" + textblock3 + "\n" + textblock4 + "\n" +textblock5;
             Data_Text.Text = text_str;
@@ -640,14 +608,16 @@ namespace Radar_Analysis_Program
 
         void Filter()
         {
-           if(Double.Parse(Change_Filter_Distance_MIN_input) < dataList[number].distance && dataList[number].distance < Double.Parse(Change_Filter_Distance_MAX_input))
+            if (Double.Parse(Change_Filter_Distance_MIN_input) < dataList[number].distance && dataList[number].distance < Double.Parse(Change_Filter_Distance_MAX_input))
             {
-              
-            }else
-            {
-
+               // System.Console.WriteLine("aa");
             }
-          
+            else
+            {
+              //  System.Console.WriteLine("bb");
+                Data_Draw.Children.Remove(rectangles[dataList[number].id]);
+                Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+            }
 
         }
 
