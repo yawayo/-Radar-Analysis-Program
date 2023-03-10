@@ -16,7 +16,7 @@ namespace Radar_Analysis_Program
     public partial class Window1 : Window
     {
         DispatcherTimer timer = new DispatcherTimer();
-        List<MyDataModel> dataList = new List<MyDataModel>();
+        public static List<MyDataModel> dataList = new List<MyDataModel>();
 
         TextBox[] textBoxes = new TextBox[41];
         Rectangle[] rectangles = new Rectangle[41];
@@ -49,6 +49,7 @@ namespace Radar_Analysis_Program
         string textblock2;
         string textblock3;
         string textblock4;
+        string textblock5;
 
         string firsttime;
         string secondtime;
@@ -64,6 +65,13 @@ namespace Radar_Analysis_Program
         public CheckBox[] checkBoxes;
         public String[] checkbox_name;
 
+
+        public static string Change_Filter_NofObj_MIN_input = "A";
+        public static string Change_Filter_NofObj_MAX_input = "A";
+        public static string Change_Filter_Distance_MIN_input = "0";
+        public static string Change_Filter_Distance_MAX_input = "409.5";
+
+
         public class MyDataModel
         {
             public DateTime time { get; set; }
@@ -78,6 +86,7 @@ namespace Radar_Analysis_Program
             public int Class { get; set; }
             public int Zone { get; set; }
             public int Lane { get; set; }
+            public double distance { get; set; }
             public DateTime Timestamp;
         }
 
@@ -183,6 +192,7 @@ namespace Radar_Analysis_Program
         private void draw()
         {
             //Data_Draw.Children.Clear();
+                      
             double X;
             double Y;
             try
@@ -235,6 +245,17 @@ namespace Radar_Analysis_Program
                             Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
                         }
                         //textblock4.Text = number.ToString();
+                        if (Double.Parse(Change_Filter_Distance_MIN_input) < dataList[number].distance && dataList[number].distance < Double.Parse(Change_Filter_Distance_MAX_input))
+                        {
+                            System.Console.WriteLine("aa");
+                        }
+                        else
+                        {
+                            System.Console.WriteLine("bb");
+                            Data_Draw.Children.Remove(rectangles[dataList[number].id]);
+                            Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+                        }
+
                         number++;
                     }
                 }
@@ -279,6 +300,18 @@ namespace Radar_Analysis_Program
                                 DateTime rect_date = DateTime.Now;
                                 dates[dataList[number].id] = rect_date;
 
+                                if (Double.Parse(Change_Filter_Distance_MIN_input) < dataList[number].distance && dataList[number].distance < Double.Parse(Change_Filter_Distance_MAX_input))
+                                {
+                                    System.Console.WriteLine("aa");
+                                }
+                                else
+                                {
+                                    System.Console.WriteLine("bb");
+                                    Data_Draw.Children.Remove(rectangles[dataList[number].id]);
+                                    Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+                                }
+
+
                                 number++;
 
                             }
@@ -330,11 +363,23 @@ namespace Radar_Analysis_Program
                                 Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
                             }
                             //textblock4.Text = number.ToString();
+
+                            if (Double.Parse(Change_Filter_Distance_MIN_input) < dataList[number].distance && dataList[number].distance < Double.Parse(Change_Filter_Distance_MAX_input))
+                            {
+                                System.Console.WriteLine("aa");
+                            }
+                            else
+                            {
+                                System.Console.WriteLine("bb");
+                                Data_Draw.Children.Remove(rectangles[dataList[number].id]);
+                                Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+                            }
+
                             number++;
                         }
                     }
                     textblock4 = number.ToString();
-
+                    textblock5 = dataList[number].distance.ToString("0.0");
                 }
                 else if (dataList[number - 1].time < dbcompareDT && dataList[number].time <= dbcompareDT)   // DB 안의 time == 지금 작동중인 시간(dbcomapretime)
                 {
@@ -379,6 +424,17 @@ namespace Radar_Analysis_Program
                                 DateTime rect_date = DateTime.Now;
                                 dates[dataList[number].id] = rect_date;
 
+                                if (Double.Parse(Change_Filter_Distance_MIN_input) < dataList[number].distance && dataList[number].distance < Double.Parse(Change_Filter_Distance_MAX_input))
+                                {
+                                    System.Console.WriteLine("aa");
+                                }
+                                else
+                                {
+                                    System.Console.WriteLine("bb");
+                                    Data_Draw.Children.Remove(rectangles[dataList[number].id]);
+                                    Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+                                }
+
                                 number++;
 
                             }
@@ -431,11 +487,23 @@ namespace Radar_Analysis_Program
                                 Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
                             }
                             //textblock4.Text = number.ToString();
+
+                            if (Double.Parse(Change_Filter_Distance_MIN_input) < dataList[number].distance && dataList[number].distance < Double.Parse(Change_Filter_Distance_MAX_input))
+                            {
+                                System.Console.WriteLine("aa");
+                            }
+                            else
+                            {
+                                System.Console.WriteLine("bb");
+                                Data_Draw.Children.Remove(rectangles[dataList[number].id]);
+                                Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+                            }
+
                             number++;
                         }
                     }
                     textblock4 = number.ToString();
-
+                    textblock5 = dataList[number].distance.ToString("0.0");
                 }
 
             }
@@ -443,6 +511,12 @@ namespace Radar_Analysis_Program
             {
 
             }
+
+
+
+            double distt = Math.Sqrt(Math.Pow(3, 2) + Math.Pow(4, 2));
+
+          
 
 
 
@@ -456,8 +530,8 @@ namespace Radar_Analysis_Program
                 }
             }
             textblock1 = dbcomparetime;
-
-
+           
+           
             //draw_map();
         }
         void TimerTickHandler(object sender, EventArgs e)
@@ -547,10 +621,27 @@ namespace Radar_Analysis_Program
 
 
             draw();
+            System.Console.WriteLine(Change_Filter_Distance_MAX_input);
 
-            text_str = textblock1 + "\n" + textblock2 + "\n" + textblock3 + "\n" + textblock4;
+             text_str = textblock1 + "\n" + textblock2 + "\n" + textblock3 + "\n" + textblock4 + "\n" +textblock5;
             Data_Text.Text = text_str;
         }
+
+
+
+        void Filter()
+        {
+           if(Double.Parse(Change_Filter_Distance_MIN_input) < dataList[number].distance && dataList[number].distance < Double.Parse(Change_Filter_Distance_MAX_input))
+            {
+              
+            }else
+            {
+
+            }
+          
+
+        }
+
 
         #region setting
         private void db_connect(MySqlConnection connection, string first, string second)
@@ -589,7 +680,10 @@ namespace Radar_Analysis_Program
                             data.Class = reader.GetInt32(11);
                             data.Zone = reader.GetInt32(14);
                             data.Lane = reader.GetInt32(15);
-                            System.Console.WriteLine("{0}", data.Zone);
+
+                            data.distance = Math.Sqrt(Math.Pow(data.DistLat,2)+ Math.Pow(data.DistLong,2));
+
+                         
                             dataList.Add(data);
                            
                             //if (dataList.Count > 1000)
@@ -800,7 +894,8 @@ namespace Radar_Analysis_Program
         }
         private void Setting_Click(object sender, RoutedEventArgs e)
         {
-            this.WindowState = System.Windows.WindowState.Minimized;
+            fSetting testWindow2 = new fSetting();
+            testWindow2.Show();
         }
         #endregion
 

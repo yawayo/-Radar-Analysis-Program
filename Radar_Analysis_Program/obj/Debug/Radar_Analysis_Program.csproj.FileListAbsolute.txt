@@ -55,4 +55,9 @@ C:\Users\hbrain\Desktop\git\Radar-Analysis-Program\Radar_Analysis_Program\obj\De
 C:\Users\hbrain\Desktop\git\Radar-Analysis-Program\Radar_Analysis_Program\obj\Debug\Radar_Analysis_Program.csproj.CopyComplete
 C:\Users\hbrain\Desktop\git\Radar-Analysis-Program\Radar_Analysis_Program\obj\Debug\Radar_Analysis_Program.exe
 C:\Users\hbrain\Desktop\git\Radar-Analysis-Program\Radar_Analysis_Program\obj\Debug\Radar_Analysis_Program.pdb
+<<<<<<< HEAD
 C:\Users\iyaso\source\repos\Radar_Analysis_Program\Radar_Analysis_Program\obj\Debug\Radar_Analysis_Program.csproj.AssemblyReference.cache
+=======
+C:\Users\hbrain\Desktop\git\Radar-Analysis-Program\Radar_Analysis_Program\obj\Debug\fSetting.g.cs
+C:\Users\hbrain\Desktop\git\Radar-Analysis-Program\Radar_Analysis_Program\obj\Debug\fSetting.baml
+>>>>>>> origin/jw_0307
