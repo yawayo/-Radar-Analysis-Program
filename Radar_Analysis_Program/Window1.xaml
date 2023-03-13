@@ -225,10 +225,10 @@
                     <ColumnDefinition Width="450"/>
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Grid.Row="2" BorderBrush="White" BorderThickness="1"></Border>
-                <Border Grid.Column="1" Grid.Row="2" BorderBrush="White" BorderThickness="1"></Border>
                 <Border Grid.Column="0" Grid.Row="0" BorderBrush="White" BorderThickness="1"></Border>
+                <Border Grid.Column="0" Grid.Row="2" BorderBrush="White" BorderThickness="1"></Border>
                 <Border Grid.Column="1" Grid.Row="0" BorderBrush="White" BorderThickness="1"></Border>
+                <Border Grid.Column="1" Grid.Row="2" BorderBrush="White" BorderThickness="1"></Border>
 
 
                 <Label Grid.Row="0" Grid.Column="0" Content="Setting"  FontFamily="KoPub바탕체_Pro Medium" Foreground="#FFF48F3D" FontSize="25"></Label>
