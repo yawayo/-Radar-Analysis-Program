@@ -632,8 +632,6 @@ namespace Radar_Analysis_Program
                 {
                     using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
-                         //List<MyDataModel> dataList = new List<MyDataModel>();
-
                         while (reader.Read())
                         {
                             DateTime date = (DateTime)reader["time"];
