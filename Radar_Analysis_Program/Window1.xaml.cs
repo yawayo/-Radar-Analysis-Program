@@ -16,10 +16,14 @@ namespace Radar_Analysis_Program
     public partial class Window1 : Window
     {
         DispatcherTimer timer = new DispatcherTimer();
-        List<MyDataModel> dataList = new List<MyDataModel>();
+        public static List<MyDataModel> dataList = new List<MyDataModel>();
+
+        public CheckBox[] checkBoxes;
+        public String[] checkbox_name;
 
         TextBox[] textBoxes = new TextBox[41];
         Rectangle[] rectangles = new Rectangle[41];
+        Polyline[] lines = new Polyline[41];
         Polyline[] dist_lines = new Polyline[9];
         Grid[] dist_line_texts = new Grid[9];
         Polyline[] car_lanes = new Polyline[100];
@@ -28,8 +32,8 @@ namespace Radar_Analysis_Program
 
         DateTime _starttime;
         DateTime _checktime;
-
         DateTime total_time;
+        DateTime dbcompareDT;
         TimeSpan diff;
         TimeSpan diff2;
 
@@ -38,19 +42,19 @@ namespace Radar_Analysis_Program
         private Point shift_pos;
 
         int number = 0; // DB  n 번째 
-        string dbcomparetime;
-        DateTime dbcompareDT;
 
         double _previousValue_check = 0; //슬라이더 값 +인지 - 인지 체크
         int drag_move_check = 0;
         int speed_check = 0;
         int drag_check = 0;
 
+        string dbcomparetime;
         string text_str = "";
         string textblock1;
         string textblock2;
         string textblock3;
         string textblock4;
+        string textblock5;
 
         string firsttime;
         string secondtime;
@@ -58,13 +62,45 @@ namespace Radar_Analysis_Program
         double duration= 0;
         private MySqlConnection conn;
 
-
         private float[] Lane_width = new float[6] { 3.3f, 3.3f, 3.3f, 3.3f, 3.3f, 3.3f };
         private float[] Lane_shift = new float[9] { 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f};
         private float Dist_Lane_gap = 25.0f;
 
-        public CheckBox[] checkBoxes;
-        public String[] checkbox_name;
+        #region Change_MIN
+        public static string Change_Filter_NofObj_MIN_input = "0";
+        public static string Change_Filter_Distance_MIN_input = "0";
+        public static string Change_Filter_Azimuth_MIN_input = "-50";
+        public static string Change_Filter_VrelOncome_MIN_input = "0";
+        public static string Change_Filter_VrelDepart_MIN_input = "0";
+        public static string Change_Filter_RCS_MIN_input = "-50";
+        public static string Change_Filter_Lifetime_MIN_input = "0";
+        public static string Change_Filter_Size_MIN_input = "0";
+        public static string Change_Filter_ProbExists_MIN_input = "0";
+        public static string Change_Filter_Y_MIN_input = "-409.5";
+        public static string Change_Filter_X_MIN_input = "-500";
+        public static string Change_Filter_VYRightLeft_MIN_input = "0";
+        public static string Change_Filter_VXOncome_MIN_input = "0";
+        public static string Change_Filter_VYLeftRight_MIN_input = "0";
+        public static string Change_Filter_VXDepart_MIN_input = "0";
+        #endregion
+        #region Change_MAX
+        public static string Change_Filter_NofObj_MAX_input = "4095";
+        public static string Change_Filter_Distance_MAX_input = "409.5";
+        public static string Change_Filter_Azimuth_MAX_input = "50.375";
+        public static string Change_Filter_VrelOncome_MAX_input = "128.993";
+        public static string Change_Filter_VrelDepart_MAX_input = "128.993";
+        public static string Change_Filter_RCS_MAX_input = "52.375";
+        public static string Change_Filter_Lifetime_MAX_input = "409.5";
+        public static string Change_Filter_Size_MAX_input = "102.375";
+        public static string Change_Filter_ProbExists_MAX_input = "7";
+        public static string Change_Filter_Y_MAX_input = "409.5";
+        public static string Change_Filter_X_MAX_input = "1138.2";
+        public static string Change_Filter_VYRightLeft_MAX_input = "128.993";
+        public static string Change_Filter_VXOncome_MAX_input = "128.993";
+        public static string Change_Filter_VYLeftRight_MAX_input = "128.993";
+        public static string Change_Filter_VXDepart_MAX_input = "128.993";
+        #endregion
+
 
         public class MyDataModel
         {
@@ -78,8 +114,12 @@ namespace Radar_Analysis_Program
             public double RCS { get; set; }
             public int ProbOfExist { get; set; }
             public int Class { get; set; }
+            public double Length { get; set; }
+            public double Width { get; set; }
             public int Zone { get; set; }
             public int Lane { get; set; }
+            public double distance { get; set; }
+            public double size { get; set; }
             public DateTime Timestamp;
         }
 
@@ -196,6 +236,7 @@ namespace Radar_Analysis_Program
         private void draw()
         {
             //Data_Draw.Children.Clear();
+                      
             double X;
             double Y;
             try
@@ -242,12 +283,8 @@ namespace Radar_Analysis_Program
                         Data_Draw.Children.Add(rectangles[dataList[number].id]);
                         Data_Draw.Children.Add(textBoxes[dataList[number].id]);
 
-                        if (dataList[number].DistLong < 10)
-                        {
-                            Data_Draw.Children.Remove(rectangles[dataList[number].id]);
-                            Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
-                        }
-                        //textblock4.Text = number.ToString();
+
+                        Filter();
                         number++;
                     }
                 }
@@ -292,6 +329,9 @@ namespace Radar_Analysis_Program
                                 DateTime rect_date = DateTime.Now;
                                 dates[dataList[number].id] = rect_date;
 
+
+
+                                Filter();
                                 number++;
 
                             }
@@ -343,11 +383,14 @@ namespace Radar_Analysis_Program
                                 Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
                             }
                             //textblock4.Text = number.ToString();
+
+
+                            Filter();
                             number++;
                         }
                     }
                     textblock4 = number.ToString();
-
+                    textblock5 = dataList[number].distance.ToString("0.0");
                 }
                 else if (dataList[number - 1].time < dbcompareDT && dataList[number].time <= dbcompareDT)   // DB 안의 time == 지금 작동중인 시간(dbcomapretime)
                 {
@@ -392,6 +435,7 @@ namespace Radar_Analysis_Program
                                 DateTime rect_date = DateTime.Now;
                                 dates[dataList[number].id] = rect_date;
 
+                                Filter();
                                 number++;
 
                             }
@@ -444,11 +488,14 @@ namespace Radar_Analysis_Program
                                 Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
                             }
                             //textblock4.Text = number.ToString();
+
+
+                            Filter();
                             number++;
                         }
                     }
                     textblock4 = number.ToString();
-
+                    textblock5 = dataList[number].distance.ToString("0.0");
                 }
 
             }
@@ -456,7 +503,6 @@ namespace Radar_Analysis_Program
             {
 
             }
-
 
 
             for (int i = 0; i < 41; i++)
@@ -557,10 +603,12 @@ namespace Radar_Analysis_Program
 
 
             draw();
+           // System.Console.WriteLine(Change_Filter_Distance_MAX_input);
 
-            text_str = textblock1 + "\n" + textblock2 + "\n" + textblock3 + "\n" + textblock4;
+             text_str = textblock1 + "\n" + textblock2 + "\n" + textblock3 + "\n" + textblock4 + "\n" +textblock5;
             Data_Text.Text = text_str;
         }
+
 
         #region setting
         private void db_connect(MySqlConnection connection, string first, string second)
@@ -577,8 +625,6 @@ namespace Radar_Analysis_Program
                 {
                     using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
-                         //List<MyDataModel> dataList = new List<MyDataModel>();
-
                         while (reader.Read())
                         {
                             DateTime date = (DateTime)reader["time"];
@@ -597,9 +643,14 @@ namespace Radar_Analysis_Program
                             data.RCS = reader.GetDouble(7);
                             data.ProbOfExist = reader.GetInt32(8);
                             data.Class = reader.GetInt32(11);
+                            data.Length = reader.GetDouble(12);
+                            data.Width = reader.GetDouble(13);
                             data.Zone = reader.GetInt32(14);
                             data.Lane = reader.GetInt32(15);
-                            System.Console.WriteLine("{0}", data.Zone);
+
+                            data.distance = Math.Sqrt(Math.Pow(data.DistLat,2)+ Math.Pow(data.DistLong,2));
+                            data.size = data.Length * data.Width;
+                         
                             dataList.Add(data);
                            
                             //if (dataList.Count > 1000)
@@ -810,7 +861,8 @@ namespace Radar_Analysis_Program
         }
         private void Setting_Click(object sender, RoutedEventArgs e)
         {
-            this.WindowState = System.Windows.WindowState.Minimized;
+            fSetting testWindow2 = new fSetting();
+            testWindow2.Show();
         }
         #endregion
 
@@ -1006,7 +1058,123 @@ namespace Radar_Analysis_Program
 
         #endregion
 
-    }
+        #region Filter
+        void Filter()
+        {
+            Filter_Distance();
+            Filter_RCS();
+            Filter_Size();
+            Filter_ProbExists();
 
+            //Filter_Nofobj();
+            //Filter_Azimuth();
+            //Filter_VrelOncome();
+            //Filter_VrelDepart();  
+            //Filter_Lifetime();       
+            //Filter_Y();
+            //Filter_X();
+            //Filter_VYRightLeft();
+            //Filter_VXOncome();
+            //Filter_VYLeftRight();
+            //Filter_VXDepart();
+        }
+        void Filter_Nofobj()
+        {
+
+        }
+        void Filter_Distance()
+        {
+            if (Double.Parse(Change_Filter_Distance_MIN_input) < dataList[number].distance && dataList[number].distance < Double.Parse(Change_Filter_Distance_MAX_input))
+            {
+                // System.Console.WriteLine("aa");
+            }
+            else
+            {
+                //  System.Console.WriteLine("bb");
+                Data_Draw.Children.Remove(rectangles[dataList[number].id]);
+                Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+            }
+        }
+        void Filter_Azimuth()
+        {
+
+        }
+        void Filter_VrelOncome()
+        {
+
+        }
+        void Filter_VrelDepart()
+        {
+
+        }
+        void Filter_RCS()
+        {
+            if (Double.Parse(Change_Filter_RCS_MIN_input) < dataList[number].RCS && dataList[number].RCS < Double.Parse(Change_Filter_RCS_MAX_input))
+            {
+                // System.Console.WriteLine("aa");
+            }
+            else
+            {
+                //  System.Console.WriteLine("bb");
+                Data_Draw.Children.Remove(rectangles[dataList[number].id]);
+                Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+            }
+        }
+        void Filter_Lifetime()
+        {
+
+        }
+        void Filter_Size()
+        {
+            if (Double.Parse(Change_Filter_Size_MIN_input) <= dataList[number].size && dataList[number].size < Double.Parse(Change_Filter_Size_MAX_input))
+            {
+                // System.Console.WriteLine("aa");
+            }
+            else
+            {
+                //  System.Console.WriteLine("bb");
+                Data_Draw.Children.Remove(rectangles[dataList[number].id]);
+                Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+            }
+        }
+        void Filter_ProbExists()
+        {
+            if (Double.Parse(Change_Filter_ProbExists_MIN_input) < dataList[number].ProbOfExist && dataList[number].ProbOfExist < Double.Parse(Change_Filter_ProbExists_MAX_input))
+            {
+                // System.Console.WriteLine("aa");
+            }
+            else
+            {
+                //  System.Console.WriteLine("bb");
+                Data_Draw.Children.Remove(rectangles[dataList[number].id]);
+                Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+            }
+        }
+        void Filter_Y()
+        {
+
+        }
+        void Filter_X()
+        {
+
+        }
+        void Filter_VYRightLeft()
+        {
+
+        }
+        void Filter_VXOncome()
+        {
+
+        }
+        void Filter_VYLeftRight()
+        {
+
+        }
+        void Filter_VXDepart()
+        {
+
+        }
+        #endregion
+    }
 
 }
