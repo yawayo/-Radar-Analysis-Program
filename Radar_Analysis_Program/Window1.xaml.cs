@@ -18,16 +18,18 @@ namespace Radar_Analysis_Program
         DispatcherTimer timer = new DispatcherTimer();
         public static List<MyDataModel> dataList = new List<MyDataModel>();
 
+        public CheckBox[] checkBoxes;
+        public String[] checkbox_name;
+
         TextBox[] textBoxes = new TextBox[41];
         Rectangle[] rectangles = new Rectangle[41];
         Polyline[] lines = new Polyline[41];
-
         DateTime[] dates = new DateTime[41];
 
         DateTime _starttime;
         DateTime _checktime;
-
         DateTime total_time;
+        DateTime dbcompareDT;
         TimeSpan diff;
         TimeSpan diff2;
 
@@ -36,14 +38,13 @@ namespace Radar_Analysis_Program
         private Point shift_pos;
 
         int number = 0; // DB  n 번째 
-        string dbcomparetime;
-        DateTime dbcompareDT;
 
         double _previousValue_check = 0; //슬라이더 값 +인지 - 인지 체크
         int drag_move_check = 0;
         int speed_check = 0;
         int drag_check = 0;
 
+        string dbcomparetime;
         string text_str = "";
         string textblock1;
         string textblock2;
@@ -57,15 +58,9 @@ namespace Radar_Analysis_Program
         double duration= 0;
         private MySqlConnection conn;
 
-
         private float[] Lane_width = new float[6] { 3.3f, 3.3f, 3.3f, 3.3f, 3.3f, 3.3f };
         private float[] Lane_shift = new float[9] { 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f};
         private float Dist_Lane_gap = 25.0f;
-
-        public CheckBox[] checkBoxes;
-        public String[] checkbox_name;
-
-    
 
         #region Change_MIN
         public static string Change_Filter_NofObj_MIN_input = "0";
@@ -115,9 +110,12 @@ namespace Radar_Analysis_Program
             public double RCS { get; set; }
             public int ProbOfExist { get; set; }
             public int Class { get; set; }
+            public double Length { get; set; }
+            public double Width { get; set; }
             public int Zone { get; set; }
             public int Lane { get; set; }
             public double distance { get; set; }
+            public double size { get; set; }
             public DateTime Timestamp;
         }
 
@@ -270,8 +268,8 @@ namespace Radar_Analysis_Program
                         Data_Draw.Children.Add(rectangles[dataList[number].id]);
                         Data_Draw.Children.Add(textBoxes[dataList[number].id]);
 
-                  
 
+                        Filter();
                         number++;
                     }
                 }
@@ -316,9 +314,9 @@ namespace Radar_Analysis_Program
                                 DateTime rect_date = DateTime.Now;
                                 dates[dataList[number].id] = rect_date;
 
-                         
 
 
+                                Filter();
                                 number++;
 
                             }
@@ -371,8 +369,8 @@ namespace Radar_Analysis_Program
                             }
                             //textblock4.Text = number.ToString();
 
-                        
 
+                            Filter();
                             number++;
                         }
                     }
@@ -422,7 +420,7 @@ namespace Radar_Analysis_Program
                                 DateTime rect_date = DateTime.Now;
                                 dates[dataList[number].id] = rect_date;
 
-                            
+                                Filter();
                                 number++;
 
                             }
@@ -476,8 +474,8 @@ namespace Radar_Analysis_Program
                             }
                             //textblock4.Text = number.ToString();
 
-                          
 
+                            Filter();
                             number++;
                         }
                     }
@@ -600,23 +598,6 @@ namespace Radar_Analysis_Program
         }
 
 
-
-        void Filter()
-        {
-            if (Double.Parse(Change_Filter_Distance_MIN_input) < dataList[number].distance && dataList[number].distance < Double.Parse(Change_Filter_Distance_MAX_input))
-            {
-               // System.Console.WriteLine("aa");
-            }
-            else
-            {
-              //  System.Console.WriteLine("bb");
-                Data_Draw.Children.Remove(rectangles[dataList[number].id]);
-                Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
-            }
-
-        }
-
-
         #region setting
         private void db_connect(MySqlConnection connection, string first, string second)
         {
@@ -650,11 +631,13 @@ namespace Radar_Analysis_Program
                             data.RCS = reader.GetDouble(7);
                             data.ProbOfExist = reader.GetInt32(8);
                             data.Class = reader.GetInt32(11);
+                            data.Length = reader.GetDouble(12);
+                            data.Width = reader.GetDouble(13);
                             data.Zone = reader.GetInt32(14);
                             data.Lane = reader.GetInt32(15);
 
                             data.distance = Math.Sqrt(Math.Pow(data.DistLat,2)+ Math.Pow(data.DistLong,2));
-
+                            data.size = data.Length * data.Width;
                          
                             dataList.Add(data);
                            
@@ -1063,7 +1046,123 @@ namespace Radar_Analysis_Program
 
         #endregion
 
-    }
+        #region Filter
+        void Filter()
+        {
+            Filter_Distance();
+            Filter_RCS();
+            Filter_Size();
+            Filter_ProbExists();
 
+            //Filter_Nofobj();
+            //Filter_Azimuth();
+            //Filter_VrelOncome();
+            //Filter_VrelDepart();  
+            //Filter_Lifetime();       
+            //Filter_Y();
+            //Filter_X();
+            //Filter_VYRightLeft();
+            //Filter_VXOncome();
+            //Filter_VYLeftRight();
+            //Filter_VXDepart();
+        }
+        void Filter_Nofobj()
+        {
+
+        }
+        void Filter_Distance()
+        {
+            if (Double.Parse(Change_Filter_Distance_MIN_input) < dataList[number].distance && dataList[number].distance < Double.Parse(Change_Filter_Distance_MAX_input))
+            {
+                // System.Console.WriteLine("aa");
+            }
+            else
+            {
+                //  System.Console.WriteLine("bb");
+                Data_Draw.Children.Remove(rectangles[dataList[number].id]);
+                Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+            }
+        }
+        void Filter_Azimuth()
+        {
+
+        }
+        void Filter_VrelOncome()
+        {
+
+        }
+        void Filter_VrelDepart()
+        {
+
+        }
+        void Filter_RCS()
+        {
+            if (Double.Parse(Change_Filter_RCS_MIN_input) < dataList[number].RCS && dataList[number].RCS < Double.Parse(Change_Filter_RCS_MAX_input))
+            {
+                // System.Console.WriteLine("aa");
+            }
+            else
+            {
+                //  System.Console.WriteLine("bb");
+                Data_Draw.Children.Remove(rectangles[dataList[number].id]);
+                Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+            }
+        }
+        void Filter_Lifetime()
+        {
+
+        }
+        void Filter_Size()
+        {
+            if (Double.Parse(Change_Filter_Size_MIN_input) <= dataList[number].size && dataList[number].size < Double.Parse(Change_Filter_Size_MAX_input))
+            {
+                // System.Console.WriteLine("aa");
+            }
+            else
+            {
+                //  System.Console.WriteLine("bb");
+                Data_Draw.Children.Remove(rectangles[dataList[number].id]);
+                Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+            }
+        }
+        void Filter_ProbExists()
+        {
+            if (Double.Parse(Change_Filter_ProbExists_MIN_input) < dataList[number].ProbOfExist && dataList[number].ProbOfExist < Double.Parse(Change_Filter_ProbExists_MAX_input))
+            {
+                // System.Console.WriteLine("aa");
+            }
+            else
+            {
+                //  System.Console.WriteLine("bb");
+                Data_Draw.Children.Remove(rectangles[dataList[number].id]);
+                Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+            }
+        }
+        void Filter_Y()
+        {
+
+        }
+        void Filter_X()
+        {
+
+        }
+        void Filter_VYRightLeft()
+        {
+
+        }
+        void Filter_VXOncome()
+        {
+
+        }
+        void Filter_VYLeftRight()
+        {
+
+        }
+        void Filter_VXDepart()
+        {
+
+        }
+        #endregion
+    }
 
 }
