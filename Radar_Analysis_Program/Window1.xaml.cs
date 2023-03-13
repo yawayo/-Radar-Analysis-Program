@@ -22,15 +22,14 @@ namespace Radar_Analysis_Program
         public CheckBox[] checkBoxes;
         public String[] checkbox_name;
 
-        TextBox[] textBoxes = new TextBox[41];
-        Rectangle[] rectangles = new Rectangle[41];
-        Polyline[] lines = new Polyline[41];
+        TextBox[] textBoxes = new TextBox[100];
+        Rectangle[] rectangles = new Rectangle[100];
         Polyline[] dist_lines = new Polyline[20];
         Grid[] dist_line_texts = new Grid[20];
         Polyline[] car_lanes = new Polyline[100];
         Mat LUT_img = new Mat(new OpenCvSharp.Size(400, 800), MatType.CV_8UC1, 0);
 
-        DateTime[] dates = new DateTime[41];
+        DateTime[] dates = new DateTime[100];
 
         DateTime _starttime;
         DateTime _checktime;
@@ -250,6 +249,39 @@ namespace Radar_Analysis_Program
 
             int point_num = (int)(max_long / Dist_Lane_gap) + 1;
 
+            #region Dist Line
+            int dist_line_index = 0;
+            for (int line_n = 0; line_n < point_num; line_n++)
+            {
+                Polyline distline = new Polyline();
+                distline.Points = new PointCollection()
+                {
+                    new System.Windows.Point(0, 0),
+                    new System.Windows.Point(Data_Draw.ActualWidth, 0)
+                };
+                distline.Stroke = Brushes.Yellow;
+                distline.StrokeThickness = 1;
+                distline.StrokeDashArray = new DoubleCollection() { 15, 15 };
+
+                Grid panel = new Grid(); //사각형을 감싸줄 Panel 생성
+                TextBlock textBlock = new TextBlock();//Text 생성
+                textBlock.Text = ((int)(Dist_Lane_gap * line_n)).ToString() + "m";
+                textBlock.Foreground = Brushes.White;
+                panel.Children.Add(textBlock);//Panel에 Text 추가
+
+                int Y = (int)(Data_Draw.ActualHeight - ((Data_Draw.ActualHeight * Dist_Lane_gap * ((2 * line_n) + 1)) / (2 * (max_long + Dist_Lane_gap))));
+
+                Canvas.SetLeft(distline, 0);//Panel 위치 조정
+                Canvas.SetTop(distline, Y);
+                Canvas.SetLeft(panel, Data_Draw.ActualWidth - (textBlock.Text.Length + 2) * 5);//Panel 위치 조정
+                Canvas.SetTop(panel, Y - 9);
+
+                dist_lines[dist_line_index] = distline;
+                dist_line_texts[dist_line_index] = panel;
+                dist_line_index++;
+            }
+            #endregion
+
             #region Lane
             int car_lane_index = 0;
             for (int l = 0; l < 6 + 1; l++)
@@ -315,7 +347,7 @@ namespace Radar_Analysis_Program
                         //textblock3.Text = dataList[number].DistLat.ToString("0.0");
                         //textblock2.Text = dataList[number].DistLong.ToString("0.0");
 
-                        X = shift_pos.X + ((-1 * dataList[number].DistLat) * (Data_Draw.ActualWidth / max_lat)) + (Data_Draw.ActualWidth / 2);
+                        X = shift_pos.X + ((-1 * dataList[number].DistLat) * ((Data_Draw.ActualWidth / 2) / max_lat)) + (Data_Draw.ActualWidth / 2);
                         Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
 
                         Rectangle rect = new Rectangle
@@ -364,11 +396,9 @@ namespace Radar_Analysis_Program
                                 textblock2 = dataList[number].DistLat.ToString("0.0");
                                 textblock3 = dataList[number].DistLong.ToString("0.0");
 
-
-                                X = shift_pos.X + ((-1 * dataList[number].DistLat) * (Data_Draw.ActualWidth / max_lat)) + (Data_Draw.ActualWidth / 2);
+                                X = shift_pos.X + ((-1 * dataList[number].DistLat) * ((Data_Draw.ActualWidth / 2) / max_lat)) + (Data_Draw.ActualWidth / 2);
                                 Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
 
-                                //textBoxes[dataList[number].ID].Text = "ID = " + dataList[number].ID.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
                                 textBoxes[dataList[number].ID].Text = CheckBox_print();
                                 textBoxes[dataList[number].ID].VerticalAlignment = VerticalAlignment.Center;
                                 textBoxes[dataList[number].ID].Margin = new Thickness(10, 0, 0, 0);
@@ -410,7 +440,7 @@ namespace Radar_Analysis_Program
                             //textblock3.Text = dataList[number].DistLat.ToString("0.0");
                             //textblock2.Text = dataList[number].DistLong.ToString("0.0");
 
-                            X = shift_pos.X + ((-1 * dataList[number].DistLat) * (Data_Draw.ActualWidth / max_lat)) + (Data_Draw.ActualWidth / 2);
+                            X = shift_pos.X + ((-1 * dataList[number].DistLat) * ((Data_Draw.ActualWidth / 2) / max_lat)) + (Data_Draw.ActualWidth / 2);
                             Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
 
                             Rectangle rect = new Rectangle
@@ -466,7 +496,7 @@ namespace Radar_Analysis_Program
                                 textblock3 = dataList[number].DistLong.ToString("0.0");
 
 
-                                X = shift_pos.X + ((-1 * dataList[number].DistLat) * (Data_Draw.ActualWidth / max_lat)) + (Data_Draw.ActualWidth / 2);
+                                X = shift_pos.X + ((-1 * dataList[number].DistLat) * ((Data_Draw.ActualWidth / 2) / max_lat)) + (Data_Draw.ActualWidth / 2);
                                 Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
 
                              
@@ -501,7 +531,7 @@ namespace Radar_Analysis_Program
                             //textblock3.Text = dataList[number].DistLat.ToString("0.0");
                             //textblock2.Text = dataList[number].DistLong.ToString("0.0");
 
-                            X = shift_pos.X + ((-1 * dataList[number].DistLat) * (Data_Draw.ActualWidth / max_lat)) + (Data_Draw.ActualWidth / 2);
+                            X = shift_pos.X + ((-1 * dataList[number].DistLat) * ((Data_Draw.ActualWidth / 2) / max_lat)) + (Data_Draw.ActualWidth / 2);
                             Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
 
                             Rectangle rect = new Rectangle
@@ -705,13 +735,10 @@ namespace Radar_Analysis_Program
         #region setting
         private void db_connect(MySqlConnection connection, string first, string second)
         {
-            //first = firsttime;
-            //second = secondtime;
-
             try
             {
                 connection.Open();
-                string query = "SELECT * FROM obj_info where time BETWEEN" + "'" + first + "'" + "AND" + "'" + second + "'"+";";
+                string query = "SELECT * FROM real_data where time BETWEEN" + "'" + first + "'" + "AND" + "'" + second + "'"+";";
                 
                 using (MySqlCommand cmd = new MySqlCommand(query, connection))
                 {
@@ -764,7 +791,7 @@ namespace Radar_Analysis_Program
             }
             catch (Exception)
             {
-                MessageBox.Show("접속 실패, 다시 시도");
+                MessageBox.Show("DB Read ERROR");
             }
         }
 
@@ -870,10 +897,10 @@ namespace Radar_Analysis_Program
             Lane_Point[6] = 0 + (Lane_width[3] + Lane_width[4] + Lane_width[5]);
         }
 
-    #endregion
+        #endregion
 
-    #region Set Lane Point
-    private void LanePoint0Up_Click(object sender, RoutedEventArgs e)
+        #region Set Lane Point
+        private void LanePoint0Up_Click(object sender, RoutedEventArgs e)
         {
             Lane_shift[0] += 0.1f;
             Update_map();
@@ -1072,9 +1099,10 @@ namespace Radar_Analysis_Program
         #region btn
         private void btnPlay_Click(object sender, RoutedEventArgs e)
         {
-            /*if (speed_check == 0)
+            Set_map_value();
+
+            if (speed_check == 0)
             {
-                draw_map();
                 timer.Interval = TimeSpan.FromMilliseconds(0.1);
                 timer.Tick += TimerTickHandler;
                 speed_check++;
@@ -1082,9 +1110,7 @@ namespace Radar_Analysis_Program
 
             mediaElement.LoadedBehavior = MediaState.Manual;
             mediaElement.Play();
-            timer.Start();*/
-            InitializeLanePoint();
-            Set_map_value();
+            timer.Start();
         }
         private void btnStop_Click(object sender, RoutedEventArgs e)
         {
@@ -1230,10 +1256,10 @@ namespace Radar_Analysis_Program
 
         void Filter_Speed()
         {
-            if(dataList[number].Speed == 0)
+            if(dataList[number].Velocity == 0)
             {
-                Data_Draw.Children.Remove(rectangles[dataList[number].id]);
-                Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+                Data_Draw.Children.Remove(rectangles[dataList[number].ID]);
+                Data_Draw.Children.Remove(textBoxes[dataList[number].ID]);
             }
         }
         void Filter_Azimuth()
