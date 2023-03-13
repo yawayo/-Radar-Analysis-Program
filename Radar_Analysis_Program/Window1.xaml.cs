@@ -21,15 +21,16 @@ namespace Radar_Analysis_Program
         public CheckBox[] checkBoxes;
         public String[] checkbox_name;
 
-        TextBox[] textBoxes = new TextBox[41];
-        Rectangle[] rectangles = new Rectangle[41];
-        Polyline[] lines = new Polyline[41];
-        DateTime[] dates = new DateTime[41];
+        TextBox[] textBoxes = new TextBox[100];
+        Rectangle[] rectangles = new Rectangle[100];
+        Polyline[] lines = new Polyline[100];
+        DateTime[] dates = new DateTime[100];
 
         DateTime _starttime;
         DateTime _checktime;
         DateTime total_time;
         DateTime dbcompareDT;
+        DateTime dbcompareDT2; // 영상 시간 비교하기 위해
         TimeSpan diff;
         TimeSpan diff2;
 
@@ -39,7 +40,7 @@ namespace Radar_Analysis_Program
 
         int number = 0; // DB  n 번째 
 
-        double _previousValue_check = 0; //슬라이더 값 +인지 - 인지 체크
+        double _previousValue_check = 0; //슬라이더 값 +, -  체크
         int drag_move_check = 0;
         int speed_check = 0;
         int drag_check = 0;
@@ -49,8 +50,10 @@ namespace Radar_Analysis_Program
         string textblock1;
         string textblock2;
         string textblock3;
-        string textblock4;
-        string textblock5;
+        string textblock4; //number
+        string textblock5; //distance 
+        string textblock6;  // media_time 영상 시간
+        string textblock7; //dura 영상 시간 차
 
         string firsttime;
         string secondtime;
@@ -116,6 +119,7 @@ namespace Radar_Analysis_Program
             public int Lane { get; set; }
             public double distance { get; set; }
             public double size { get; set; }
+            public double Speed { get; set; }
             public DateTime Timestamp;
         }
 
@@ -273,9 +277,11 @@ namespace Radar_Analysis_Program
                         number++;
                     }
                 }
+
+
                 else if (number == 0 && rectangles[dataList[number].id] != null)   //드래그 시 number가 0일 때 ,   
                 {
-                    for (int i = 0; i < 41; i++)
+                    for (int i = 0; i < 100; i++)
                     {
                         if (rectangles[dataList[number].id] != null && dataList[number].time <= dbcompareDT)  // 이미 존재한
                         {
@@ -304,12 +310,7 @@ namespace Radar_Analysis_Program
                                     Data_Draw.Children.Add(rectangles[dataList[number].id]);
                                     Data_Draw.Children.Add(textBoxes[dataList[number].id]);
                                 }
-
-                                if (dataList[number].DistLong < 10)
-                                {
-                                    Data_Draw.Children.Remove(rectangles[dataList[number].id]);
-                                    Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
-                                }
+                
 
                                 DateTime rect_date = DateTime.Now;
                                 dates[dataList[number].id] = rect_date;
@@ -362,12 +363,7 @@ namespace Radar_Analysis_Program
                             Data_Draw.Children.Add(rectangles[dataList[number].id]);
                             Data_Draw.Children.Add(textBoxes[dataList[number].id]);
 
-                            if (dataList[number].DistLong < 10)
-                            {
-                                Data_Draw.Children.Remove(rectangles[dataList[number].id]);
-                                Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
-                            }
-                            //textblock4.Text = number.ToString();
+
 
 
                             Filter();
@@ -377,10 +373,15 @@ namespace Radar_Analysis_Program
                     textblock4 = number.ToString();
                     textblock5 = dataList[number].distance.ToString("0.0");
                 }
+
+
+
+
+
                 else if (dataList[number - 1].time < dbcompareDT && dataList[number].time <= dbcompareDT)   // DB 안의 time == 지금 작동중인 시간(dbcomapretime)
                 {
 
-                    for (int i = 0; i < 41; i++)
+                    for (int i = 0; i < 100; i++)
                     {
 
                         if (rectangles[dataList[number].id] != null && dataList[number - 1].time < dbcompareDT && dataList[number].time <= dbcompareDT)  // 이미 존재한
@@ -411,11 +412,7 @@ namespace Radar_Analysis_Program
                                     Data_Draw.Children.Add(textBoxes[dataList[number].id]);
                                 }
 
-                                if (dataList[number].DistLong < 10)
-                                {
-                                    Data_Draw.Children.Remove(rectangles[dataList[number].id]);
-                                    Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
-                                }
+            
 
                                 DateTime rect_date = DateTime.Now;
                                 dates[dataList[number].id] = rect_date;
@@ -449,7 +446,6 @@ namespace Radar_Analysis_Program
                             dates[dataList[number].id] = rect_date;
 
 
-
                             TextBox textBox = new TextBox();
                             textBoxes[dataList[number].id] = textBox;
 
@@ -467,11 +463,7 @@ namespace Radar_Analysis_Program
                             Data_Draw.Children.Add(rectangles[dataList[number].id]);
                             Data_Draw.Children.Add(textBoxes[dataList[number].id]);
 
-                            if (dataList[number].DistLong < 10)
-                            {
-                                Data_Draw.Children.Remove(rectangles[dataList[number].id]);
-                                Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
-                            }
+
                             //textblock4.Text = number.ToString();
 
 
@@ -490,7 +482,7 @@ namespace Radar_Analysis_Program
             }
 
 
-            for (int i = 0; i < 41; i++)
+            for (int i = 0; i < 100; i++)
             {
                 TimeSpan difTime = DateTime.Now - dates[i];
                 if ((difTime.Seconds > 3) || (difTime.Milliseconds > 3000))
@@ -514,25 +506,26 @@ namespace Radar_Analysis_Program
             diff2 += diff;
 
             TimeSpan value_time = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum);
-         
+
             if (drag_check == 1)    // 드래그 했을 때 
             {
                 if (drag_move_check == 2)   //앞으로 갔을 때 
                 {
                     int a = 0;
                     while (a < dataList.Count)
-                    {                  
-                        try  // number 값이 없을 때 
+                    {
+                        try  // number 값이 없을 때   > 왜 number
                         {
                             _checktime = dataList[number].time;
                         }
                         catch
                         {
                             number = 0;
+
                             break;
                         }
 
-                        if (_starttime.Add(value_time) <= _checktime)    //  _starttime.add(value_time) = 현재 시간  
+                        if (_starttime.Add(value_time) < _checktime)    //  _starttime.add(value_time) = 현재 시간  
                         {                                               //   _check_time = db 데이터의 시간 값
                             break;
                         }
@@ -547,7 +540,7 @@ namespace Radar_Analysis_Program
                 {
                     int a = 0;
                     while (a < dataList.Count)
-                    {                   
+                    {
                         try   // number 값이 없을 때 
                         {
                             _checktime = dataList[number].time;
@@ -555,11 +548,12 @@ namespace Radar_Analysis_Program
                         catch
                         {
                             number = 0;
+                            System.Console.WriteLine("Bb");
                             break;
                         }
                         if (_starttime.Add(value_time) > _checktime)  //  _starttime.add(value_time) = 현재 시간  
                         {                                                //   _check_time = db 데이터의 시간 값
-                           
+
                             number++;
                             if (number == 1)
                             {
@@ -577,7 +571,7 @@ namespace Radar_Analysis_Program
                 }
 
                 diff2 = value_time;
-               
+
                 dbcomparetime = _starttime.Add(diff2).ToString("yyyy-MM-dd HH:mm:ss.fff");
                 dbcompareDT = _starttime.Add(diff2);
                 drag_move_check = 0;   //움직인 다음 무브체크, 다시 0으로 초기화
@@ -592,12 +586,54 @@ namespace Radar_Analysis_Program
 
 
             draw();
-           // System.Console.WriteLine(Change_Filter_Distance_MAX_input);
+            // System.Console.WriteLine(Change_Filter_Distance_MAX_input);
 
-             text_str = textblock1 + "\n" + textblock2 + "\n" + textblock3 + "\n" + textblock4 + "\n" +textblock5;
+
+            TimeSpan dura = mediaElement.Position; //영상 시간 계산
+            dbcompareDT2 = _starttime.Add(dura);
+            textblock6 = dbcompareDT2.ToString("yyyy-MM-dd HH:mm:ss.fff"); //영상 시간 
+
+            TimeSpan ts = new TimeSpan(0, 0, 0, 0, 300);
+            double at = dura.TotalMilliseconds - diff2.TotalMilliseconds;
+            if (150 <at && at<300)
+            {
+                // dura = dura.Add(TimeSpan.FromMilliseconds(-300));
+                //mediaElement.Position = mediaElement.Position.Add(-ts);
+                mediaElement.SpeedRatio = 0.9;
+
+            }
+            else if(400 < at && at<500)
+            {
+                mediaElement.SpeedRatio = 0.8;
+            }
+            else if (at >600)
+            {
+                mediaElement.SpeedRatio = 0.7;
+            }
+            else if (-150>at && at>-300)
+            {
+                mediaElement.SpeedRatio = 1.1;
+                // mediaElement.Position = mediaElement.Position.Add(ts);
+            }
+            else if (-400>at && at>-500)
+            {
+                mediaElement.SpeedRatio = 1.2;
+                // mediaElement.Position = mediaElement.Position.Add(ts);
+            }
+            else if (at < -600)
+            {
+                mediaElement.SpeedRatio = 1.3;
+                // mediaElement.Position = mediaElement.Position.Add(ts);
+            }
+            textblock7 = at.ToString(); // 시간 차이 
+                text_str = textblock1 + "\n" + textblock2 + "\n" + textblock3 + "\n" + textblock4 + "\n" + textblock5 + "\n" + textblock6 + "\n" + textblock7;
+              
+
             Data_Text.Text = text_str;
-        }
 
+            
+
+        }
 
         #region setting
         private void db_connect(MySqlConnection connection, string first, string second)
@@ -607,7 +643,7 @@ namespace Radar_Analysis_Program
 
             try
             {
-                 connection.Open();
+                connection.Open();
                 string query = "SELECT * FROM obj_info where time BETWEEN" + "'" + first + "'" + "AND" + "'" + second + "'"+";";
                 
                 using (MySqlCommand cmd = new MySqlCommand(query, connection))
@@ -626,22 +662,22 @@ namespace Radar_Analysis_Program
 
                             data.time = date;
                             data.id = reader.GetInt32(1);
-                            data.DistLat = reader.GetDouble(2);
-                            data.DistLong = reader.GetDouble(3);
-                            data.VrelLat = reader.GetDouble(4);
-                            data.VrelLong = reader.GetDouble(5);
-                            data.Velocity = reader.GetDouble(6);
+                            data.DistLong = reader.GetDouble(2);
+                            data.DistLat = reader.GetDouble(3)/100;
+                            data.VrelLong = reader.GetDouble(4);
+                            data.VrelLat = reader.GetDouble(5);
+                            data.Velocity = 3.6*Math.Sqrt(Math.Pow(data.VrelLat, 2) + Math.Pow(data.VrelLong, 2));
                             data.RCS = reader.GetDouble(7);
-                            data.ProbOfExist = reader.GetInt32(8);
-                            data.Class = reader.GetInt32(11);
-                            data.Length = reader.GetDouble(12);
-                            data.Width = reader.GetDouble(13);
-                            data.Zone = reader.GetInt32(14);
-                            data.Lane = reader.GetInt32(15);
+                            data.ProbOfExist = reader.GetInt32(16);
+                            data.Class = reader.GetInt32(20);
+                            data.Length = reader.GetDouble(22);
+                            data.Width = reader.GetDouble(23);
+                          //  data.Zone = reader.GetInt32(14);
+                           // data.Lane = reader.GetInt32(15);
 
                             data.distance = Math.Sqrt(Math.Pow(data.DistLat,2)+ Math.Pow(data.DistLong,2));
                             data.size = data.Length * data.Width;
-                         
+                            data.Speed = 3.6*Math.Sqrt(Math.Pow(data.VrelLat, 2) + Math.Pow(data.VrelLong, 2));
                             dataList.Add(data);
                            
                             //if (dataList.Count > 1000)
@@ -862,7 +898,7 @@ namespace Radar_Analysis_Program
         #region checkBox
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < 41; i++)
+            for (int i = 0; i < 100; i++)
             {
                 if (textBoxes[i] == null) { }
                 else textBoxes[i].Visibility = Visibility.Visible;
@@ -870,7 +906,7 @@ namespace Radar_Analysis_Program
         }
         private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < 41; i++)
+            for (int i = 0; i < 100; i++)
             {
                 if (textBoxes[i] == null) { }
                 else textBoxes[i].Visibility = Visibility.Collapsed;
@@ -1027,7 +1063,7 @@ namespace Radar_Analysis_Program
 
             _previousValue_check = currentValue;
 
-            mediaElement.Position = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum);
+            //mediaElement.Position = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum);
             //  textblock.Text = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum).ToString();
         }
         private void slider_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
@@ -1056,10 +1092,11 @@ namespace Radar_Analysis_Program
         void Filter()
         {
             Filter_Distance();
+            Filter_Speed();
             Filter_RCS();
             Filter_Size();
             Filter_ProbExists();
-
+      
             //Filter_Nofobj();
             //Filter_Azimuth();
             //Filter_VrelOncome();
@@ -1085,6 +1122,15 @@ namespace Radar_Analysis_Program
             else
             {
                 //  System.Console.WriteLine("bb");
+                Data_Draw.Children.Remove(rectangles[dataList[number].id]);
+                Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
+            }
+        }
+
+        void Filter_Speed()
+        {
+            if(dataList[number].Speed == 0)
+            {
                 Data_Draw.Children.Remove(rectangles[dataList[number].id]);
                 Data_Draw.Children.Remove(textBoxes[dataList[number].id]);
             }
