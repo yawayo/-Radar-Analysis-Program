@@ -723,13 +723,10 @@ namespace Radar_Analysis_Program
                 // mediaElement.Position = mediaElement.Position.Add(ts);
             }
             textblock7 = at.ToString(); // 시간 차이 
-                text_str = textblock1 + "\n" + textblock2 + "\n" + textblock3 + "\n" + textblock4 + "\n" + textblock5 + "\n" + textblock6 + "\n" + textblock7;
-              
+            text_str = textblock1 + "\n" + textblock2 + "\n" + textblock3 + "\n" + textblock4 + "\n" + textblock5 + "\n" + textblock6 + "\n" + textblock7;
+         
 
             Data_Text.Text = text_str;
-
-            
-
         }
 
         #region setting
@@ -1099,8 +1096,6 @@ namespace Radar_Analysis_Program
         #region btn
         private void btnPlay_Click(object sender, RoutedEventArgs e)
         {
-            Set_map_value();
-
             if (speed_check == 0)
             {
                 timer.Interval = TimeSpan.FromMilliseconds(0.1);
@@ -1159,12 +1154,11 @@ namespace Radar_Analysis_Program
 
             firsttime = _starttime.ToString("yyyy-MM-dd HH:mm:ss.fff");
             secondtime = total_time.ToString("yyyy-MM-dd HH:mm:ss.fff");
-           // System.Console.WriteLine(firsttime);
-           // System.Console.WriteLine(secondtime);
+            // System.Console.WriteLine(firsttime);
+            // System.Console.WriteLine(secondtime);
             // System.Console.WriteLine(total_time);
 
-            
-
+            Set_map_value();
         }
         #endregion 
 
@@ -1200,6 +1194,8 @@ namespace Radar_Analysis_Program
             timer.Stop();
             drag_check = 1;
             Data_Draw.Children.Clear();
+
+            Draw_map();
         }
         private void slider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
         {
