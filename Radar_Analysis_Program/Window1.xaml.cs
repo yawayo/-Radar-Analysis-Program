@@ -353,16 +353,31 @@ namespace Radar_Analysis_Program
                 number++;
             }
 
-            //filter_this_fram_obj_data();
-            //Filter();
-            draw_this_frame_obj_data();
+            filter_this_fram_obj_data();
             save_this_frame_obj_data();
+            draw_this_frame_obj_data();
             Clear_this_frame_obj_data();
         }
         #region obj info process
         private void filter_this_fram_obj_data()
         {
+            //Filter_Distance();
+            Filter_Speed();
+            /*Filter_RCS();
+            Filter_Size();
+            Filter_ProbExists();*/
 
+            //Filter_Nofobj();
+            //Filter_Azimuth();
+            //Filter_VrelOncome();
+            //Filter_VrelDepart();  
+            //Filter_Lifetime();       
+            //Filter_Y();
+            //Filter_X();
+            //Filter_VYRightLeft();
+            //Filter_VXOncome();
+            //Filter_VYLeftRight();
+            //Filter_VXDepart();
         }
         private void save_this_frame_obj_data()
         {
@@ -370,43 +385,7 @@ namespace Radar_Analysis_Program
             {
                 if (exist[i])
                 {
-                    Obj_inf[i].AddLast(this_frame_data[i]);
-                    if (Obj_inf[i].Count >= 100)
-                        Obj_inf[i].RemoveFirst();
-                }
-                else
-                {
-                    if (Obj_inf[i].Count != 0)
-                    {
-                        MyDataModel last_data = Obj_inf[i].Last.Value;
-                        TimeSpan difTime = DateTime.Now - last_data.Timestamp;
-                        if ((difTime.Seconds > 0) || (difTime.Milliseconds > 300))
-                            Obj_inf[i].Clear();
-                    }
-                }
-            }
-        }
-        private void draw_this_frame_obj_data()
-        {
-            Draw();
-        }
-        private void Clear_this_frame_obj_data()
-        {
-            for (int i = 0; i < 100; i++)
-                this_frame_data[i] = default(MyDataModel);
-            System.Array.Clear(exist, 0, sizeof(bool) * 100);
-        }
-        #endregion
-        private void Draw()
-        {    
-            for(int i = 0; i < 100; i++)
-            {
-                if(exist[i])
-                {
-                    int X = (int)(shift_pos.X + ((-1 * this_frame_data[i].DistLat) * ((Data_Draw.ActualWidth / 2) / max_lat)) + (Data_Draw.ActualWidth / 2));
-                    int Y = (int)(shift_pos.Y + this_frame_data[i].DistLong * (Data_Draw.ActualHeight / max_long));
-
-                    if (Obj_inf[i].Count == 0)
+                    if(Obj_inf[i].Count == 0)
                     {
                         Rectangle rect = new Rectangle
                         {
@@ -415,52 +394,68 @@ namespace Radar_Analysis_Program
                         };
                         rect.Tag = i;
                         rectangles[i] = rect;
-
-                        DateTime rect_date = DateTime.Now;
-                        dates[i] = rect_date;
-
                         TextBox textBox = new TextBox();
+                        textBox.Text = CheckBox_print();
+                        textBox.VerticalAlignment = VerticalAlignment.Center;
+                        textBox.Margin = new Thickness(10, 0, 0, 0);
                         textBoxes[i] = textBox;
-                        textBoxes[i].Text = CheckBox_print();
-                        textBoxes[i].VerticalAlignment = VerticalAlignment.Center;
-                        textBoxes[i].Margin = new Thickness(10, 0, 0, 0);
 
-                        Canvas.SetLeft(rectangles[i], X);
-                        Canvas.SetTop(rectangles[i], Data_Draw.ActualHeight - Y);
-
-                        Canvas.SetLeft(textBox, Canvas.GetLeft(rect) + 10);
-                        Canvas.SetTop(textBox, Data_Draw.ActualHeight - Y - 3);
-
-                        Data_Draw.Children.Add(rectangles[i]);
-                        Data_Draw.Children.Add(textBoxes[i]);
+                        if (Data_Draw.Children.Contains(rectangles[i]) == false)
+                        {
+                            Data_Draw.Children.Add(rectangles[i]);
+                            Data_Draw.Children.Add(textBoxes[i]);
+                        }
                     }
-                    else
-                    {
-                        Canvas.SetLeft(rectangles[i], X);
-                        Canvas.SetTop(rectangles[i], Data_Draw.ActualHeight - Y);
-
-                        Canvas.SetLeft(textBoxes[i], X + 10);
-                        Canvas.SetTop(textBoxes[i], Data_Draw.ActualHeight - Y - 3);
-                    }
+                    Obj_inf[i].AddLast(this_frame_data[i]);
+                    if (Obj_inf[i].Count >= 100)
+                        Obj_inf[i].RemoveFirst();
                 }
                 else
                 {
                     if (Obj_inf[i].Count != 0)
                     {
                         TimeSpan difTime = dbcompareDT - Obj_inf[i].Last.Value.Timestamp;
-                        if ((difTime.Seconds > 3) || (difTime.Milliseconds > 3000))
+                        if ((difTime.Seconds > 0) || (difTime.Milliseconds > 300))
                         {
-                            System.Console.WriteLine(dbcompareDT.ToString("yyyy-MM-dd HH:mm:ss.fff") + " " + Obj_inf[i].Last.Value.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff") + " " + (dbcompareDT - Obj_inf[i].Last.Value.Timestamp).ToString());
-
-                            Data_Draw.Children.Remove(rectangles[i]);
-                            Data_Draw.Children.Remove(textBoxes[i]);
                             Obj_inf[i].Clear();
+
+                            if (Data_Draw.Children.Contains(rectangles[i]) == true)
+                            {
+                                Data_Draw.Children.Remove(rectangles[i]);
+                                Data_Draw.Children.Remove(textBoxes[i]);
+                            }
                         }
                     }
                 }
             }
+        }
+        private void draw_this_frame_obj_data()
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                if (exist[i])
+                {
+                    int X = (int)(shift_pos.X + ((-1 * this_frame_data[i].DistLat) * ((Data_Draw.ActualWidth / 2) / max_lat)) + (Data_Draw.ActualWidth / 2));
+                    int Y = (int)(shift_pos.Y + this_frame_data[i].DistLong * (Data_Draw.ActualHeight / max_long));
+
+                    textBoxes[i].Text = CheckBox_print();
+
+                    Canvas.SetLeft(rectangles[i], X);
+                    Canvas.SetTop(rectangles[i], Data_Draw.ActualHeight - Y);
+
+                    Canvas.SetLeft(textBoxes[i], X + 10);
+                    Canvas.SetTop(textBoxes[i], Data_Draw.ActualHeight - Y - 3);
+                }
+            }
             textblock1 = dbcomparetime;
         }
+        private void Clear_this_frame_obj_data()
+        {
+            for (int i = 0; i < 100; i++)
+                this_frame_data[i] = default(MyDataModel);
+            System.Array.Clear(exist, 0, sizeof(bool) * 100);
+        }
+        #endregion
         void TimerTickHandler(object sender, EventArgs e)
         {
 
@@ -1080,26 +1075,6 @@ namespace Radar_Analysis_Program
         #endregion
 
         #region Filter
-        void Filter()
-        {
-            Filter_Distance();
-            Filter_Speed();
-            Filter_RCS();
-            Filter_Size();
-            Filter_ProbExists();
-
-            //Filter_Nofobj();
-            //Filter_Azimuth();
-            //Filter_VrelOncome();
-            //Filter_VrelDepart();  
-            //Filter_Lifetime();       
-            //Filter_Y();
-            //Filter_X();
-            //Filter_VYRightLeft();
-            //Filter_VXOncome();
-            //Filter_VYLeftRight();
-            //Filter_VXDepart();
-        }
         void Filter_Nofobj()
         {
 
@@ -1120,10 +1095,13 @@ namespace Radar_Analysis_Program
 
         void Filter_Speed()
         {
-            if(dataList[number].Velocity == 0)
+            for(int i = 0; i < 100; i++)
             {
-                Data_Draw.Children.Remove(rectangles[dataList[number].ID]);
-                Data_Draw.Children.Remove(textBoxes[dataList[number].ID]);
+                if (dataList[number].Velocity <= 10)
+                {
+                    this_frame_data[i] = default(MyDataModel);
+                    exist[i] = false;
+                }
             }
         }
         void Filter_Azimuth()
