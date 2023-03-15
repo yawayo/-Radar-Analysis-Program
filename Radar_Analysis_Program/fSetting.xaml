@@ -102,35 +102,35 @@
                 <Label x:Name="Filter_NofObj_change_label" Foreground="White" Margin="5" FontSize="18" FontFamily="Constantia" Width="131">NofObj</Label>
                 <TextBox x:Name="Filter_NofObj_MIN_input" Margin="5" FontFamily="Constantia" Width="81" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
                 <TextBox x:Name="Filter_NofObj_MAX_input" Margin="5" FontFamily="Constantia" Width="80" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
-                <CheckBox x:Name="Filter_NofObj_Active_btn" Margin="40,5,30,5" Width="20" Height="20"   Click="NofObj_Active_btn_Click" />
+                <CheckBox x:Name="Filter_NofObj_Active_btn" Margin="40,5,30,5" Width="20" Height="20"/>
                 <Label x:Name="Filter_Distance_chage_label" Foreground="White" Margin="5" FontSize="18" FontFamily="Constantia" Width="131">Distance</Label>
                 <TextBox x:Name="Filter_Distance_MIN_input" FontFamily="Constantia" Margin="5" Width="81" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
                 <TextBox x:Name="Filter_Distance_MAX_input" FontFamily="Constantia" Margin="5" Width="80" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
-                <CheckBox x:Name="Filter_Distance_Active_btn" Margin="40,5,30,5" Width="20" Height="20"   Click="Distance_Active_btn_Click"  />
+                <CheckBox x:Name="Filter_Distance_Active_btn" Margin="40,5,30,5" Width="20" Height="20"/>
                 <Label x:Name="Filter_Azimuth_chage_label" Foreground="White" Margin="5" FontSize="18" FontFamily="Constantia" Width="131">Azimuth</Label>
                 <TextBox x:Name="Filter_Azimuth_MIN_input" Margin="5" FontFamily="Constantia" Width="81" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
                 <TextBox x:Name="Filter_Azimuth_MAX_input" Margin="5" FontFamily="Constantia" Width="80" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
-                <CheckBox x:Name="Filter_Azimuth_Active_btn" Margin="40,5,30,5" Width="20" Height="20"   Click="Azimuth_Active_btn_Click"  />
+                <CheckBox x:Name="Filter_Azimuth_Active_btn" Margin="40,5,30,5" Width="20" Height="20"/>
                 <Label x:Name="Filter_VrelOncome_chage_label" Foreground="White" Margin="5" FontSize="18" FontFamily="Constantia" Width="131">VrelOncome</Label>
                 <TextBox x:Name="Filter_VrelOncome_MIN_input" Margin="5" FontFamily="Constantia" Width="81" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
                 <TextBox x:Name="Filter_VrelOncome_MAX_input" Margin="5" FontFamily="Constantia" Width="80" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
-                <CheckBox x:Name="Filter_VrelOncome_Active_btn" Margin="40,5,30,5" Width="20" Height="20"   Click="VrelOncome_Active_btn_Click"  />
+                <CheckBox x:Name="Filter_VrelOncome_Active_btn" Margin="40,5,30,5" Width="20" Height="20"/>
                 <Label x:Name="Filter_VrelDepart_chage_label" Foreground="White" Margin="5" FontSize="18" FontFamily="Constantia" Width="131">VrelDepart</Label>
                 <TextBox x:Name="Filter_VrelDepart_MIN_input" Margin="5" FontFamily="Constantia" Width="81" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
                 <TextBox x:Name="Filter_VrelDepart_MAX_input" Margin="5" FontFamily="Constantia" Width="80" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
-                <CheckBox x:Name="Filter_VrelDepart_Active_btn" Margin="40,5,30,5" Width="20" Height="20"   Click="VrelDepart_Active_btn_Click"  />
+                <CheckBox x:Name="Filter_VrelDepart_Active_btn" Margin="40,5,30,5" Width="20" Height="20"/>
                 <Label x:Name="Filter_RCS_change_label" Foreground="White" Margin="5" FontSize="18" FontFamily="Constantia" Width="131">RCS</Label>
                 <TextBox x:Name="Filter_RCS_MIN_input" Margin="5" FontFamily="Constantia" Width="81" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
                 <TextBox x:Name="Filter_RCS_MAX_input" Margin="5" FontFamily="Constantia" Width="80" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
-                <CheckBox x:Name="Filter_RCS_Active_btn" Margin="40,5,30,5" Width="20" Height="20"   Click="RCS_Active_btn_Click"  />
+                <CheckBox x:Name="Filter_RCS_Active_btn" Margin="40,5,30,5" Width="20" Height="20"/>
                 <Label x:Name="Filter_Lifetime_change_label" Foreground="White" Margin="5" FontSize="18" FontFamily="Constantia" Width="131">Lifetime</Label>
                 <TextBox x:Name="Filter_Lifetime_MIN_input" Margin="5" FontFamily="Constantia" Width="81" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
                 <TextBox x:Name="Filter_Lifetime_MAX_input" Margin="5" FontFamily="Constantia" Width="80" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
-                <CheckBox x:Name="Filter_Lifetime_Active_btn" Margin="40,5,30,5" Width="20" Height="20"   Click="Lifetime_Active_btn_Click"  />
+                <CheckBox x:Name="Filter_Lifetime_Active_btn" Margin="40,5,30,5" Width="20" Height="20"/>
                 <Label x:Name="Filter_Size_change_label" Foreground="White" Margin="5" FontSize="18" FontFamily="Constantia" Width="131">Size</Label>
                 <TextBox x:Name="Filter_Size_MIN_input" Margin="5" FontFamily="Constantia" Width="81" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
                 <TextBox x:Name="Filter_Size_MAX_input" Margin="5" FontFamily="Constantia" Width="80" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
-                <CheckBox x:Name="Filter_Size_Active_btn" Margin="40,5,30,5" Width="20" Height="20"   Click="Size_Active_btn_Click"  />
+                <CheckBox x:Name="Filter_Size_Active_btn" Margin="40,5,30,5" Width="20" Height="20"/>
                 <Label x:Name="Filter_ProbExists_change_label" Foreground="White" Margin="5" FontSize="18" FontFamily="Constantia" Width="131">ProbExists</Label>
                 <ComboBox x:Name="Filter_ProbExists_MIN_input" Margin="5" Width="81" Height="20" Background="{x:Null}" IsEnabled="true" FontFamily="Constantia" Foreground="#FFF48F3D">
                     <ComboBoxItem>0 %</ComboBoxItem>
@@ -152,31 +152,31 @@
                     <ComboBoxItem>99.9%</ComboBoxItem>
                     <ComboBoxItem>100%</ComboBoxItem>
                 </ComboBox>
-                <CheckBox x:Name="Filter_ProbExists_Active_btn" Margin="40,5,30,5" Width="20" Height="20"   Click="ProbExists_Active_btn_Click"  />
+                <CheckBox x:Name="Filter_ProbExists_Active_btn" Margin="40,5,30,5" Width="20" Height="20"/>
                 <Label x:Name="Filter_Y_change_label"   Foreground="White" Margin="5" FontSize="18" FontFamily="Constantia" Width="131">Y</Label>
                 <TextBox x:Name="Filter_Y_MIN_input" Margin="5" FontFamily="Constantia" Width="81" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
                 <TextBox x:Name="Filter_Y_MAX_input" Margin="5" FontFamily="Constantia" Width="80" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
-                <CheckBox x:Name="Filter_Y_Active_btn" Margin="40,5,30,5" Width="20" Height="20"   Click="Y_Active_btn_Click"  />
+                <CheckBox x:Name="Filter_Y_Active_btn" Margin="40,5,30,5" Width="20" Height="20"/>
                 <Label x:Name="Filter_X_change_label" Foreground="White" Margin="5" FontSize="18" FontFamily="Constantia" Width="131">X</Label>
                 <TextBox x:Name="Filter_X_MIN_input" Margin="5" FontFamily="Constantia" Width="81" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
                 <TextBox x:Name="Filter_X_MAX_input" Margin="5" FontFamily="Constantia" Width="80" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
-                <CheckBox x:Name="Filter_X_Active_btn" Margin="40,5,30,5" Width="20" Height="20"   Click="X_Active_btn_Click"  />
+                <CheckBox x:Name="Filter_X_Active_btn" Margin="40,5,30,5" Width="20" Height="20"/>
                 <Label x:Name="Filter_VYRightLeft_change_label" Foreground="White" Margin="5" FontSize="18" FontFamily="Constantia" Width="131">VYRightLeft</Label>
                 <TextBox x:Name="Filter_VYRightLeft_MIN_input" Margin="5" FontFamily="Constantia" Width="81" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
                 <TextBox x:Name="Filter_VYRightLeft_MAX_input" Margin="5" FontFamily="Constantia" Width="80" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
-                <CheckBox x:Name="Filter_VYRightLeft_Active_btn" Margin="40,5,30,5" Width="20" Height="20"   Click="VYRightLeft_Active_btn_Click"  />
+                <CheckBox x:Name="Filter_VYRightLeft_Active_btn" Margin="40,5,30,5" Width="20" Height="20"/>
                 <Label x:Name="Filter_VXOncome_change_label" Foreground="White" Margin="5" FontSize="18" FontFamily="Constantia" Width="131">VXOncome</Label>
                 <TextBox x:Name="Filter_VXOncome_MIN_input" Margin="5" FontFamily="Constantia" Width="81" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
                 <TextBox x:Name="Filter_VXOncome_MAX_input" Margin="5" FontFamily="Constantia" Width="80" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
-                <CheckBox x:Name="Filter_VXOncome_Active_btn" Margin="40,5,30,5" Width="20" Height="20"   Click="VXOncome_Active_btn_Click"  />
+                <CheckBox x:Name="Filter_VXOncome_Active_btn" Margin="40,5,30,5" Width="20" Height="20"/>
                 <Label x:Name="Filter_VYLeftRight_change_label" Foreground="White" Margin="5" FontSize="18" FontFamily="Constantia" Width="131">VYLeftRight</Label>
                 <TextBox x:Name="Filter_VYLeftRight_MIN_input" Margin="5" FontFamily="Constantia" Width="81" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
                 <TextBox x:Name="Filter_VYLeftRight_MAX_input" Margin="5" FontFamily="Constantia" Width="80" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
-                <CheckBox x:Name="Filter_VYLeftRight_Active_btn" Margin="40,5,30,5" Width="20" Height="20"   Click="VYLeftRight_Active_btn_Click"  />
+                <CheckBox x:Name="Filter_VYLeftRight_Active_btn" Margin="40,5,30,5" Width="20" Height="20"/>
                 <Label x:Name="Filter_VXDepart_change_label" Foreground="White" Margin="5" FontSize="18" FontFamily="Constantia" Width="131">VXDepart</Label>
                 <TextBox x:Name="Filter_VXDepart_MIN_input" Margin="5" FontFamily="Constantia" Width="81" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
                 <TextBox x:Name="Filter_VXDepart_MAX_input" Margin="5" FontFamily="Constantia" Width="80" Height="20" Background="{x:Null}" IsEnabled="true" Foreground="#FFF48F3D"></TextBox>
-                <CheckBox x:Name="Filter_VXDepart_Active_btn" Margin="40,5,30,5" Width="20" Height="20"   Click="VXDepart_Active_btn_Click"  />
+                <CheckBox x:Name="Filter_VXDepart_Active_btn" Margin="40,5,30,5" Width="20" Height="20"/>
 
 
             </WrapPanel>

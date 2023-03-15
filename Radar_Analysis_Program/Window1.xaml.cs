@@ -78,39 +78,56 @@ namespace Radar_Analysis_Program
         public double Shift = 17.4;
         public int Angle = 20;
 
-        #region Change_MIN
-        public static string Change_Filter_NofObj_MIN_input = "0";
-        public static string Change_Filter_Distance_MIN_input = "0";
-        public static string Change_Filter_Azimuth_MIN_input = "-50";
-        public static string Change_Filter_VrelOncome_MIN_input = "0";
-        public static string Change_Filter_VrelDepart_MIN_input = "0";
-        public static string Change_Filter_RCS_MIN_input = "-50";
-        public static string Change_Filter_Lifetime_MIN_input = "0";
-        public static string Change_Filter_Size_MIN_input = "0";
-        public static string Change_Filter_ProbExists_MIN_input = "0";
-        public static string Change_Filter_Y_MIN_input = "-409.5";
-        public static string Change_Filter_X_MIN_input = "-500";
-        public static string Change_Filter_VYRightLeft_MIN_input = "0";
-        public static string Change_Filter_VXOncome_MIN_input = "0";
-        public static string Change_Filter_VYLeftRight_MIN_input = "0";
-        public static string Change_Filter_VXDepart_MIN_input = "0";
+        #region ACTIVE
+        public static bool Filter_NofObj_ACTIVE = false;
+        public static bool Filter_Distance_ACTIVE = false;
+        public static bool Filter_Azimuth_ACTIVE = false;
+        public static bool Filter_VrelOncome_ACTIVE = false;
+        public static bool Filter_VrelDepart_ACTIVE = false;
+        public static bool Filter_RCS_ACTIVE = false;
+        public static bool Filter_Lifetime_ACTIVE = false;
+        public static bool Filter_Size_ACTIVE = false;
+        public static bool Filter_ProbExists_ACTIVE = false;
+        public static bool Filter_Y_ACTIVE = false;
+        public static bool Filter_X_ACTIVE = false;
+        public static bool Filter_VYRightLeft_ACTIVE = false;
+        public static bool Filter_VXOncome_ACTIVE = false;
+        public static bool Filter_VYLeftRight_ACTIVE = false;
+        public static bool Filter_VXDepart_ACTIVE = false;
         #endregion
-        #region Change_MAX
-        public static string Change_Filter_NofObj_MAX_input = "4095";
-        public static string Change_Filter_Distance_MAX_input = "409.5";
-        public static string Change_Filter_Azimuth_MAX_input = "50.375";
-        public static string Change_Filter_VrelOncome_MAX_input = "128.993";
-        public static string Change_Filter_VrelDepart_MAX_input = "128.993";
-        public static string Change_Filter_RCS_MAX_input = "52.375";
-        public static string Change_Filter_Lifetime_MAX_input = "409.5";
-        public static string Change_Filter_Size_MAX_input = "102.375";
-        public static string Change_Filter_ProbExists_MAX_input = "7";
-        public static string Change_Filter_Y_MAX_input = "409.5";
-        public static string Change_Filter_X_MAX_input = "1138.2";
-        public static string Change_Filter_VYRightLeft_MAX_input = "128.993";
-        public static string Change_Filter_VXOncome_MAX_input = "128.993";
-        public static string Change_Filter_VYLeftRight_MAX_input = "128.993";
-        public static string Change_Filter_VXDepart_MAX_input = "128.993";
+        #region MIN
+        public static int Filter_NofObj_MIN = 0;
+        public static double Filter_Distance_MIN = 0.0;
+        public static double Filter_Azimuth_MIN = 0.0;
+        public static double Filter_VrelOncome_MIN = 0.0;
+        public static double Filter_VrelDepart_MIN = 0.0;
+        public static double Filter_RCS_MIN = -50.0;
+        public static double Filter_Lifetime_MIN = 0.0;
+        public static double Filter_Size_MIN = 0.0;
+        public static int Filter_ProbExists_MIN = 0;
+        public static double Filter_Y_MIN = -409.5;
+        public static double Filter_X_MIN = -500;
+        public static double Filter_VYRightLeft_MIN = 0.0;
+        public static double Filter_VXOncome_MIN = 0.0;
+        public static double Filter_VYLeftRight_MIN = 0.0;
+        public static double Filter_VXDepart_MIN = 0.0;
+        #endregion
+        #region MAX
+        public static int Filter_NofObj_MAX = 4095;
+        public static double Filter_Distance_MAX = 409.5;
+        public static double Filter_Azimuth_MAX = 50.375;
+        public static double Filter_VrelOncome_MAX = 128.993;
+        public static double Filter_VrelDepart_MAX = 128.993;
+        public static double Filter_RCS_MAX = 52.375;
+        public static double Filter_Lifetime_MAX = 409.5;
+        public static double Filter_Size_MAX = 102.375;
+        public static int Filter_ProbExists_MAX = 7;
+        public static double Filter_Y_MAX = 409.5;
+        public static double Filter_X_MAX = 1138.2;
+        public static double Filter_VYRightLeft_MAX = 128.993;
+        public static double Filter_VXOncome_MAX = 128.993;
+        public static double Filter_VYLeftRight_MAX = 128.993;
+        public static double Filter_VXDepart_MAX = 128.993;
         #endregion
 
 
@@ -503,98 +520,116 @@ namespace Radar_Analysis_Program
         #region Filter Setting
         void Filter_Nofobj(int index)
         {
-
+            if(Filter_NofObj_ACTIVE)
+            {
+                /*if(this_frame_data[index].ID > Filter_NofObj_MAX)
+                {
+                    this_frame_data[index] = default(MyDataModel);
+                    exist[index] = false;
+                }*/
+            }
         }
         void Filter_Distance(int index)
         {
-            if (Change_Filter_Distance_MIN_input < this_frame_data[index].Distance && dataList[number].Distance < Double.Parse(Change_Filter_Distance_MAX_input))
+            if (Filter_Distance_ACTIVE)
             {
-                // System.Console.WriteLine("aa");
-            }
-            else
-            {
-                this_frame_data[dataList[number].ID] = dataList[number];
-                exist[dataList[number].ID] = true;
+                if ((this_frame_data[index].Distance >= Filter_Distance_MAX) || (this_frame_data[index].Distance <= Filter_Distance_MIN))
+                {
+                    this_frame_data[index] = default(MyDataModel);
+                    exist[index] = false;
+                }
             }
         }
         void Filter_Azimuth(int index)
         {
+            if (Filter_Azimuth_ACTIVE)
+            {
 
+            }
         }
         void Filter_VrelOncome(int index)
         {
+            if (Filter_VrelOncome_ACTIVE)
+            {
 
+            }
         }
         void Filter_VrelDepart(int index)
         {
+            if (Filter_VrelDepart_ACTIVE)
+            {
 
+            }
         }
         void Filter_RCS(int index)
         {
-            if (Double.Parse(Change_Filter_RCS_MIN_input) < dataList[number].RCS && dataList[number].RCS < Double.Parse(Change_Filter_RCS_MAX_input))
+            if (Filter_RCS_ACTIVE)
             {
-                // System.Console.WriteLine("aa");
-            }
-            else
-            {
-                //  System.Console.WriteLine("bb");
-                Data_Draw.Children.Remove(rectangles[dataList[number].ID]);
-                Data_Draw.Children.Remove(textBoxes[dataList[number].ID]);
+
             }
         }
         void Filter_Lifetime(int index)
         {
+            if (Filter_Lifetime_ACTIVE)
+            {
 
+            }
         }
         void Filter_Size(int index)
         {
-            if (Double.Parse(Change_Filter_Size_MIN_input) <= dataList[number].Size && dataList[number].Size < Double.Parse(Change_Filter_Size_MAX_input))
+            if (Filter_Size_ACTIVE)
             {
-                // System.Console.WriteLine("aa");
-            }
-            else
-            {
-                //  System.Console.WriteLine("bb");
-                Data_Draw.Children.Remove(rectangles[dataList[number].ID]);
-                Data_Draw.Children.Remove(textBoxes[dataList[number].ID]);
+
             }
         }
         void Filter_ProbExists(int index)
         {
-            if (Double.Parse(Change_Filter_ProbExists_MIN_input) < dataList[number].ProbOfExist && dataList[number].ProbOfExist < Double.Parse(Change_Filter_ProbExists_MAX_input))
+            if (Filter_ProbExists_ACTIVE)
             {
-                // System.Console.WriteLine("aa");
-            }
-            else
-            {
-                //  System.Console.WriteLine("bb");
-                Data_Draw.Children.Remove(rectangles[dataList[number].ID]);
-                Data_Draw.Children.Remove(textBoxes[dataList[number].ID]);
+
             }
         }
         void Filter_Y(int index)
         {
+            if (Filter_Y_ACTIVE)
+            {
 
+            }
         }
         void Filter_X(int index)
         {
+            if (Filter_X_ACTIVE)
+            {
 
+            }
         }
         void Filter_VYRightLeft(int index)
         {
+            if (Filter_VYRightLeft_ACTIVE)
+            {
 
+            }
         }
         void Filter_VXOncome(int index)
         {
+            if (Filter_VXOncome_ACTIVE)
+            {
 
+            }
         }
         void Filter_VYLeftRight(int index)
         {
+            if (Filter_VYLeftRight_ACTIVE)
+            {
 
+            }
         }
         void Filter_VXDepart(int index)
         {
+            if (Filter_VXDepart_ACTIVE)
+            {
 
+            }
         }
         #endregion
 
@@ -1004,10 +1039,10 @@ namespace Radar_Analysis_Program
         private void Setting_Click(object sender, RoutedEventArgs e)
         {
             fSetting testWindow2 = new fSetting();
+            testWindow2.Set_Filter_Form();
             testWindow2.Show();
         }
         #endregion
-
 
         #region mediaElement
         private void mediaElement_MediaOpened(object sender, RoutedEventArgs e)
