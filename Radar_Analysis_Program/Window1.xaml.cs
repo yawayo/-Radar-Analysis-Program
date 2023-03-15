@@ -71,6 +71,10 @@ namespace Radar_Analysis_Program
         private float[] Lane_Point = new float[6 + 1] { -9.9f, -6.6f, -3.3f, 0.0f, 3.3f, 6.6f, 9.9f };
         private float Dist_Lane_gap = 25.0f;
 
+        private MyDataModel[] this_frame_data = new MyDataModel[100];
+        private bool[] exist = new bool[100];
+        public LinkedList<MyDataModel>[] Obj_inf = new LinkedList<MyDataModel>[100];
+
         #region Change_MIN
         public static string Change_Filter_NofObj_MIN_input = "0";
         public static string Change_Filter_Distance_MIN_input = "0";
@@ -144,6 +148,7 @@ namespace Radar_Analysis_Program
             public double Velocity;
             public double Size;
             public int Zone;
+            public bool Noise;
         }
 
         public Window1(MySqlConnection connection)
@@ -153,6 +158,9 @@ namespace Radar_Analysis_Program
 
             //db_connect(conn, firsttime, secondtime);
             CheckBox_setting();
+
+            for (int NODE = 0; NODE < 100; NODE++)
+                Obj_inf[NODE] = new LinkedList<MyDataModel>();
         }
 
         private void Set_map_value()
@@ -330,269 +338,124 @@ namespace Radar_Analysis_Program
             // Cv2.WaitKey(0);
             #endregion
         }
-        private void draw()
+        private void Read()
         {
-            //Data_Draw.Children.Clear();
-                      
-            double X;
-            double Y;
-            try
+            if (dataList[number].Timestamp <= dbcompareDT)
             {
-                if (number == 0 && rectangles[dataList[number].ID] == null)
+                while (!((number > dataList.Count) || (dataList[number].Timestamp != dataList[number + 1].Timestamp)))
                 {
-                    if (rectangles[dataList[number].ID] == null && _starttime <= dbcompareDT)     //생성 
+                    this_frame_data[dataList[number].ID] = dataList[number];
+                    exist[dataList[number].ID] = true;
+                    number++;
+                }
+                this_frame_data[dataList[number].ID] = dataList[number];
+                exist[dataList[number].ID] = true;
+                number++;
+            }
+
+            filter_this_fram_obj_data();
+            save_this_frame_obj_data();
+            draw_this_frame_obj_data();
+            Clear_this_frame_obj_data();
+        }
+        #region obj info process
+        private void filter_this_fram_obj_data()
+        {
+            //Filter_Distance();
+            Filter_Speed();
+            /*Filter_RCS();
+            Filter_Size();
+            Filter_ProbExists();*/
+
+            //Filter_Nofobj();
+            //Filter_Azimuth();
+            //Filter_VrelOncome();
+            //Filter_VrelDepart();  
+            //Filter_Lifetime();       
+            //Filter_Y();
+            //Filter_X();
+            //Filter_VYRightLeft();
+            //Filter_VXOncome();
+            //Filter_VYLeftRight();
+            //Filter_VXDepart();
+        }
+        private void save_this_frame_obj_data()
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                if (exist[i])
+                {
+                    if(Obj_inf[i].Count == 0)
                     {
-                        textblock2 = dataList[number].DistLat.ToString("0.0");
-                        textblock3 = dataList[number].DistLong.ToString("0.0");
-                        //textblock3.Text = dataList[number].DistLat.ToString("0.0");
-                        //textblock2.Text = dataList[number].DistLong.ToString("0.0");
-
-                        X = shift_pos.X + ((-1 * dataList[number].DistLat) * ((Data_Draw.ActualWidth / 2) / max_lat)) + (Data_Draw.ActualWidth / 2);
-                        Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
-
                         Rectangle rect = new Rectangle
                         {
                             Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61)),
                             StrokeThickness = 15
                         };
-
-                        rect.Tag = dataList[number].ID;
-                        rectangles[dataList[number].ID] = rect;
-
-                        DateTime rect_date = DateTime.Now;
-                        dates[dataList[number].ID] = rect_date;
-
-
-
+                        rect.Tag = i;
+                        rectangles[i] = rect;
                         TextBox textBox = new TextBox();
-                        textBoxes[dataList[number].ID] = textBox;
-                        //textBoxes[dataList[number].ID].Text = "ID = " + dataList[number].ID.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
-                        textBoxes[dataList[number].ID].Text = CheckBox_print();
-                        textBoxes[dataList[number].ID].VerticalAlignment = VerticalAlignment.Center;
-                        textBoxes[dataList[number].ID].Margin = new Thickness(10, 0, 0, 0);
+                        textBox.Text = CheckBox_print();
+                        textBox.VerticalAlignment = VerticalAlignment.Center;
+                        textBox.Margin = new Thickness(10, 0, 0, 0);
+                        textBoxes[i] = textBox;
 
-                        Canvas.SetLeft(rectangles[dataList[number].ID], X);
-                        Canvas.SetTop(rectangles[dataList[number].ID], Data_Draw.ActualHeight - Y);
-
-                        Canvas.SetLeft(textBox, Canvas.GetLeft(rect) + 10);
-                        Canvas.SetTop(textBox, Data_Draw.ActualHeight - Y - 3);
-
-                        Data_Draw.Children.Add(rectangles[dataList[number].ID]);
-                        Data_Draw.Children.Add(textBoxes[dataList[number].ID]);
-
-
-                        Filter();
-                        number++;
+                        if (Data_Draw.Children.Contains(rectangles[i]) == false)
+                        {
+                            Data_Draw.Children.Add(rectangles[i]);
+                            Data_Draw.Children.Add(textBoxes[i]);
+                        }
                     }
+                    Obj_inf[i].AddLast(this_frame_data[i]);
+                    if (Obj_inf[i].Count >= 100)
+                        Obj_inf[i].RemoveFirst();
                 }
-                else if (number == 0 && rectangles[dataList[number].ID] != null)   //드래그 시 number가 0일 때 ,   
+                else
                 {
-                    for (int i = 0; i < 100; i++)
+                    if (Obj_inf[i].Count != 0)
                     {
-                        if (rectangles[dataList[number].ID] != null && dataList[number].Timestamp <= dbcompareDT)  // 이미 존재한
+                        TimeSpan difTime = dbcompareDT - Obj_inf[i].Last.Value.Timestamp;
+                        if ((difTime.Seconds > 0) || (difTime.Milliseconds > 300))
                         {
-                            if (rectangles[i] != null && dataList[number].Timestamp <= dbcompareDT)
+                            Obj_inf[i].Clear();
+
+                            if (Data_Draw.Children.Contains(rectangles[i]) == true)
                             {
-                                textblock2 = dataList[number].DistLat.ToString("0.0");
-                                textblock3 = dataList[number].DistLong.ToString("0.0");
-
-                                X = shift_pos.X + ((-1 * dataList[number].DistLat) * ((Data_Draw.ActualWidth / 2) / max_lat)) + (Data_Draw.ActualWidth / 2);
-                                Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
-
-                                textBoxes[dataList[number].ID].Text = CheckBox_print();
-                                textBoxes[dataList[number].ID].VerticalAlignment = VerticalAlignment.Center;
-                                textBoxes[dataList[number].ID].Margin = new Thickness(10, 0, 0, 0);
-
-                                Canvas.SetLeft(rectangles[dataList[number].ID], X);
-                                Canvas.SetTop(rectangles[dataList[number].ID], Data_Draw.ActualHeight - Y);
-
-                                Canvas.SetLeft(textBoxes[dataList[number].ID], Canvas.GetLeft(rectangles[dataList[number].ID]) + 10);
-                                Canvas.SetTop(textBoxes[dataList[number].ID], Data_Draw.ActualHeight - Y - 3);
-
-                                if (Data_Draw.Children.Contains(rectangles[dataList[number].ID]) == false)
-                                {
-                                    Data_Draw.Children.Add(rectangles[dataList[number].ID]);
-                                    Data_Draw.Children.Add(textBoxes[dataList[number].ID]);
-                                }
-
-                                if (dataList[number].DistLong < 10)
-                                {
-                                    Data_Draw.Children.Remove(rectangles[dataList[number].ID]);
-                                    Data_Draw.Children.Remove(textBoxes[dataList[number].ID]);
-                                }
-                
-
-                                DateTime rect_date = DateTime.Now;
-                                dates[dataList[number].ID] = rect_date;
-
-
-
-                                Filter();
-                                number++;
-
+                                Data_Draw.Children.Remove(rectangles[i]);
+                                Data_Draw.Children.Remove(textBoxes[i]);
                             }
-
-                        }
-                        else if (rectangles[dataList[number].ID] == null && dataList[number - 1].Timestamp < dbcompareDT && dataList[number].Timestamp <= dbcompareDT)     //생성 
-                        {
-                            textblock2 = dataList[number].DistLat.ToString("0.0");
-                            textblock3 = dataList[number].DistLong.ToString("0.0");
-                            //textblock3.Text = dataList[number].DistLat.ToString("0.0");
-                            //textblock2.Text = dataList[number].DistLong.ToString("0.0");
-
-                            X = shift_pos.X + ((-1 * dataList[number].DistLat) * ((Data_Draw.ActualWidth / 2) / max_lat)) + (Data_Draw.ActualWidth / 2);
-                            Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
-
-                            Rectangle rect = new Rectangle
-                            {
-                                Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61)),
-                                StrokeThickness = 15
-                            };
-
-                            rect.Tag = dataList[number].ID;
-                            rectangles[dataList[number].ID] = rect;
-
-                            DateTime rect_date = DateTime.Now;
-                            dates[dataList[number].ID] = rect_date;
-
-
-
-                            TextBox textBox = new TextBox();
-                            textBoxes[dataList[number].ID] = textBox;
-                            //textBoxes[dataList[number].ID].Text = "ID = " + dataList[number].ID.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
-                            textBoxes[dataList[number].ID].Text = CheckBox_print();
-                            textBoxes[dataList[number].ID].VerticalAlignment = VerticalAlignment.Center;
-                            textBoxes[dataList[number].ID].Margin = new Thickness(10, 0, 0, 0);
-
-                            Canvas.SetLeft(rectangles[dataList[number].ID], X);
-                            Canvas.SetTop(rectangles[dataList[number].ID], Data_Draw.ActualHeight - Y);
-
-                            Canvas.SetLeft(textBox, Canvas.GetLeft(rect) + 10);
-                            Canvas.SetTop(textBox, Data_Draw.ActualHeight - Y - 3);
-
-                            Data_Draw.Children.Add(rectangles[dataList[number].ID]);
-                            Data_Draw.Children.Add(textBoxes[dataList[number].ID]);
-
-
-
-
-                            Filter();
-                            number++;
                         }
                     }
-                    textblock4 = number.ToString();
-                    textblock5 = dataList[number].Distance.ToString("0.0");
-                }
-                else if (dataList[number - 1].Timestamp < dbcompareDT && dataList[number].Timestamp <= dbcompareDT)   // DB 안의 time == 지금 작동중인 시간(dbcomapretime)
-                {
-
-                    for (int i = 0; i < 100; i++)
-                    {
-                        if (rectangles[dataList[number].ID] != null && dataList[number - 1].Timestamp < dbcompareDT && dataList[number].Timestamp <= dbcompareDT)  // 이미 존재한
-                        {
-                            if (rectangles[i] != null && dataList[number].Timestamp <= dbcompareDT)
-                            {
-                                textblock2 = dataList[number].DistLat.ToString("0.0");
-                                textblock3 = dataList[number].DistLong.ToString("0.0");
-
-
-                                X = shift_pos.X + ((-1 * dataList[number].DistLat) * ((Data_Draw.ActualWidth / 2) / max_lat)) + (Data_Draw.ActualWidth / 2);
-                                Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
-
-                             
-
-                                Canvas.SetLeft(rectangles[dataList[number].ID], X);
-                                Canvas.SetTop(rectangles[dataList[number].ID], Data_Draw.ActualHeight - Y);
-
-                                Canvas.SetLeft(textBoxes[dataList[number].ID], Canvas.GetLeft(rectangles[dataList[number].ID]) + 10);
-                                Canvas.SetTop(textBoxes[dataList[number].ID], Data_Draw.ActualHeight - Y - 3);
-
-                                if (Data_Draw.Children.Contains(rectangles[dataList[number].ID]) == false)
-                                {
-                                    Data_Draw.Children.Add(rectangles[dataList[number].ID]);
-                                    Data_Draw.Children.Add(textBoxes[dataList[number].ID]);
-                                }
-
-            
-
-                                DateTime rect_date = DateTime.Now;
-                                dates[dataList[number].ID] = rect_date;
-
-                                Filter();
-                                number++;
-
-                            }
-
-                        }
-                        else if (rectangles[dataList[number].ID] == null && dataList[number - 1].Timestamp < dbcompareDT && dataList[number].Timestamp <= dbcompareDT)     //생성 
-                        {
-                            textblock2 = dataList[number].DistLat.ToString("0.0");
-                            textblock3 = dataList[number].DistLong.ToString("0.0");
-                            //textblock3.Text = dataList[number].DistLat.ToString("0.0");
-                            //textblock2.Text = dataList[number].DistLong.ToString("0.0");
-
-                            X = shift_pos.X + ((-1 * dataList[number].DistLat) * ((Data_Draw.ActualWidth / 2) / max_lat)) + (Data_Draw.ActualWidth / 2);
-                            Y = shift_pos.Y + dataList[number].DistLong * (Data_Draw.ActualHeight / max_long);
-
-                            Rectangle rect = new Rectangle
-                            {
-                                Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61)),
-                                StrokeThickness = 15
-                            };
-
-                            rect.Tag = dataList[number].ID;
-                            rectangles[dataList[number].ID] = rect;
-
-                            DateTime rect_date = DateTime.Now;
-                            dates[dataList[number].ID] = rect_date;
-
-
-                            TextBox textBox = new TextBox();
-                            textBoxes[dataList[number].ID] = textBox;
-
-                            //textBoxes[dataList[number].ID].Text = "ID = " + dataList[number].ID.ToString() + "\n" + "DistLat = " + dataList[number].DistLat.ToString("0.0") + "\n" + "DistLong = " + dataList[number].DistLong.ToString("0.0");
-                            textBoxes[dataList[number].ID].Text = CheckBox_print();
-                            textBoxes[dataList[number].ID].VerticalAlignment = VerticalAlignment.Center;
-                            textBoxes[dataList[number].ID].Margin = new Thickness(10, 0, 0, 0);
-
-                            Canvas.SetLeft(rectangles[dataList[number].ID], X);
-                            Canvas.SetTop(rectangles[dataList[number].ID], Data_Draw.ActualHeight - Y);
-
-                            Canvas.SetLeft(textBox, Canvas.GetLeft(rect) + 10);
-                            Canvas.SetTop(textBox, Data_Draw.ActualHeight - Y - 3);
-
-                            Data_Draw.Children.Add(rectangles[dataList[number].ID]);
-                            Data_Draw.Children.Add(textBoxes[dataList[number].ID]);
-
-
-                            //textblock4.Text = number.ToString();
-
-
-                            Filter();
-                            number++;
-                        }
-                    }
-                    textblock4 = number.ToString();
-                    textblock5 = dataList[number].Distance.ToString("0.0");
                 }
             }
-            catch
-            {
-
-            }
-
-
+        }
+        private void draw_this_frame_obj_data()
+        {
             for (int i = 0; i < 100; i++)
             {
-                TimeSpan difTime = DateTime.Now - dates[i];
-                if ((difTime.Seconds > 3) || (difTime.Milliseconds > 3000))
+                if (exist[i])
                 {
-                    Data_Draw.Children.Remove(rectangles[i]);
-                    Data_Draw.Children.Remove(textBoxes[i]);
+                    int X = (int)(shift_pos.X + ((-1 * this_frame_data[i].DistLat) * ((Data_Draw.ActualWidth / 2) / max_lat)) + (Data_Draw.ActualWidth / 2));
+                    int Y = (int)(shift_pos.Y + this_frame_data[i].DistLong * (Data_Draw.ActualHeight / max_long));
+
+                    textBoxes[i].Text = CheckBox_print();
+
+                    Canvas.SetLeft(rectangles[i], X);
+                    Canvas.SetTop(rectangles[i], Data_Draw.ActualHeight - Y);
+
+                    Canvas.SetLeft(textBoxes[i], X + 10);
+                    Canvas.SetTop(textBoxes[i], Data_Draw.ActualHeight - Y - 3);
                 }
             }
             textblock1 = dbcomparetime;
         }
+        private void Clear_this_frame_obj_data()
+        {
+            for (int i = 0; i < 100; i++)
+                this_frame_data[i] = default(MyDataModel);
+            System.Array.Clear(exist, 0, sizeof(bool) * 100);
+        }
+        #endregion
         void TimerTickHandler(object sender, EventArgs e)
         {
 
@@ -682,7 +545,7 @@ namespace Radar_Analysis_Program
             }       // 드래그 안 했을 때
 
 
-            draw();
+            Read();
             // System.Console.WriteLine(Change_Filter_Distance_MAX_input);
 
 
@@ -1212,26 +1075,6 @@ namespace Radar_Analysis_Program
         #endregion
 
         #region Filter
-        void Filter()
-        {
-            Filter_Distance();
-            Filter_Speed();
-            Filter_RCS();
-            Filter_Size();
-            Filter_ProbExists();
-      
-            //Filter_Nofobj();
-            //Filter_Azimuth();
-            //Filter_VrelOncome();
-            //Filter_VrelDepart();  
-            //Filter_Lifetime();       
-            //Filter_Y();
-            //Filter_X();
-            //Filter_VYRightLeft();
-            //Filter_VXOncome();
-            //Filter_VYLeftRight();
-            //Filter_VXDepart();
-        }
         void Filter_Nofobj()
         {
 
@@ -1252,10 +1095,13 @@ namespace Radar_Analysis_Program
 
         void Filter_Speed()
         {
-            if(dataList[number].Velocity == 0)
+            for(int i = 0; i < 100; i++)
             {
-                Data_Draw.Children.Remove(rectangles[dataList[number].ID]);
-                Data_Draw.Children.Remove(textBoxes[dataList[number].ID]);
+                if (dataList[number].Velocity <= 10)
+                {
+                    this_frame_data[i] = default(MyDataModel);
+                    exist[i] = false;
+                }
             }
         }
         void Filter_Azimuth()
