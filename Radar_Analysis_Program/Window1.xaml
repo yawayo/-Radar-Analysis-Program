@@ -266,7 +266,7 @@
                 <ScrollViewer Grid.Row="1"  VerticalScrollBarVisibility="Auto">
                     <WrapPanel ItemWidth="100" ItemHeight="60" Margin="10, 10, 10, 10">
                         <CheckBox  x:Name ="text_time" Content="Time" FontSize="12" IsChecked="False" Foreground="White"/>
-                        <CheckBox  x:Name ="text_id" Content ="ID"  FontSize="12" IsChecked="False" Foreground="White"/>
+                        <CheckBox  x:Name ="text_id" Content ="ID"  FontSize="12" IsChecked="True" Foreground="White"/>
                         <CheckBox  x:Name ="text_distlat" Content ="DistLat"  FontSize="12" IsChecked="False" Foreground="White"/>
                         <CheckBox  x:Name ="text_distlong" Content ="DistLong"  FontSize="12" IsChecked="False" Foreground="White"/>
                         <CheckBox  x:Name ="text_vrellat" Content ="VrelLat"  FontSize="12" IsChecked="False" Foreground="White"/>

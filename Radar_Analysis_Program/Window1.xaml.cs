@@ -159,15 +159,33 @@ namespace Radar_Analysis_Program
             conn = connection;
             InitializeComponent();
 
-            CheckBox_setting();
 
             for (int NODE = 0; NODE < 100; NODE++)
                 Obj_inf[NODE] = new LinkedList<MyDataModel>();
 
+            Set_Obj_TextBox();
             Set_map_value();
             AngleShiftText();
         }
 
+        #region Draw Func
+        private void Set_Obj_TextBox()
+        {
+            checkBoxes = new CheckBox[] { text_time, text_id, text_distlat, text_distlong, text_vrellat, text_vrellong, text_velocity, text_rsc, text_probofexist, text_class, text_zone, text_lane };
+            checkbox_name = new String[] { "Time", "ID", "DistLat", "DistLong", "VrelLat", "VrelLong", "Velocity", "RCS", "ProbOfExist", "Class", "Zone", "Lane" };
+
+            for (int i = 0; i < 100; i++)
+            {
+                TextBox textBox = new TextBox();
+                textBox.Text = "";
+                textBox.VerticalAlignment = VerticalAlignment.Center;
+                textBox.Margin = new Thickness(10, 0, 0, 0);
+                textBoxes[i] = textBox;
+
+                textBoxes[i].Visibility = Visibility.Hidden;
+                Data_Draw.Children.Add(textBoxes[i]);
+            }
+        }
         private void Set_map_value()
         {
             InitializeLanePoint();
@@ -326,6 +344,10 @@ namespace Radar_Analysis_Program
             // Cv2.WaitKey(0);
             #endregion
         }
+        #endregion
+
+        #region obj info process
+
         private void Read()
         {
             if (dataList[number].Timestamp <= dbcompareDT)
@@ -340,15 +362,38 @@ namespace Radar_Analysis_Program
                 exist[dataList[number].ID] = true;
                 number++;
             }
+            Radar_Filter_Setting();
             radar_RotateShift();
-            filter();
             check_zone_index();
             save_this_frame_obj_data();
             draw_this_frame_obj_data();
             Clear_this_frame_obj_data();
         }
-        #region obj info process
 
+        private void Radar_Filter_Setting()
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                if (exist[i])
+                {
+                    Filter_Nofobj(i);
+                    Filter_Distance(i);
+                    Filter_Azimuth(i);
+                    Filter_VrelOncome(i);
+                    Filter_VrelDepart(i);
+                    Filter_RCS(i);
+                    Filter_Lifetime(i);
+                    Filter_Size(i);
+                    Filter_ProbExists(i);
+                    Filter_X(i);
+                    Filter_Y(i);
+                    Filter_VYRightLeft(i);
+                    Filter_VXOncome(i);
+                    Filter_VYLeftRight(i);
+                    Filter_VXDepart(i);
+                }
+            }
+        }
         private void radar_RotateShift()
         {
             double Radian = Angle * (Math.PI / 180);
@@ -379,26 +424,7 @@ namespace Radar_Analysis_Program
                 }
             }
         }
-        private void filter()
-        {
-            //Filter_Distance();
-            //Filter_Speed();
-            /*Filter_RCS();
-            Filter_Size();
-            Filter_ProbExists();*/
-
-            //Filter_Nofobj();
-            //Filter_Azimuth();
-            //Filter_VrelOncome();
-            //Filter_VrelDepart();  
-            //Filter_Lifetime();       
-            //Filter_Y();
-            //Filter_X();
-            //Filter_VYRightLeft();
-            //Filter_VXOncome();
-            //Filter_VYLeftRight();
-            //Filter_VXDepart();
-        }
+     
         private void save_this_frame_obj_data()
         {
             for (int i = 0; i < 100; i++)
@@ -414,16 +440,14 @@ namespace Radar_Analysis_Program
                         };
                         rect.Tag = i;
                         rectangles[i] = rect;
-                        TextBox textBox = new TextBox();
-                        textBox.Text = CheckBox_print();
-                        textBox.VerticalAlignment = VerticalAlignment.Center;
-                        textBox.Margin = new Thickness(10, 0, 0, 0);
-                        textBoxes[i] = textBox;
 
-                        if (Data_Draw.Children.Contains(rectangles[i]) == false)
+                        if (!Data_Draw.Children.Contains(rectangles[i]))
                         {
                             Data_Draw.Children.Add(rectangles[i]);
-                            Data_Draw.Children.Add(textBoxes[i]);
+                            if(CheckBox.IsChecked == true)
+                                textBoxes[i].Visibility = Visibility.Visible;
+                            else
+                                textBoxes[i].Visibility = Visibility.Hidden;
                         }
                     }
                     Obj_inf[i].AddLast(this_frame_data[i]);
@@ -439,10 +463,10 @@ namespace Radar_Analysis_Program
                         {
                             Obj_inf[i].Clear();
 
-                            if (Data_Draw.Children.Contains(rectangles[i]) == true)
+                            if (Data_Draw.Children.Contains(rectangles[i]))
                             {
                                 Data_Draw.Children.Remove(rectangles[i]);
-                                Data_Draw.Children.Remove(textBoxes[i]);
+                                textBoxes[i].Visibility = Visibility.Hidden;
                             }
                         }
                     }
@@ -458,7 +482,7 @@ namespace Radar_Analysis_Program
                     int X = (int)(shift_pos.X + ((-1 * this_frame_data[i].DistLat) * ((Data_Draw.ActualWidth / 2) / max_lat)) + (Data_Draw.ActualWidth / 2));
                     int Y = (int)(shift_pos.Y + this_frame_data[i].DistLong * (Data_Draw.ActualHeight / max_long));
 
-                    textBoxes[i].Text = CheckBox_print();
+                    textBoxes[i].Text = CheckBox_print(i);
 
                     Canvas.SetLeft(rectangles[i], X);
                     Canvas.SetTop(rectangles[i], Data_Draw.ActualHeight - Y);
@@ -475,7 +499,107 @@ namespace Radar_Analysis_Program
                 this_frame_data[i] = default(MyDataModel);
             System.Array.Clear(exist, 0, sizeof(bool) * 100);
         }
+
+        #region Filter Setting
+        void Filter_Nofobj(int index)
+        {
+
+        }
+        void Filter_Distance(int index)
+        {
+            if (Change_Filter_Distance_MIN_input < this_frame_data[index].Distance && dataList[number].Distance < Double.Parse(Change_Filter_Distance_MAX_input))
+            {
+                // System.Console.WriteLine("aa");
+            }
+            else
+            {
+                this_frame_data[dataList[number].ID] = dataList[number];
+                exist[dataList[number].ID] = true;
+            }
+        }
+        void Filter_Azimuth(int index)
+        {
+
+        }
+        void Filter_VrelOncome(int index)
+        {
+
+        }
+        void Filter_VrelDepart(int index)
+        {
+
+        }
+        void Filter_RCS(int index)
+        {
+            if (Double.Parse(Change_Filter_RCS_MIN_input) < dataList[number].RCS && dataList[number].RCS < Double.Parse(Change_Filter_RCS_MAX_input))
+            {
+                // System.Console.WriteLine("aa");
+            }
+            else
+            {
+                //  System.Console.WriteLine("bb");
+                Data_Draw.Children.Remove(rectangles[dataList[number].ID]);
+                Data_Draw.Children.Remove(textBoxes[dataList[number].ID]);
+            }
+        }
+        void Filter_Lifetime(int index)
+        {
+
+        }
+        void Filter_Size(int index)
+        {
+            if (Double.Parse(Change_Filter_Size_MIN_input) <= dataList[number].Size && dataList[number].Size < Double.Parse(Change_Filter_Size_MAX_input))
+            {
+                // System.Console.WriteLine("aa");
+            }
+            else
+            {
+                //  System.Console.WriteLine("bb");
+                Data_Draw.Children.Remove(rectangles[dataList[number].ID]);
+                Data_Draw.Children.Remove(textBoxes[dataList[number].ID]);
+            }
+        }
+        void Filter_ProbExists(int index)
+        {
+            if (Double.Parse(Change_Filter_ProbExists_MIN_input) < dataList[number].ProbOfExist && dataList[number].ProbOfExist < Double.Parse(Change_Filter_ProbExists_MAX_input))
+            {
+                // System.Console.WriteLine("aa");
+            }
+            else
+            {
+                //  System.Console.WriteLine("bb");
+                Data_Draw.Children.Remove(rectangles[dataList[number].ID]);
+                Data_Draw.Children.Remove(textBoxes[dataList[number].ID]);
+            }
+        }
+        void Filter_Y(int index)
+        {
+
+        }
+        void Filter_X(int index)
+        {
+
+        }
+        void Filter_VYRightLeft(int index)
+        {
+
+        }
+        void Filter_VXOncome(int index)
+        {
+
+        }
+        void Filter_VYLeftRight(int index)
+        {
+
+        }
+        void Filter_VXDepart(int index)
+        {
+
+        }
         #endregion
+
+        #endregion
+
         void TimerTickHandler(object sender, EventArgs e)
         {
             TimeSpan dura = mediaElement.Position; //영상 시간 계산
@@ -556,7 +680,6 @@ namespace Radar_Analysis_Program
                 dbcompareDT = _starttime.Add(dura);
                 drag_move_check = 0;   //움직인 다음 무브체크, 다시 0으로 초기화
                 drag_check = 0;       //드래그 했는지 체크, 다시 0으로 초기화
-
             }
             else if (drag_check == 0)
             {
@@ -575,36 +698,7 @@ namespace Radar_Analysis_Program
 
             TimeSpan ts = new TimeSpan(0, 0, 0, 0, 300);
             double at = dura.TotalMilliseconds - diff2.TotalMilliseconds;
-            /*if (150 <at && at<300)
-            {
-                // dura = dura.Add(TimeSpan.FromMilliseconds(-300));
-                //mediaElement.Position = mediaElement.Position.Add(-ts);
-                mediaElement.SpeedRatio = 0.9;
 
-            }
-            else if(400 < at && at<500)
-            {
-                mediaElement.SpeedRatio = 0.8;
-            }
-            else if (at >600)
-            {
-                mediaElement.SpeedRatio = 0.7;
-            }
-            else if (-150>at && at>-300)
-            {
-                mediaElement.SpeedRatio = 1.1;
-                // mediaElement.Position = mediaElement.Position.Add(ts);
-            }
-            else if (-400>at && at>-500)
-            {
-                mediaElement.SpeedRatio = 1.2;
-                // mediaElement.Position = mediaElement.Position.Add(ts);
-            }
-            else if (at < -600)
-            {
-                mediaElement.SpeedRatio = 1.3;
-                // mediaElement.Position = mediaElement.Position.Add(ts);
-            }*/
             textblock7 = at.ToString(); // 시간 차이 
             text_str = textblock1 + "\n" + textblock2 + "\n" + textblock3 + "\n" + textblock4 + "\n" + textblock5 + "\n" + textblock6 + "\n" + textblock7;
          
@@ -675,23 +769,6 @@ namespace Radar_Analysis_Program
             }
         }
 
-        private void CheckBox_setting()
-        {
-            checkBoxes = new CheckBox[] { text_time, text_id, text_distlat, text_distlong, text_vrellat, text_vrellong, text_velocity, text_rsc, text_probofexist, text_class, text_zone, text_lane };
-            checkbox_name = new String[] { "Time", "ID", "DistLat", "DistLong", "VrelLat", "VrelLong", "Velocity", "RCS", "ProbOfExist", "Class", "Zone", "Lane" };
-            //checkBoxes[0] = text_time;
-            //checkBoxes[1] = text_id;
-            //checkBoxes[2] = text_distlat;
-            //checkBoxes[3] = text_distlong;
-            //checkBoxes[4] = text_vrellat;
-            //checkBoxes[5] = text_vrellong;
-            //checkBoxes[6] = text_velocity;
-            //checkBoxes[7] = text_rsc;
-            //checkBoxes[8] = text_probofexist;
-            //checkBoxes[9] = text_class;
-            //checkBoxes[10] = text_zone;
-            //checkBoxes[11] = text_lane;
-        }
 
         #region Set Lane Info
         #region Set Lane Width
@@ -931,49 +1008,6 @@ namespace Radar_Analysis_Program
         }
         #endregion
 
-        #region checkBox
-        private void CheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            for (int i = 0; i < 100; i++)
-            {
-                if (textBoxes[i] == null) { }
-                else textBoxes[i].Visibility = Visibility.Visible;
-            }
-        }
-        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            for (int i = 0; i < 100; i++)
-            {
-                if (textBoxes[i] == null) { }
-                else textBoxes[i].Visibility = Visibility.Collapsed;
-            }
-        }
-        private string CheckBox_print()
-        {
-            string pprint = "";
-            string db_data = "";
-            for (int i = 0; i < 12; i++)
-            {
-                if (i == 0) db_data = dataList[number].Timestamp.ToString();
-                else if (i == 1) db_data = dataList[number].ID.ToString();
-                else if (i == 2) db_data = dataList[number].DistLat.ToString("0.0");
-                else if (i == 3) db_data = dataList[number].DistLong.ToString("0.0");
-                else if (i == 4) db_data = dataList[number].VrelLat.ToString("0.0");
-                else if (i == 5) db_data = dataList[number].VrelLong.ToString("0.0");
-                else if (i == 6) db_data = dataList[number].Velocity.ToString("0.0");
-                else if (i == 7) db_data = dataList[number].RCS.ToString();
-                else if (i == 8) db_data = dataList[number].ProbOfExist.ToString();
-                else if (i == 9) db_data = dataList[number].Class.ToString();
-                else if (i == 10) db_data = dataList[number].Zone.ToString();
-
-                if (checkBoxes[i].IsChecked == true)
-                {
-                    pprint += checkbox_name[i] + " = " + db_data + "\n";
-                }
-            }
-            return pprint;
-        }
-        #endregion
 
         #region mediaElement
         private void mediaElement_MediaOpened(object sender, RoutedEventArgs e)
@@ -1103,9 +1137,9 @@ namespace Radar_Analysis_Program
             mediaElement.Pause();
             timer.Stop();
             drag_check = 1;
-            Data_Draw.Children.Clear();
 
-            Draw_map();
+            //Data_Draw.Children.Clear();
+            //Draw_map();
         }
         private void slider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
         {
@@ -1120,115 +1154,49 @@ namespace Radar_Analysis_Program
 
 
         #endregion
-
-        #region Filter
-        void Filter_Nofobj()
+        
+        #region checkBox
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
         {
-
-        }
-        void Filter_Distance()
-        {
-            if (Double.Parse(Change_Filter_Distance_MIN_input) < dataList[number].Distance && dataList[number].Distance < Double.Parse(Change_Filter_Distance_MAX_input))
+            for (int i = 0; i < 100; i++)
             {
-                // System.Console.WriteLine("aa");
-            }
-            else
-            {
-                //  System.Console.WriteLine("bb");
-                Data_Draw.Children.Remove(rectangles[dataList[number].ID]);
-                Data_Draw.Children.Remove(textBoxes[dataList[number].ID]);
+                if (textBoxes[i] != null)
+                    textBoxes[i].Visibility = Visibility.Visible;
             }
         }
-
-        void Filter_Speed()
+        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
-           /* for(int i = 0; i < 100; i++)
+            for (int i = 0; i < 100; i++)
             {
-                if (dataList[number].Velocity <= 10)
+                if (textBoxes[i] != null)
+                    textBoxes[i].Visibility = Visibility.Hidden;
+            }
+        }
+        private string CheckBox_print(int index)
+        {
+            string pprint = "";
+            string db_data = "";
+            for (int i = 0; i < 12; i++)
+            {
+                if (checkBoxes[i].IsChecked == true)
                 {
-                    this_frame_data[i] = default(MyDataModel);
-                    exist[i] = false;
+                    if (i == 0) db_data = this_frame_data[index].Timestamp.ToString();
+                    else if (i == 1) db_data = this_frame_data[index].ID.ToString();
+                    else if (i == 2) db_data = this_frame_data[index].DistLat.ToString("0.0");
+                    else if (i == 3) db_data = this_frame_data[index].DistLong.ToString("0.0");
+                    else if (i == 4) db_data = this_frame_data[index].VrelLat.ToString("0.0");
+                    else if (i == 5) db_data = this_frame_data[index].VrelLong.ToString("0.0");
+                    else if (i == 6) db_data = this_frame_data[index].Velocity.ToString("0.0");
+                    else if (i == 7) db_data = this_frame_data[index].RCS.ToString();
+                    else if (i == 8) db_data = this_frame_data[index].ProbOfExist.ToString();
+                    else if (i == 9) db_data = this_frame_data[index].Class.ToString();
+                    else if (i == 10) db_data = this_frame_data[index].Zone.ToString();
+
+                    pprint += checkbox_name[i] + " = " + db_data + '\n';
                 }
-            }*/
-        }
-        void Filter_Azimuth()
-        {
-
-        }
-        void Filter_VrelOncome()
-        {
-
-        }
-        void Filter_VrelDepart()
-        {
-
-        }
-        void Filter_RCS()
-        {
-            if (Double.Parse(Change_Filter_RCS_MIN_input) < dataList[number].RCS && dataList[number].RCS < Double.Parse(Change_Filter_RCS_MAX_input))
-            {
-                // System.Console.WriteLine("aa");
             }
-            else
-            {
-                //  System.Console.WriteLine("bb");
-                Data_Draw.Children.Remove(rectangles[dataList[number].ID]);
-                Data_Draw.Children.Remove(textBoxes[dataList[number].ID]);
-            }
-        }
-        void Filter_Lifetime()
-        {
-
-        }
-        void Filter_Size()
-        {
-            if (Double.Parse(Change_Filter_Size_MIN_input) <= dataList[number].Size && dataList[number].Size < Double.Parse(Change_Filter_Size_MAX_input))
-            {
-                // System.Console.WriteLine("aa");
-            }
-            else
-            {
-                //  System.Console.WriteLine("bb");
-                Data_Draw.Children.Remove(rectangles[dataList[number].ID]);
-                Data_Draw.Children.Remove(textBoxes[dataList[number].ID]);
-            }
-        }
-        void Filter_ProbExists()
-        {
-            if (Double.Parse(Change_Filter_ProbExists_MIN_input) < dataList[number].ProbOfExist && dataList[number].ProbOfExist < Double.Parse(Change_Filter_ProbExists_MAX_input))
-            {
-                // System.Console.WriteLine("aa");
-            }
-            else
-            {
-                //  System.Console.WriteLine("bb");
-                Data_Draw.Children.Remove(rectangles[dataList[number].ID]);
-                Data_Draw.Children.Remove(textBoxes[dataList[number].ID]);
-            }
-        }
-        void Filter_Y()
-        {
-
-        }
-        void Filter_X()
-        {
-
-        }
-        void Filter_VYRightLeft()
-        {
-
-        }
-        void Filter_VXOncome()
-        {
-
-        }
-        void Filter_VYLeftRight()
-        {
-
-        }
-        void Filter_VXDepart()
-        {
-
+            pprint = pprint.TrimEnd('\n');
+            return pprint;
         }
         #endregion
 
