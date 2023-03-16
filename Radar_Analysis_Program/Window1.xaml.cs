@@ -63,11 +63,11 @@ namespace Radar_Analysis_Program
         string firsttime;
         string secondtime;
 
-        double duration= 0;
+        double duration = 0;
         private MySqlConnection conn;
 
         private float[] Lane_width = new float[6] { 3.3f, 3.3f, 3.3f, 3.3f, 3.3f, 3.3f };
-        private float[] Lane_shift = new float[9] { 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f};
+        private float[] Lane_shift = new float[9] { 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f };
         private float[] Lane_Point = new float[6 + 1] { -9.9f, -6.6f, -3.3f, 0.0f, 3.3f, 6.6f, 9.9f };
         private float Dist_Lane_gap = 25.0f;
 
@@ -430,9 +430,9 @@ namespace Radar_Analysis_Program
         }
         private void check_zone_index()
         {
-            for(int i = 0; i < 100; i++)
+            for (int i = 0; i < 100; i++)
             {
-                if(exist[i])
+                if (exist[i])
                 {
                     int x = (int)((this_frame_data[i].DistLat * (-1)) + max_lat) * 10;
                     int y = (int)(this_frame_data[i].DistLong * 2);
@@ -444,14 +444,14 @@ namespace Radar_Analysis_Program
                 }
             }
         }
-     
+
         private void save_this_frame_obj_data()
         {
             for (int i = 0; i < 100; i++)
             {
                 if (exist[i])
                 {
-                    if(Obj_inf[i].Count == 0)
+                    if (Obj_inf[i].Count == 0)
                     {
                         Rectangle rect = new Rectangle
                         {
@@ -464,7 +464,7 @@ namespace Radar_Analysis_Program
                         if (!Data_Draw.Children.Contains(rectangles[i]))
                         {
                             Data_Draw.Children.Add(rectangles[i]);
-                            if(CheckBox.IsChecked == true)
+                            if (CheckBox.IsChecked == true)
                                 textBoxes[i].Visibility = Visibility.Visible;
                             else
                                 textBoxes[i].Visibility = Visibility.Hidden;
@@ -523,7 +523,7 @@ namespace Radar_Analysis_Program
         #region Filter Setting
         void Filter_Nofobj(int index)
         {
-            if(Filter_NofObj_ACTIVE)
+            if (Filter_NofObj_ACTIVE)
             {
 
             }
@@ -725,7 +725,7 @@ namespace Radar_Analysis_Program
             Read();
 
 
-            
+
             dbcompareDT2 = _starttime.Add(dura);
             textblock6 = dbcompareDT2.ToString("yyyy-MM-dd HH:mm:ss.fff"); //영상 시간 
 
@@ -734,7 +734,7 @@ namespace Radar_Analysis_Program
 
             textblock7 = at.ToString(); // 시간 차이 
             text_str = textblock1 + "\n" + textblock2 + "\n" + textblock3 + "\n" + textblock4 + "\n" + textblock5 + "\n" + textblock6 + "\n" + textblock7;
-         
+
 
             Data_Text.Text = text_str;
         }
@@ -745,8 +745,8 @@ namespace Radar_Analysis_Program
             try
             {
                 connection.Open();
-                string query = "SELECT * FROM real_data where time BETWEEN" + "'" + first + "'" + "AND" + "'" + second + "'"+";";
-                
+                string query = "SELECT * FROM real_data where time BETWEEN" + "'" + first + "'" + "AND" + "'" + second + "'" + ";";
+
                 using (MySqlCommand cmd = new MySqlCommand(query, connection))
                 {
                     using (MySqlDataReader reader = cmd.ExecuteReader())
@@ -754,35 +754,35 @@ namespace Radar_Analysis_Program
                         while (reader.Read())
                         {
                             MyDataModel data = new MyDataModel();
-                         
+
                             // General      
                             data.ID = (int)reader["ID"];
                             data.DistLat = (double)reader["DISTLAT"];
-                            data.DistLong = (double) reader["DISTLONG"];
+                            data.DistLong = (double)reader["DISTLONG"];
                             data.VrelLat = (double)reader["VRELLAT"];
-                            data.VrelLong = (double) reader["VRELLONG"];
-                            data.DynProp = (int) reader["DYNPROP"];
-                            data.RCS = (double) reader["RCS"];
+                            data.VrelLong = (double)reader["VRELLONG"];
+                            data.DynProp = (int)reader["DYNPROP"];
+                            data.RCS = (double)reader["RCS"];
 
                             // Quality
-                            data.DistLat_rms = (int) reader["DISTLAT_RMS"];
-                            data.DistLong_rms = (int) reader["DISTLONG_RMS"];
-                            data.VrelLat_rms = (int) reader["VRELLAT_RMS"];
+                            data.DistLat_rms = (int)reader["DISTLAT_RMS"];
+                            data.DistLong_rms = (int)reader["DISTLONG_RMS"];
+                            data.VrelLat_rms = (int)reader["VRELLAT_RMS"];
                             data.VrelLong_rms = (int)reader["VRELLONG_RMS"];
-                            data.ArelLat_rms = (int) reader["ARELLAT_RMS"];
-                            data.ArelLong_rms = (int) reader["ARELLONG_RMS"];
-                            data.Orientation_rms = (int) reader["ORIENTATION_RMS"];
-                            data.MirrorProb = (int) reader["MIRRORPROB"];
-                            data.MeasState = (int) reader["MEASSTATE"];
-                            data.ProbOfExist = (int) reader["PROBOFEXIST"];
+                            data.ArelLat_rms = (int)reader["ARELLAT_RMS"];
+                            data.ArelLong_rms = (int)reader["ARELLONG_RMS"];
+                            data.Orientation_rms = (int)reader["ORIENTATION_RMS"];
+                            data.MirrorProb = (int)reader["MIRRORPROB"];
+                            data.MeasState = (int)reader["MEASSTATE"];
+                            data.ProbOfExist = (int)reader["PROBOFEXIST"];
 
                             // Extended
                             data.ArelLong = (double)reader["ARELLAT"];
-                            data.ArelLat = (double) reader["ARELLONG"];
-                            data.Class = (int) reader["CLASS"];
-                            data.OrientationAngle = (double) reader["ORIEMTATIONANGLE"];
-                            data.Length = (double) reader["LENGTH"];
-                            data.Width = (double) reader["WIDTH"];
+                            data.ArelLat = (double)reader["ARELLONG"];
+                            data.Class = (int)reader["CLASS"];
+                            data.OrientationAngle = (double)reader["ORIEMTATIONANGLE"];
+                            data.Length = (double)reader["LENGTH"];
+                            data.Width = (double)reader["WIDTH"];
 
                             // Other
                             data.Timestamp = (DateTime)reader["TIME"];
@@ -1186,7 +1186,7 @@ namespace Radar_Analysis_Program
 
         }
         #endregion
-        
+
         #region checkBox
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
         {
