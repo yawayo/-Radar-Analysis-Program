@@ -370,7 +370,7 @@ namespace Radar_Analysis_Program
         private void Read()
         {       
 
-            if ( dataList[number].Timestamp <= dbcompareDT )
+            if ( dataList[number].Timestamp <= dbcompareDT)
             {
               
                 while (!((number > dataList.Count) || (dataList[number].Timestamp != dataList[number + 1].Timestamp)))
