@@ -454,7 +454,7 @@ namespace Radar_Analysis_Program
 
                     if (this_frame_data[i].Zone == 0)
                     {
-                        exist[i] = false;
+                        //exist[i] = false;
                     }
                 }
             }
