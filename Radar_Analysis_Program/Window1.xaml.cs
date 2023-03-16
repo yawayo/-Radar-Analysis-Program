@@ -77,8 +77,8 @@ namespace Radar_Analysis_Program
         private bool[] exist = new bool[100];
         public LinkedList<MyDataModel>[] Obj_inf = new LinkedList<MyDataModel>[100];
 
-        public double Shift = 0;
-        public int Angle = 10;
+        public double Shift = 17.40;
+        public int Angle = 20;
 
         #region ACTIVE
         public static bool Filter_NofObj_ACTIVE = false;
@@ -1110,8 +1110,6 @@ namespace Radar_Analysis_Program
             mediaElement.Pause();
             timer.Stop();
             drag_check = 1;
-
-            Draw_map();
         }
         private void slider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
         {
