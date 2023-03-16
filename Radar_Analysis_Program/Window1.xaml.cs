@@ -63,9 +63,9 @@ namespace Radar_Analysis_Program
         string firsttime;
         string secondtime;
 
-        int jun=0;
+        int jun = 0;
 
-        double duration= 0;
+        double duration = 0;
         private MySqlConnection conn;
 
         private float[] Lane_width = new float[6] { 3.3f, 3.3f, 3.3f, 3.3f, 3.3f, 3.3f };
@@ -418,21 +418,17 @@ namespace Radar_Analysis_Program
         }
         private void radar_RotateShift()
         {
-
-            
-                double Radian = Angle * (Math.PI / 180);
-                for (int i = 0; i < 100; i++)
+            double Radian = Angle * (Math.PI / 180);
+            for (int i = 0; i < 100; i++)
+            {
+                if (exist[i])
                 {
-                    if (exist[i])
-                    {
-                        double fTempX = this_frame_data[i].DistLat * Math.Cos(Radian) - this_frame_data[i].DistLong * Math.Sin(Radian);
-                        double fTempY = this_frame_data[i].DistLat * Math.Sin(Radian) + this_frame_data[i].DistLong * Math.Cos(Radian);
-                        this_frame_data[i].DistLat = fTempX + Shift;
-                        this_frame_data[i].DistLong = fTempY;
-                    }
+                    double fTempX = this_frame_data[i].DistLat * Math.Cos(Radian) - this_frame_data[i].DistLong * Math.Sin(Radian);
+                    double fTempY = this_frame_data[i].DistLat * Math.Sin(Radian) + this_frame_data[i].DistLong * Math.Cos(Radian);
+                    this_frame_data[i].DistLat = fTempX + Shift;
+                    this_frame_data[i].DistLong = fTempY;
                 }
-            
-            
+            }
         }
         private void check_zone_index()
         {
@@ -477,7 +473,7 @@ namespace Radar_Analysis_Program
                     }
                     Obj_inf[i].AddLast(this_frame_data[i]);
                     if (Obj_inf[i].Count >= 100)
-                    Obj_inf[i].RemoveFirst();
+                        Obj_inf[i].RemoveFirst();
                 }
                 else
                 {
@@ -505,7 +501,7 @@ namespace Radar_Analysis_Program
                 if (exist[i])
                 {
                     int X = (int)((Data_Draw.ActualWidth / 2) + (Data_Draw.ActualWidth / (max_lat * 2)) * (-1 * this_frame_data[i].DistLat));
-                    int Y = (int)(Data_Draw.ActualHeight * (( max_long + Dist_Lane_gap - this_frame_data[i].DistLong - (Dist_Lane_gap / 2)) / (max_long + Dist_Lane_gap)));
+                    int Y = (int)(Data_Draw.ActualHeight * ((max_long + Dist_Lane_gap - this_frame_data[i].DistLong - (Dist_Lane_gap / 2)) / (max_long + Dist_Lane_gap)));
 
                     textBoxes[i].Text = CheckBox_print(i);
 
@@ -641,7 +637,7 @@ namespace Radar_Analysis_Program
 
         void TimerTickHandler(object sender, EventArgs e)
         {
-            
+
             double positionMs = mediaElement.Position.TotalMilliseconds;
             slider.Value = slider.Minimum + positionMs;
 
@@ -654,7 +650,7 @@ namespace Radar_Analysis_Program
             dbcompareDT = _starttime.Add(dura);
             Read();
 
-         
+
             // System.Console.WriteLine(Change_Filter_Distance_MAX_input);
 
 
@@ -664,7 +660,7 @@ namespace Radar_Analysis_Program
 
             TimeSpan ts = new TimeSpan(0, 0, 0, 0, 300);
             double at = dura.TotalMilliseconds - diff2.TotalMilliseconds;
-           
+
             textblock7 = at.ToString(); // 시간 차이 
             textblock4 = number.ToString();
             text_str = textblock1 + "\n" + textblock2 + "\n" + textblock3 + "\n" + textblock4 + "\n" + textblock5 + "\n" + textblock6 + "\n" + textblock7;
@@ -997,9 +993,9 @@ namespace Radar_Analysis_Program
         {
             mediaElement.Stop();
             timer.Stop();
-           
-          
-         
+
+
+
         }
         private void mediaElement_MediaFailed(object sender, ExceptionRoutedEventArgs e)
         {
@@ -1178,7 +1174,7 @@ namespace Radar_Analysis_Program
             Update_map();
         }
 
-        public void tt ()
+        public void tt()
         {
             TimeSpan dura = mediaElement.Position; //영상 시간 계산
 
