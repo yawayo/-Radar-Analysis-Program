@@ -367,24 +367,27 @@ namespace Radar_Analysis_Program
 
         private void Read()
         {
-            if (dataList[number].Timestamp <= dbcompareDT)
+            if (number + 1 < dataList.Count)
             {
-                while (!((number > dataList.Count) || (dataList[number].Timestamp != dataList[number + 1].Timestamp)))
+                if (dataList[number].Timestamp <= dbcompareDT)
                 {
+                    while (!((number + 1 >= dataList.Count) || (dataList[number].Timestamp != dataList[number + 1].Timestamp)))
+                    {
+                        this_frame_data[dataList[number].ID] = dataList[number];
+                        exist[dataList[number].ID] = true;
+                        number++;
+                    }
                     this_frame_data[dataList[number].ID] = dataList[number];
                     exist[dataList[number].ID] = true;
                     number++;
                 }
-                this_frame_data[dataList[number].ID] = dataList[number];
-                exist[dataList[number].ID] = true;
-                number++;
+                Radar_Filter_Setting();
+                radar_RotateShift();
+                check_zone_index();
+                save_this_frame_obj_data();
+                draw_this_frame_obj_data();
+                Clear_this_frame_obj_data();
             }
-            Radar_Filter_Setting();
-            radar_RotateShift();
-            check_zone_index();
-            save_this_frame_obj_data();
-            draw_this_frame_obj_data();
-            Clear_this_frame_obj_data();
         }
 
         private void Radar_Filter_Setting()
@@ -522,11 +525,7 @@ namespace Radar_Analysis_Program
         {
             if(Filter_NofObj_ACTIVE)
             {
-                /*if(this_frame_data[index].ID > Filter_NofObj_MAX)
-                {
-                    this_frame_data[index] = default(MyDataModel);
-                    exist[index] = false;
-                }*/
+
             }
         }
         void Filter_Distance(int index)
@@ -724,7 +723,6 @@ namespace Radar_Analysis_Program
 
 
             Read();
-            // System.Console.WriteLine(Change_Filter_Distance_MAX_input);
 
 
             
@@ -1163,31 +1161,30 @@ namespace Radar_Analysis_Program
             }
 
             _previousValue_check = currentValue;
-
-            //mediaElement.Position = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum);
-            //  textblock.Text = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum).ToString();
         }
         private void slider_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
         {
             mediaElement.Pause();
             timer.Stop();
             drag_check = 1;
-
-            //Data_Draw.Children.Clear();
-            //Draw_map();
         }
         private void slider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
         {
+            number = 0;
+
+            //set point time
+            System.Console.WriteLine((slider.Value - slider.Minimum).ToString("F2"));
+            while (number < dataList.Count)
+            {
+                //if(dataList[number].Timestamp != dataList[number + 1].Timestamp))
+                int id = dataList[number].ID;
+                number++;
+            }
+            mediaElement.Position = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum);  //value 이동시 position 변경
             mediaElement.Play();
             timer.Start();
 
-            mediaElement.Position = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum);  //value 이동시 position 변경
-
         }
-
-
-
-
         #endregion
         
         #region checkBox
