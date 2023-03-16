@@ -5,18 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UI_test_01"
         mc:Ignorable="d"
-        Title="Window1" Height="900" Width="1600" WindowStyle="None" Visibility="Visible" BorderBrush="Black" WindowStartupLocation="CenterScreen" >
+        Title="Window1" Height="900" Width="1600" WindowStyle="None" Visibility="Visible" BorderBrush="Black" WindowStartupLocation="CenterScreen" SizeChanged="Window_SizeChanged" >
     <Grid x:Name="Main_grid" Background="#FF212528" OpacityMask="#FF212528">
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
             <RowDefinition Height="40"/>
-            <RowDefinition/>
-            <RowDefinition Height="250"/>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="10"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="50"/>
-            <ColumnDefinition Width="650"/>
-            <ColumnDefinition />
+            <ColumnDefinition Width="60"/>
+            <ColumnDefinition Width="5*"/>
+            <ColumnDefinition Width="4*"/>
+            <ColumnDefinition Width="10"/>
         </Grid.ColumnDefinitions>
 
         <Border Grid.Row="0" Grid.Column="1" Grid.RowSpan="2">
@@ -60,7 +62,35 @@
             <StackPanel Grid.Column="0"/>
         </Grid>
 
-
+        <Grid Grid.Row="2" Grid.Column="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Label Grid.Row="1" Content="Angle" Foreground="White" FontSize="16" FontFamily="KoPub바탕체_Pro Medium" HorizontalAlignment="Center"/>
+            <Grid Grid.Row="1" Width="50" Height="23" VerticalAlignment="Center">
+                <TextBox x:Name="AngleText" x:FieldModifier="private" Text="0" Margin="3,2,13,3" IsReadOnly="True"/>
+                <Button x:Name="AngleUp" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▲" Width="10" Margin="33,2,1,13" Click="AngleUp_Click"/>
+                <Button x:Name="AngleDown" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▼" Width="10" Margin="33,12,1,3" Click="AngleDown_Click"/>
+            </Grid>
+            <Label Grid.Row="2" Content="Shift" Foreground="White" FontSize="16" FontFamily="KoPub바탕체_Pro Medium" HorizontalAlignment="Center"/>
+            <Grid Grid.Row="2" Width="50" Height="23" VerticalAlignment="Center">
+                <TextBox x:Name="ShiftText" x:FieldModifier="private" Text="0.0" Margin="3,2,13,3" IsReadOnly="True"/>
+                <Button x:Name="ShiftUp" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▲" Width="10" Margin="33,2,1,13" Click="ShiftUp_Click"/>
+                <Button x:Name="ShiftDown" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▼" Width="10" Margin="33,12,1,3" Click="ShiftDown_Click"/>
+            </Grid>
+        </Grid>
+        
         <Border Grid.Row="2" Grid.Column="1" Grid.RowSpan="2" BorderBrush="White" BorderThickness="1">
             <Grid x:Name="grid" Background="#00000000" >
                 <Grid.RowDefinitions>
@@ -178,9 +208,9 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="40"/>
-                    <RowDefinition Height="400"/>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="50"/>
                 </Grid.RowDefinitions>
 
                 <Label Grid.Row="0" Content="Camera" FontFamily="KoPub바탕체_Pro Medium" Foreground="#FFF48F3D" FontSize="25"></Label>
@@ -188,7 +218,7 @@
                 <MediaElement Grid.Row ="1" Name="mediaElement"  LoadedBehavior="Manual" Unloaded="btnStop_Click" MediaOpened="mediaElement_MediaOpened"
                       MediaEnded="mediaElement_MediaEnded" MediaFailed="mediaElement_MediaFailed" ScrubbingEnabled="True"  />
 
-                <Slider  Grid.Row="2" Name="slider" HorizontalAlignment="Center" TickFrequency="1" Thumb.DragStarted="slider_DragStarted" Thumb.DragCompleted="slider_DragCompleted" VerticalAlignment="Center" Height="50" Width="300" ValueChanged="slider_ValueChanged" />
+                <Slider  Grid.Row="2" Name="slider" HorizontalAlignment="Center" VerticalAlignment="Center" TickFrequency="1" Thumb.DragStarted="slider_DragStarted" Thumb.DragCompleted="slider_DragCompleted" Height="20" Width="500" ValueChanged="slider_ValueChanged" />
 
                 <WrapPanel HorizontalAlignment="Center"  Grid.Row="3">
                     <Button Name="btnPlay"  FontFamily="KoPub바탕체_Pro Medium" Click="btnPlay_Click">
@@ -218,11 +248,11 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="40"/>
-                    <RowDefinition/>
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="450"/>
-                    <ColumnDefinition Width="450"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
 
                 <Border Grid.Column="0" Grid.Row="0" BorderBrush="White" BorderThickness="1"></Border>
@@ -233,21 +263,22 @@
 
                 <Label Grid.Row="0" Grid.Column="0" Content="Setting"  FontFamily="KoPub바탕체_Pro Medium" Foreground="#FFF48F3D" FontSize="25"></Label>
                 <Label Grid.Row="0" Grid.Column="1" Content="Data" FontFamily="KoPub바탕체_Pro Medium" Foreground="#FFF48F3D" FontSize="25"></Label>
-
-                <WrapPanel  Grid.Row="1" ItemWidth="100" ItemHeight="60" Grid.ColumnSpan="2" Margin="1,30,449,-30">
-                    <CheckBox  x:Name ="text_time" Content="Time" FontSize="12" Grid.Row="1"  IsChecked="False" Foreground="White"/>
-                    <CheckBox  x:Name ="text_id" Content ="ID"  FontSize="12" Grid.Row="1"   IsChecked="False" Foreground="White"/>
-                    <CheckBox  x:Name ="text_distlat" Content ="DistLat"  FontSize="12"    IsChecked="False" Foreground="White"/>
-                    <CheckBox  x:Name ="text_distlong" Content ="DistLong"  FontSize="12"    IsChecked="False" Foreground="White"/>
-                    <CheckBox  x:Name ="text_vrellat" Content ="VrelLat"  FontSize="12"    IsChecked="False" Foreground="White"/>
-                    <CheckBox  x:Name ="text_vrellong" Content ="VrelLong"  FontSize="12"    IsChecked="False" Foreground="White"/>
-                    <CheckBox  x:Name ="text_velocity" Content ="Velocity"  FontSize="12"    IsChecked="False" Foreground="White"/>
-                    <CheckBox  x:Name ="text_rsc" Content ="RCS"  FontSize="12"    IsChecked="False" Foreground="White"/>
-                    <CheckBox  x:Name ="text_probofexist" Content ="ProbOfExist"  FontSize="12"    IsChecked="False" Foreground="White"/>
-                    <CheckBox  x:Name ="text_class" Content ="Class"  FontSize="12"    IsChecked="False" Foreground="White"/>
-                    <CheckBox  x:Name ="text_zone" Content ="Zone"  FontSize="12"    IsChecked="False" Foreground="White"/>
-                    <CheckBox  x:Name ="text_lane" Content ="Lane"  FontSize="12"    IsChecked="False" Foreground="White"/>
-                </WrapPanel>
+                <ScrollViewer Grid.Row="1"  VerticalScrollBarVisibility="Auto">
+                    <WrapPanel ItemWidth="100" ItemHeight="60" Margin="10, 10, 10, 10">
+                        <CheckBox  x:Name ="text_time" Content="Time" FontSize="12" IsChecked="False" Foreground="White"/>
+                        <CheckBox  x:Name ="text_id" Content ="ID"  FontSize="12" IsChecked="False" Foreground="White"/>
+                        <CheckBox  x:Name ="text_distlat" Content ="DistLat"  FontSize="12" IsChecked="False" Foreground="White"/>
+                        <CheckBox  x:Name ="text_distlong" Content ="DistLong"  FontSize="12" IsChecked="False" Foreground="White"/>
+                        <CheckBox  x:Name ="text_vrellat" Content ="VrelLat"  FontSize="12" IsChecked="False" Foreground="White"/>
+                        <CheckBox  x:Name ="text_vrellong" Content ="VrelLong"  FontSize="12" IsChecked="False" Foreground="White"/>
+                        <CheckBox  x:Name ="text_velocity" Content ="Velocity"  FontSize="12" IsChecked="False" Foreground="White"/>
+                        <CheckBox  x:Name ="text_rsc" Content ="RCS"  FontSize="12" IsChecked="False" Foreground="White"/>
+                        <CheckBox  x:Name ="text_probofexist" Content ="ProbOfExist"  FontSize="12" IsChecked="False" Foreground="White"/>
+                        <CheckBox  x:Name ="text_class" Content ="Class"  FontSize="12" IsChecked="False" Foreground="White"/>
+                        <CheckBox  x:Name ="text_zone" Content ="Zone"  FontSize="12" IsChecked="False" Foreground="White"/>
+                        <CheckBox  x:Name ="text_lane" Content ="Lane"  FontSize="12" IsChecked="False" Foreground="White"/>
+                    </WrapPanel>
+                </ScrollViewer>
 
 
 

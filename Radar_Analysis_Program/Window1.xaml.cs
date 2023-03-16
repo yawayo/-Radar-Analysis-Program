@@ -18,7 +18,7 @@ namespace Radar_Analysis_Program
     {
         DispatcherTimer timer = new DispatcherTimer();
         public static List<MyDataModel> dataList = new List<MyDataModel>();
-
+        //private MyDataModel[] this_frame_data = new MyDataModel[100];
         public CheckBox[] checkBoxes;
         public String[] checkbox_name;
 
@@ -63,6 +63,8 @@ namespace Radar_Analysis_Program
         string firsttime;
         string secondtime;
 
+        int jun=0;
+
         double duration= 0;
         private MySqlConnection conn;
 
@@ -74,6 +76,9 @@ namespace Radar_Analysis_Program
         private MyDataModel[] this_frame_data = new MyDataModel[100];
         private bool[] exist = new bool[100];
         public LinkedList<MyDataModel>[] Obj_inf = new LinkedList<MyDataModel>[100];
+
+        public double Shift = 0;
+        public int Angle = 10;
 
         #region Change_MIN
         public static string Change_Filter_NofObj_MIN_input = "0";
@@ -156,11 +161,13 @@ namespace Radar_Analysis_Program
             conn = connection;
             InitializeComponent();
 
-            //db_connect(conn, firsttime, secondtime);
             CheckBox_setting();
 
             for (int NODE = 0; NODE < 100; NODE++)
                 Obj_inf[NODE] = new LinkedList<MyDataModel>();
+
+            Set_map_value();
+            AngleShiftText();
         }
 
         private void Set_map_value()
@@ -168,6 +175,39 @@ namespace Radar_Analysis_Program
             InitializeLanePoint();
 
             int point_num = (int)(max_long / Dist_Lane_gap) + 1;
+
+            #region Dist Line
+            int dist_line_index = 0;
+            for (int line_n = 0; line_n < point_num; line_n++)
+            {
+                Polyline distline = new Polyline();
+                distline.Points = new PointCollection()
+                {
+                    new System.Windows.Point(0, 0),
+                    new System.Windows.Point(Data_Draw.ActualWidth, 0)
+                };
+                distline.Stroke = Brushes.Yellow;
+                distline.StrokeThickness = 1;
+                distline.StrokeDashArray = new DoubleCollection() { 15, 15 };
+
+                Grid panel = new Grid(); //사각형을 감싸줄 Panel 생성
+                TextBlock textBlock = new TextBlock();//Text 생성
+                textBlock.Text = ((int)(Dist_Lane_gap * line_n)).ToString() + "m";
+                textBlock.Foreground = Brushes.White;
+                panel.Children.Add(textBlock);//Panel에 Text 추가
+
+                int Y = (int)(Data_Draw.ActualHeight - ((Data_Draw.ActualHeight * Dist_Lane_gap * ((2 * line_n) + 1)) / (2 * (max_long + Dist_Lane_gap))));
+
+                Canvas.SetLeft(distline, 0);//Panel 위치 조정
+                Canvas.SetTop(distline, Y);
+                Canvas.SetLeft(panel, Data_Draw.ActualWidth - (textBlock.Text.Length + 2) * 5);//Panel 위치 조정
+                Canvas.SetTop(panel, Y - 9);
+
+                dist_lines[dist_line_index] = distline;
+                dist_line_texts[dist_line_index] = panel;
+                dist_line_index++;
+            }
+            #endregion
 
             #region Lane
             int car_lane_index = 0;
@@ -201,39 +241,6 @@ namespace Radar_Analysis_Program
             }
             #endregion
 
-            #region Dist Line
-            int dist_line_index = 0;
-            for (int line_n = 0; line_n < point_num; line_n++)
-            {
-                Polyline distline = new Polyline();
-                distline.Points = new PointCollection()
-                {
-                    new System.Windows.Point(0, 0),
-                    new System.Windows.Point(Data_Draw.ActualWidth, 0)
-                };
-                distline.Stroke = Brushes.Yellow;
-                distline.StrokeThickness = 1;
-                distline.StrokeDashArray = new DoubleCollection() { 15, 15 };
-
-                Grid panel = new Grid(); //사각형을 감싸줄 Panel 생성
-                TextBlock textBlock = new TextBlock();//Text 생성
-                textBlock.Text = ((int)(Dist_Lane_gap * line_n)).ToString() + "m";
-                textBlock.Foreground = Brushes.White;
-                panel.Children.Add(textBlock);//Panel에 Text 추가
-
-                int Y = (int)(Data_Draw.ActualHeight - ((Data_Draw.ActualHeight * Dist_Lane_gap * ((2 * line_n) + 1)) / (2 * (max_long + Dist_Lane_gap))));
-
-                Canvas.SetLeft(distline, 0);//Panel 위치 조정
-                Canvas.SetTop(distline, Y);
-                Canvas.SetLeft(panel, Data_Draw.ActualWidth - (textBlock.Text.Length + 2) * 5);//Panel 위치 조정
-                Canvas.SetTop(panel, Y - 9);
-
-                dist_lines[dist_line_index] = distline;
-                dist_line_texts[dist_line_index] = panel;
-                dist_line_index++;
-            }
-            #endregion
-
             Update_LaneWidthText();
 
             Draw_map();
@@ -258,35 +265,18 @@ namespace Radar_Analysis_Program
             int point_num = (int)(max_long / Dist_Lane_gap) + 1;
 
             #region Dist Line
-            int dist_line_index = 0;
-            for (int line_n = 0; line_n < point_num; line_n++)
+            for (int dist_line_index = 0; dist_line_index < point_num; dist_line_index++)
             {
-                Polyline distline = new Polyline();
-                distline.Points = new PointCollection()
-                {
-                    new System.Windows.Point(0, 0),
-                    new System.Windows.Point(Data_Draw.ActualWidth, 0)
-                };
-                distline.Stroke = Brushes.Yellow;
-                distline.StrokeThickness = 1;
-                distline.StrokeDashArray = new DoubleCollection() { 15, 15 };
-
-                Grid panel = new Grid(); //사각형을 감싸줄 Panel 생성
                 TextBlock textBlock = new TextBlock();//Text 생성
-                textBlock.Text = ((int)(Dist_Lane_gap * line_n)).ToString() + "m";
-                textBlock.Foreground = Brushes.White;
-                panel.Children.Add(textBlock);//Panel에 Text 추가
+                textBlock.Text = ((int)(Dist_Lane_gap * dist_line_index)).ToString() + "m";
 
-                int Y = (int)(Data_Draw.ActualHeight - ((Data_Draw.ActualHeight * Dist_Lane_gap * ((2 * line_n) + 1)) / (2 * (max_long + Dist_Lane_gap))));
-
-                Canvas.SetLeft(distline, 0);//Panel 위치 조정
-                Canvas.SetTop(distline, Y);
-                Canvas.SetLeft(panel, Data_Draw.ActualWidth - (textBlock.Text.Length + 2) * 5);//Panel 위치 조정
-                Canvas.SetTop(panel, Y - 9);
-
-                dist_lines[dist_line_index] = distline;
-                dist_line_texts[dist_line_index] = panel;
-                dist_line_index++;
+                int Y = (int)(Data_Draw.ActualHeight - ((Data_Draw.ActualHeight * Dist_Lane_gap * ((2 * dist_line_index) + 1)) / (2 * (max_long + Dist_Lane_gap))));
+                dist_lines[dist_line_index].Points[0] = new System.Windows.Point(0, Y);
+                dist_lines[dist_line_index].Points[1] = new System.Windows.Point(Data_Draw.ActualWidth, Y);
+                Canvas.SetLeft(dist_lines[dist_line_index], 0);//Panel 위치 조정
+                Canvas.SetTop(dist_lines[dist_line_index], 0);
+                Canvas.SetLeft(dist_line_texts[dist_line_index], Data_Draw.ActualWidth - (textBlock.Text.Length + 2) * 5);//Panel 위치 조정
+                Canvas.SetTop(dist_line_texts[dist_line_index], Y - 9);
             }
             #endregion
 
@@ -339,9 +329,11 @@ namespace Radar_Analysis_Program
             #endregion
         }
         private void Read()
-        {
-            if (dataList[number].Timestamp <= dbcompareDT)
+        {       
+
+            if ( dataList[number].Timestamp <= dbcompareDT )
             {
+              
                 while (!((number > dataList.Count) || (dataList[number].Timestamp != dataList[number + 1].Timestamp)))
                 {
                     this_frame_data[dataList[number].ID] = dataList[number];
@@ -352,17 +344,57 @@ namespace Radar_Analysis_Program
                 exist[dataList[number].ID] = true;
                 number++;
             }
+           
 
-            filter_this_fram_obj_data();
+          
+
+            radar_RotateShift();
+            filter();
+            check_zone_index();
             save_this_frame_obj_data();
             draw_this_frame_obj_data();
             Clear_this_frame_obj_data();
         }
         #region obj info process
-        private void filter_this_fram_obj_data()
+
+        private void radar_RotateShift()
+        {
+
+            
+                double Radian = Angle * (Math.PI / 180);
+                for (int i = 0; i < 100; i++)
+                {
+                    if (exist[i])
+                    {
+                        double fTempX = this_frame_data[i].DistLat * Math.Cos(Radian) - this_frame_data[i].DistLong * Math.Sin(Radian);
+                        double fTempY = this_frame_data[i].DistLat * Math.Sin(Radian) + this_frame_data[i].DistLong * Math.Cos(Radian);
+                        this_frame_data[i].DistLat = fTempX + Shift;
+                        this_frame_data[i].DistLong = fTempY;
+                    }
+                }
+            
+            
+        }
+        private void check_zone_index()
+        {
+            for(int i = 0; i < 100; i++)
+            {
+                if(exist[i])
+                {
+                    int x = (int)((this_frame_data[i].DistLat * (-1)) + max_lat) * 10;
+                    int y = (int)(this_frame_data[i].DistLong * 2);
+
+                    if ((x >= 0) && (x < LUT_img.Width) && (y >= 0) && (y < LUT_img.Height))
+                    {
+                        this_frame_data[i].Zone = LUT_img.At<char>(x, y);
+                    }
+                }
+            }
+        }
+        private void filter()
         {
             //Filter_Distance();
-            Filter_Speed();
+            //Filter_Speed();
             /*Filter_RCS();
             Filter_Size();
             Filter_ProbExists();*/
@@ -395,7 +427,7 @@ namespace Radar_Analysis_Program
                         rect.Tag = i;
                         rectangles[i] = rect;
                         TextBox textBox = new TextBox();
-                        textBox.Text = CheckBox_print();
+                        textBox.Text = CheckBox_print(); 
                         textBox.VerticalAlignment = VerticalAlignment.Center;
                         textBox.Margin = new Thickness(10, 0, 0, 0);
                         textBoxes[i] = textBox;
@@ -408,7 +440,7 @@ namespace Radar_Analysis_Program
                     }
                     Obj_inf[i].AddLast(this_frame_data[i]);
                     if (Obj_inf[i].Count >= 100)
-                        Obj_inf[i].RemoveFirst();
+                    Obj_inf[i].RemoveFirst();
                 }
                 else
                 {
@@ -458,134 +490,31 @@ namespace Radar_Analysis_Program
         #endregion
         void TimerTickHandler(object sender, EventArgs e)
         {
-
+            
             double positionMs = mediaElement.Position.TotalMilliseconds;
             slider.Value = slider.Minimum + positionMs;
 
             diff = TimeSpan.FromMilliseconds(1);
             diff2 += diff;
 
-            TimeSpan value_time = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum);
-
-            if (drag_check == 1)    // 드래그 했을 때 
-            {
-                if (drag_move_check == 2)   //앞으로 갔을 때 
-                {
-                    int a = 0;
-                    while (a < dataList.Count)
-                    {
-                        try  // number 값이 없을 때   > 왜 number
-                        {
-                            _checktime = dataList[number].Timestamp;
-                        }
-                        catch
-                        {
-                            number = 0;
-
-                            break;
-                        }
-
-                        if (_starttime.Add(value_time) < _checktime)    //  _starttime.add(value_time) = 현재 시간  
-                        {                                               //   _check_time = db 데이터의 시간 값
-                            break;
-                        }
-                        else
-                        {
-                            number++;   // ++할수록 checktime 도 앞으로 커짐   
-                        }
-                        a++;
-                    }
-                }
-                else if (drag_move_check == 1)    // 뒤로 갔을 때
-                {
-                    int a = 0;
-                    while (a < dataList.Count)
-                    {
-                        try   // number 값이 없을 때 
-                        {
-                            _checktime = dataList[number].Timestamp;
-                        }
-                        catch
-                        {
-                            number = 0;
-                            System.Console.WriteLine("Bb");
-                            break;
-                        }
-                        if (_starttime.Add(value_time) > _checktime)  //  _starttime.add(value_time) = 현재 시간  
-                        {                                                //   _check_time = db 데이터의 시간 값
-
-                            number++;
-                            if (number == 1)
-                            {
-                                number = 0;
-                            }
-                            break;
-                        }
-                        else
-                        {
-                            if (number == 0) number = 1;
-                            number--;   // --할수록 checktime 도 뒤로 점점 작아짐 
-                        }
-                        a++;
-                    }
-                }
-
-                diff2 = value_time;
-
-                dbcomparetime = _starttime.Add(diff2).ToString("yyyy-MM-dd HH:mm:ss.fff");
-                dbcompareDT = _starttime.Add(diff2);
-                drag_move_check = 0;   //움직인 다음 무브체크, 다시 0으로 초기화
-                drag_check = 0;       //드래그 했는지 체크, 다시 0으로 초기화
-
-            }
-            else if (drag_check == 0)
-            {
-                dbcomparetime = _starttime.Add(diff2).ToString("yyyy-MM-dd HH:mm:ss.fff");
-                dbcompareDT = _starttime.Add(diff2);
-            }       // 드래그 안 했을 때
-
-
-            Read();
-            // System.Console.WriteLine(Change_Filter_Distance_MAX_input);
-
 
             TimeSpan dura = mediaElement.Position; //영상 시간 계산
+
+            dbcompareDT = _starttime.Add(dura);
+            Read();
+
+         
+
+
+
             dbcompareDT2 = _starttime.Add(dura);
             textblock6 = dbcompareDT2.ToString("yyyy-MM-dd HH:mm:ss.fff"); //영상 시간 
 
             TimeSpan ts = new TimeSpan(0, 0, 0, 0, 300);
             double at = dura.TotalMilliseconds - diff2.TotalMilliseconds;
-            if (150 <at && at<300)
-            {
-                // dura = dura.Add(TimeSpan.FromMilliseconds(-300));
-                //mediaElement.Position = mediaElement.Position.Add(-ts);
-                mediaElement.SpeedRatio = 0.9;
-
-            }
-            else if(400 < at && at<500)
-            {
-                mediaElement.SpeedRatio = 0.8;
-            }
-            else if (at >600)
-            {
-                mediaElement.SpeedRatio = 0.7;
-            }
-            else if (-150>at && at>-300)
-            {
-                mediaElement.SpeedRatio = 1.1;
-                // mediaElement.Position = mediaElement.Position.Add(ts);
-            }
-            else if (-400>at && at>-500)
-            {
-                mediaElement.SpeedRatio = 1.2;
-                // mediaElement.Position = mediaElement.Position.Add(ts);
-            }
-            else if (at < -600)
-            {
-                mediaElement.SpeedRatio = 1.3;
-                // mediaElement.Position = mediaElement.Position.Add(ts);
-            }
+           
             textblock7 = at.ToString(); // 시간 차이 
+            textblock4 = number.ToString();
             text_str = textblock1 + "\n" + textblock2 + "\n" + textblock3 + "\n" + textblock4 + "\n" + textblock5 + "\n" + textblock6 + "\n" + textblock7;
          
 
@@ -854,6 +783,34 @@ namespace Radar_Analysis_Program
 
         #endregion
 
+        #region Set Angle & Shift
+        private void AngleUp_Click(object sender, RoutedEventArgs e)
+        {
+            Angle += 1;
+            AngleShiftText();
+        }
+        private void AngleDown_Click(object sender, RoutedEventArgs e)
+        {
+            Angle -= 1;
+            AngleShiftText();
+        }
+        private void ShiftUp_Click(object sender, RoutedEventArgs e)
+        {
+            Shift += 0.1;
+            AngleShiftText();
+        }
+        private void ShiftDown_Click(object sender, RoutedEventArgs e)
+        {
+            Shift -= 0.1;
+            AngleShiftText();
+        }
+        private void AngleShiftText()
+        {
+            AngleText.Text = Angle.ToString();
+            ShiftText.Text = Shift.ToString("F1");
+        }
+        #endregion
+
         #endregion
 
         #region form_Click
@@ -948,6 +905,9 @@ namespace Radar_Analysis_Program
         {
             mediaElement.Stop();
             timer.Stop();
+           
+          
+         
         }
         private void mediaElement_MediaFailed(object sender, ExceptionRoutedEventArgs e)
         {
@@ -1021,7 +981,6 @@ namespace Radar_Analysis_Program
             // System.Console.WriteLine(secondtime);
             // System.Console.WriteLine(total_time);
 
-            Set_map_value();
         }
         #endregion 
 
@@ -1033,7 +992,7 @@ namespace Radar_Analysis_Program
             double currentValue = e.NewValue;
             double difference = currentValue - _previousValue_check;
 
-            if (difference > 0)
+            if (difference > 1000)
             {
                 drag_move_check = 2;
             }
@@ -1056,16 +1015,29 @@ namespace Radar_Analysis_Program
             mediaElement.Pause();
             timer.Stop();
             drag_check = 1;
-            Data_Draw.Children.Clear();
+           Data_Draw.Children.Clear();
 
             Draw_map();
         }
         private void slider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
         {
+            //e.HorizontalChange;
+
+            tt();
+
+
+            drag_move_check = 0;   //움직인 다음 무브체크, 다시 0으로 초기화
+            drag_check = 0;       //드래그 했는지 체크, 다시 0으로 초기화
+                                  // System.Console.WriteLine(Change_Filter_Distance_MAX_input);
+
+
+            mediaElement.Position = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum);
             mediaElement.Play();
             timer.Start();
 
-            mediaElement.Position = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum);  //value 이동시 position 변경
+
+
+          //value 이동시 position 변경
 
         }
 
@@ -1095,14 +1067,14 @@ namespace Radar_Analysis_Program
 
         void Filter_Speed()
         {
-            for(int i = 0; i < 100; i++)
+           /* for(int i = 0; i < 100; i++)
             {
                 if (dataList[number].Velocity <= 10)
                 {
                     this_frame_data[i] = default(MyDataModel);
                     exist[i] = false;
                 }
-            }
+            }*/
         }
         void Filter_Azimuth()
         {
@@ -1184,6 +1156,98 @@ namespace Radar_Analysis_Program
 
         }
         #endregion
+
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            Update_map();
+        }
+
+        public void tt ()
+        {
+            TimeSpan dura = mediaElement.Position; //영상 시간 계산
+
+            if (drag_check == 1)    // 드래그 했을 때 
+            {
+                if (drag_move_check == 2)   //앞으로 갔을 때 
+                {
+                    int a = 0;
+                    while (a < dataList.Count)
+                    {
+                        try  // number 값이 없을 때   > 왜 number
+                        {
+                            _checktime = dataList[number].Timestamp;
+                        }
+                        catch
+                        {
+                            number = 0;
+                            break;
+                        }
+
+                        if (_starttime.Add(dura) < _checktime)    //  _starttime.add(value_time) = 현재 시간  
+                        {                                               //   _check_time = db 데이터의 시간 값
+                            break;
+                        }
+                        else
+                        {
+                            number++;   // ++할수록 checktime 도 앞으로 커짐   
+                        }
+                        a++;
+                    }
+                }
+                else if (drag_move_check == 1)    // 뒤로 갔을 때
+                {
+                    int a = 0;
+                    while (a < dataList.Count)
+                    {
+                        try   // number 값이 없을 때 
+                        {
+                            _checktime = dataList[number].Timestamp;
+                        }
+                        catch
+                        {
+                            number = 0;
+                            break;
+                        }
+                        if (_checktime <= _starttime.Add(dura))  //  _starttime.add(value_time) = 현재 시간  
+                        {                                                //   _check_time = db 데이터의 시간 값
+
+                            //number++;
+                            if (number == -1)
+                            {
+                                number = 0;
+                            }
+                            break;
+                        }
+                        else
+                        {
+                            number--;
+                            if (number >= 0)
+                            {
+                                while (dataList[number].Timestamp != dataList[number + 1].Timestamp)
+                                {
+                                    number--;
+                                }
+                            }
+
+                            //if (number == 0) number = 1;
+                            //;   // --할수록 checktime 도 뒤로 점점 작아짐 
+                        }
+                        a++;
+                    }
+                }
+
+                dbcomparetime = _starttime.Add(dura).ToString("yyyy-MM-dd HH:mm:ss.fff");
+                dbcompareDT = _starttime.Add(dura);
+
+
+            }
+            else if (drag_check == 0)
+            {
+                dbcomparetime = _starttime.Add(dura).ToString("yyyy-MM-dd HH:mm:ss.fff");
+                dbcompareDT = _starttime.Add(dura);
+            }       // 드래그 안 했을 때
+
+        }
     }
 
 }
