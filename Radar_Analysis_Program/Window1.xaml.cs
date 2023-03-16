@@ -390,13 +390,27 @@ namespace Radar_Analysis_Program
                     Radar_Filter_Setting();
                     radar_RotateShift();
                     check_zone_index();
+                    test_code();
                     save_this_frame_obj_data();
                     draw_this_frame_obj_data();
                     Clear_this_frame_obj_data();
                 }
             }
         }
-
+        private void test_code()
+        {
+            double Radian = Angle * (Math.PI / 180);
+            for (int i = 0; i < 100; i++)
+            {
+                if (exist[i])
+                {
+                    double fTempX = this_frame_data[i].DistLat * Math.Cos(Radian) - this_frame_data[i].DistLong * Math.Sin(Radian);
+                    double fTempY = this_frame_data[i].DistLat * Math.Sin(Radian) + this_frame_data[i].DistLong * Math.Cos(Radian);
+                    this_frame_data[i].DistLat = fTempX + Shift;
+                    this_frame_data[i].DistLong = fTempY;
+                }
+            }
+        }
         private void Radar_Filter_Setting()
         {
             for (int i = 0; i < 100; i++)
