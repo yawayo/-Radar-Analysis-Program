@@ -442,7 +442,6 @@ namespace Radar_Analysis_Program
                 {
                     int x = (int)((this_frame_data[i].DistLat * (-1)) + max_lat) * 10;
                     int y = (int)(this_frame_data[i].DistLong * 2);
-
                     if ((x >= 0) && (x < LUT_img.Width) && (y >= 0) && (y < LUT_img.Height))
                     {
                         this_frame_data[i].Zone = LUT_img.At<char>(x, y);
@@ -505,16 +504,16 @@ namespace Radar_Analysis_Program
             {
                 if (exist[i])
                 {
-                    int X = (int)(shift_pos.X + ((-1 * this_frame_data[i].DistLat) * ((Data_Draw.ActualWidth / 2) / max_lat)) + (Data_Draw.ActualWidth / 2));
-                    int Y = (int)(shift_pos.Y + this_frame_data[i].DistLong * (Data_Draw.ActualHeight / max_long));
+                    int X = (int)((Data_Draw.ActualWidth / 2) + (Data_Draw.ActualWidth / (max_lat * 2)) * (-1 * this_frame_data[i].DistLat));
+                    int Y = (int)(Data_Draw.ActualHeight * (( max_long + Dist_Lane_gap - this_frame_data[i].DistLong - (Dist_Lane_gap / 2)) / (max_long + Dist_Lane_gap)));
 
                     textBoxes[i].Text = CheckBox_print(i);
 
                     Canvas.SetLeft(rectangles[i], X);
-                    Canvas.SetTop(rectangles[i], Data_Draw.ActualHeight - Y);
+                    Canvas.SetTop(rectangles[i], Y);
 
                     Canvas.SetLeft(textBoxes[i], X + 10);
-                    Canvas.SetTop(textBoxes[i], Data_Draw.ActualHeight - Y - 3);
+                    Canvas.SetTop(textBoxes[i], Y - 3);
                 }
             }
             textblock1 = dbcomparetime;
@@ -1107,7 +1106,11 @@ namespace Radar_Analysis_Program
             drag_check = 1;
         }
         private void slider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
-        { 
+        {
+            Clear_this_frame_obj_data();
+            for (int i = 0; i < 100; i++)
+                Obj_inf[i].Clear();
+
             //e.HorizontalChange;
 
             tt();
