@@ -503,21 +503,16 @@ namespace Radar_Analysis_Program
             dbcompareDT = _starttime.Add(dura);
             Read();
 
-         
-
-
 
             dbcompareDT2 = _starttime.Add(dura);
             textblock6 = dbcompareDT2.ToString("yyyy-MM-dd HH:mm:ss.fff"); //영상 시간 
-
-            TimeSpan ts = new TimeSpan(0, 0, 0, 0, 300);
-            double at = dura.TotalMilliseconds - diff2.TotalMilliseconds;
-           
-            textblock7 = at.ToString(); // 시간 차이 
+            textblock5 = dbcompareDT.ToString("yyyy-MM-dd HH:mm:ss.fff"); //db 시간
             textblock4 = number.ToString();
             text_str = textblock1 + "\n" + textblock2 + "\n" + textblock3 + "\n" + textblock4 + "\n" + textblock5 + "\n" + textblock6 + "\n" + textblock7;
          
 
+  
+            
             Data_Text.Text = text_str;
         }
 
@@ -905,8 +900,8 @@ namespace Radar_Analysis_Program
         {
             mediaElement.Stop();
             timer.Stop();
-           
-          
+
+            number = 0;
          
         }
         private void mediaElement_MediaFailed(object sender, ExceptionRoutedEventArgs e)
@@ -992,18 +987,18 @@ namespace Radar_Analysis_Program
             double currentValue = e.NewValue;
             double difference = currentValue - _previousValue_check;
 
-            if (difference > 1000)
-            {
-                drag_move_check = 2;
-            }
-            else if (difference < 0)
-            {
-                drag_move_check = 1;
-            }
-            else if (difference == 0)
-            {
-                drag_move_check = 0;
-            }
+            //if (difference > 1000)
+            //{
+            //    drag_move_check = 2;
+            //}
+            //else if (difference < 0)
+            //{
+            //    drag_move_check = 1;
+            //}
+            //else if (difference == 0)
+            //{
+            //    drag_move_check = 0;
+            //}
 
             _previousValue_check = currentValue;
 
@@ -1021,15 +1016,126 @@ namespace Radar_Analysis_Program
         }
         private void slider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
         {
-            //e.HorizontalChange;
+            if(e.HorizontalChange>0)
+            {
+                System.Console.WriteLine("aaaa");
+            }
+            if (e.HorizontalChange <0)
+            {
+                System.Console.WriteLine("bbb");
+            }
 
-            tt();
 
 
-            drag_move_check = 0;   //움직인 다음 무브체크, 다시 0으로 초기화
-            drag_check = 0;       //드래그 했는지 체크, 다시 0으로 초기화
-                                  // System.Console.WriteLine(Change_Filter_Distance_MAX_input);
+           
 
+            TimeSpan dura = mediaElement.Position; //영상 시간 계산
+
+            TimeSpan value_time = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum);
+            
+                if (e.HorizontalChange > 0)   //앞으로 갔을 때 
+                {
+                    int a = 0;
+                    while (a < dataList.Count)
+                    {
+                        try  // number 값이 없을 때   > 왜 number
+                        {
+                            _checktime = dataList[number].Timestamp;             //시작 시간 
+                        }
+                        catch
+                        {
+                            number = 0;
+                            break;
+                        }
+
+                        if (_starttime.Add(value_time) < _checktime)    //  _starttime.add(value_time) = 현재 시간  
+                        {                                               //   _check_time = db 데이터의 시간 값
+                            break;
+                        }
+                        else
+                        {
+                            number++;   // ++할수록 checktime 도 앞으로 커짐   
+                        }
+                        a++;
+                    }
+                    dura = value_time;
+                    dbcomparetime = _starttime.Add(dura).ToString("yyyy-MM-dd HH:mm:ss.fff");
+                    dbcompareDT = _starttime.Add(dura);
+                }
+                else if (e.HorizontalChange < 0)    // 뒤로 갔을 때
+                {
+                Clear_this_frame_obj_data();
+                for (int i = 0; i < 100; i++)
+                    Obj_inf[i].Clear();
+                int a = 0;
+                    while (a < dataList.Count)
+                    {
+                        try   // number 값이 없을 때 
+                        {
+                            _checktime = dataList[number].Timestamp;
+                        }
+                        catch
+                        {
+                            number = 0;
+                            break;
+                        }
+                        if (_checktime <= _starttime.Add(value_time))  //  _starttime.add(value_time) = 현재 시간  
+                        {                                                //   _check_time = db 데이터의 시간 값
+
+                            //number++;
+                            if (number == -1)
+                            {
+                                number = 0;
+                            }
+                            break;
+                        }
+                        else
+                        {
+                            number--;
+                            if (number >= 0)
+                            {
+                                while (dataList[number].Timestamp != dataList[number + 1].Timestamp)
+                                {
+                                    number--;
+                                }
+                            }
+
+                            //if (number == 0) number = 1;
+                            //;   // --할수록 checktime 도 뒤로 점점 작아짐 
+                        }
+                        a++;
+                    }
+                    dura = value_time;
+                    dbcomparetime = _starttime.Add(dura).ToString("yyyy-MM-dd HH:mm:ss.fff");
+                    dbcompareDT = _starttime.Add(dura);
+                }
+                else
+                {
+                // dura = value_time;
+                dbcomparetime = _starttime.Add(dura).ToString("yyyy-MM-dd HH:mm:ss.fff");
+                dbcompareDT = _starttime.Add(dura);
+                }       // 드래그 안 했을 때
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
 
             mediaElement.Position = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum);
             mediaElement.Play();
@@ -1164,88 +1270,7 @@ namespace Radar_Analysis_Program
 
         public void tt ()
         {
-            TimeSpan dura = mediaElement.Position; //영상 시간 계산
-
-            if (drag_check == 1)    // 드래그 했을 때 
-            {
-                if (drag_move_check == 2)   //앞으로 갔을 때 
-                {
-                    int a = 0;
-                    while (a < dataList.Count)
-                    {
-                        try  // number 값이 없을 때   > 왜 number
-                        {
-                            _checktime = dataList[number].Timestamp;
-                        }
-                        catch
-                        {
-                            number = 0;
-                            break;
-                        }
-
-                        if (_starttime.Add(dura) < _checktime)    //  _starttime.add(value_time) = 현재 시간  
-                        {                                               //   _check_time = db 데이터의 시간 값
-                            break;
-                        }
-                        else
-                        {
-                            number++;   // ++할수록 checktime 도 앞으로 커짐   
-                        }
-                        a++;
-                    }
-                }
-                else if (drag_move_check == 1)    // 뒤로 갔을 때
-                {
-                    int a = 0;
-                    while (a < dataList.Count)
-                    {
-                        try   // number 값이 없을 때 
-                        {
-                            _checktime = dataList[number].Timestamp;
-                        }
-                        catch
-                        {
-                            number = 0;
-                            break;
-                        }
-                        if (_checktime <= _starttime.Add(dura))  //  _starttime.add(value_time) = 현재 시간  
-                        {                                                //   _check_time = db 데이터의 시간 값
-
-                            //number++;
-                            if (number == -1)
-                            {
-                                number = 0;
-                            }
-                            break;
-                        }
-                        else
-                        {
-                            number--;
-                            if (number >= 0)
-                            {
-                                while (dataList[number].Timestamp != dataList[number + 1].Timestamp)
-                                {
-                                    number--;
-                                }
-                            }
-
-                            //if (number == 0) number = 1;
-                            //;   // --할수록 checktime 도 뒤로 점점 작아짐 
-                        }
-                        a++;
-                    }
-                }
-
-                dbcomparetime = _starttime.Add(dura).ToString("yyyy-MM-dd HH:mm:ss.fff");
-                dbcompareDT = _starttime.Add(dura);
-
-
-            }
-            else if (drag_check == 0)
-            {
-                dbcomparetime = _starttime.Add(dura).ToString("yyyy-MM-dd HH:mm:ss.fff");
-                dbcompareDT = _starttime.Add(dura);
-            }       // 드래그 안 했을 때
+          
 
         }
     }
