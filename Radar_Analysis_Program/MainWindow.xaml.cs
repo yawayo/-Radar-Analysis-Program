@@ -46,7 +46,7 @@ namespace Radar_Analysis_Program
                 using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
                     connection.Open();
-                    MessageBox.Show("접속 성공");
+                    //MessageBox.Show("접속 성공");
                     Window1 testWindow = new Window1(connection);
                     this.Close();
                 }

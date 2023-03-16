@@ -32,7 +32,7 @@
         <Label Content="Password:" Grid.Column="0" Margin="5,199,15,60" Height="30"/>
         <PasswordBox Name="PasswordBox" Grid.Column="1" Margin="5,199,15,60" Height="30" Password="hbrain0372!"/>
 
-        <Button Content="Login" Click="Button_Click" Margin="10,245,82,2" Grid.Column="1"/>
+        <Button Content="Login" Click="Button_Click" Margin="10,245,82,2" Grid.Column="1" TabIndex="0"/>
     </Grid>
 
 </Window>

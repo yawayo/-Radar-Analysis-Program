@@ -62,8 +62,6 @@ namespace Radar_Analysis_Program
         string firsttime;
         string secondtime;
 
-        int jun = 0;
-
         double duration = 0;
         private MySqlConnection conn;
 
@@ -363,8 +361,10 @@ namespace Radar_Analysis_Program
                     LUT_img.FillConvexPoly(pt, label_index);
                 }
             }
-            // Cv2.ImShow("test", LUT_img);
-            // Cv2.WaitKey(0);
+/*
+            Cv2.ImShow("test", LUT_img);
+            Cv2.WaitKey(0);
+*/
             #endregion
         }
         #endregion
@@ -399,17 +399,6 @@ namespace Radar_Analysis_Program
         }
         private void test_code()
         {
-            double Radian = Angle * (Math.PI / 180);
-            for (int i = 0; i < 100; i++)
-            {
-                if (exist[i])
-                {
-                    double fTempX = this_frame_data[i].DistLat * Math.Cos(Radian) - this_frame_data[i].DistLong * Math.Sin(Radian);
-                    double fTempY = this_frame_data[i].DistLat * Math.Sin(Radian) + this_frame_data[i].DistLong * Math.Cos(Radian);
-                    this_frame_data[i].DistLat = fTempX + Shift;
-                    this_frame_data[i].DistLong = fTempY;
-                }
-            }
         }
         private void Radar_Filter_Setting()
         {
@@ -455,11 +444,17 @@ namespace Radar_Analysis_Program
             {
                 if (exist[i])
                 {
-                    int x = (int)((this_frame_data[i].DistLat * (-1)) + max_lat) * 10;
-                    int y = (int)(this_frame_data[i].DistLong * 2);
+                    int x = (int)(((this_frame_data[i].DistLat * (-1.0)) + max_lat) * 10);
+                    int y = (int)(this_frame_data[i].DistLong * 4);
                     if ((x >= 0) && (x < LUT_img.Width) && (y >= 0) && (y < LUT_img.Height))
                     {
-                        this_frame_data[i].Zone = LUT_img.At<char>(x, y);
+                        this_frame_data[i].Zone = LUT_img.At<char>(y, x);
+                    }
+                    System.Console.WriteLine(this_frame_data[i].DistLat.ToString("F2") + " " + x.ToString() + " " + this_frame_data[i].Zone.ToString());
+
+                    if (this_frame_data[i].Zone == 0)
+                    {
+                        exist[i] = false;
                     }
                 }
             }
@@ -524,11 +519,11 @@ namespace Radar_Analysis_Program
 
                     textBoxes[i].Text = CheckBox_print(i);
 
-                    Canvas.SetLeft(rectangles[i], X);
-                    Canvas.SetTop(rectangles[i], Y);
+                    Canvas.SetLeft(rectangles[i], X - (15 / 2));
+                    Canvas.SetTop(rectangles[i], Y - 15);
 
                     Canvas.SetLeft(textBoxes[i], X + 10);
-                    Canvas.SetTop(textBoxes[i], Y - 3);
+                    Canvas.SetTop(textBoxes[i], Y - 18);
 
                     if ((this_frame_data[i].DistLat <= max_lat) && (this_frame_data[i].DistLat >= (-1 * max_lat)))
                     {
@@ -1240,9 +1235,9 @@ namespace Radar_Analysis_Program
         private string CheckBox_print(int index)
         {
             string pprint = "";
-            string db_data = "";
             for (int i = 0; i < 12; i++)
             {
+                string db_data = "";
                 if (checkBoxes[i].IsChecked == true)
                 {
                     if (i == 0) db_data = this_frame_data[index].Timestamp.ToString();
@@ -1256,7 +1251,6 @@ namespace Radar_Analysis_Program
                     else if (i == 8) db_data = this_frame_data[index].ProbOfExist.ToString();
                     else if (i == 9) db_data = this_frame_data[index].Class.ToString();
                     else if (i == 10) db_data = this_frame_data[index].Zone.ToString();
-
                     pprint += checkbox_name[i] + " = " + db_data + '\n';
                 }
             }
