@@ -8,7 +8,7 @@ using System.Windows.Threading;
 using Microsoft.Win32;
 using MySql.Data.MySqlClient;
 using OpenCvSharp;
-
+using System.Reflection;
 namespace Radar_Analysis_Program
 {
     /// <summary>
@@ -17,8 +17,7 @@ namespace Radar_Analysis_Program
     public partial class Window1 : System.Windows.Window
     {
         DispatcherTimer timer = new DispatcherTimer();
-        public static List<MyDataModel> dataList = new List<MyDataModel>();
-        //private MyDataModel[] this_frame_data = new MyDataModel[100];
+        public List<MyDataModel> dataList = new List<MyDataModel>();
         public CheckBox[] checkBoxes;
         public String[] checkbox_name;
 
@@ -69,7 +68,7 @@ namespace Radar_Analysis_Program
         private MySqlConnection conn;
 
         private float[] Lane_width = new float[6] { 3.3f, 3.3f, 3.3f, 3.3f, 3.3f, 3.3f };
-        private float[] Lane_shift = new float[9] { 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f };
+        private float[] Lane_shift = new float[9] { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
         private float[] Lane_Point = new float[6 + 1] { -9.9f, -6.6f, -3.3f, 0.0f, 3.3f, 6.6f, 9.9f };
         private float Dist_Lane_gap = 25.0f;
 
@@ -79,6 +78,7 @@ namespace Radar_Analysis_Program
 
         public double Shift = 17.40;
         public int Angle = 20;
+
 
         #region ACTIVE
         public static bool Filter_NofObj_ACTIVE = false;
@@ -132,7 +132,6 @@ namespace Radar_Analysis_Program
         public static double Filter_VXDepart_MAX = 128.993;
         #endregion
 
-
         public class MyDataModel
         {
             // General      
@@ -171,6 +170,11 @@ namespace Radar_Analysis_Program
             public double Size;
             public int Zone;
             public bool Noise;
+
+            public object Clone()
+            {
+                return this.MemberwiseClone();
+            }
         }
 
         public Window1(MySqlConnection connection)
@@ -375,20 +379,21 @@ namespace Radar_Analysis_Program
                 {
                     while (!((number + 1 >= dataList.Count) || (dataList[number].Timestamp != dataList[number + 1].Timestamp)))
                     {
-                        this_frame_data[dataList[number].ID] = dataList[number];
+                        this_frame_data[dataList[number].ID] = (MyDataModel)dataList[number].Clone();
                         exist[dataList[number].ID] = true;
                         number++;
                     }
-                    this_frame_data[dataList[number].ID] = dataList[number];
+                    this_frame_data[dataList[number].ID] = (MyDataModel)dataList[number].Clone();
                     exist[dataList[number].ID] = true;
                     number++;
+
+                    Radar_Filter_Setting();
+                    radar_RotateShift();
+                    check_zone_index();
+                    save_this_frame_obj_data();
+                    draw_this_frame_obj_data();
+                    Clear_this_frame_obj_data();
                 }
-                Radar_Filter_Setting();
-                radar_RotateShift();
-                check_zone_index();
-                save_this_frame_obj_data();
-                draw_this_frame_obj_data();
-                Clear_this_frame_obj_data();
             }
         }
 
@@ -510,6 +515,17 @@ namespace Radar_Analysis_Program
 
                     Canvas.SetLeft(textBoxes[i], X + 10);
                     Canvas.SetTop(textBoxes[i], Y - 3);
+
+                    if ((this_frame_data[i].DistLat <= max_lat) && (this_frame_data[i].DistLat >= (-1 * max_lat)))
+                    {
+                        rectangles[i].Visibility = Visibility.Visible;
+                        textBoxes[i].Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        rectangles[i].Visibility = Visibility.Hidden;
+                        textBoxes[i].Visibility = Visibility.Hidden;
+                    }
                 }
             }
             textblock1 = dbcomparetime;
@@ -662,9 +678,6 @@ namespace Radar_Analysis_Program
             textblock4 = number.ToString();
             text_str = textblock1 + "\n" + textblock2 + "\n" + textblock3 + "\n" + textblock4 + "\n" + textblock5 + "\n" + textblock6 + "\n" + textblock7;
 
-
-  
-            
             Data_Text.Text = text_str;
         }
 
@@ -730,7 +743,6 @@ namespace Radar_Analysis_Program
                 MessageBox.Show("DB Read ERROR");
             }
         }
-
 
         #region Set Lane Info
         #region Set Lane Width
@@ -987,6 +999,17 @@ namespace Radar_Analysis_Program
             db_connect(conn, firsttime, secondtime);
 
             slider.Maximum = slider.Minimum + durationMs;
+
+            for (int i = 0; i < 100; i++)
+            {
+                if (Data_Draw.Children.Contains(rectangles[i]))
+                {
+                    Data_Draw.Children.Remove(rectangles[i]);
+                    textBoxes[i].Visibility = Visibility.Hidden;
+                }
+                Obj_inf[i].Clear();
+            }
+            Clear_this_frame_obj_data();
         }
         private void mediaElement_MediaEnded(object sender, RoutedEventArgs e)
         {
@@ -994,7 +1017,7 @@ namespace Radar_Analysis_Program
             timer.Stop();
 
             number = 0;
-         
+
         }
         private void mediaElement_MediaFailed(object sender, ExceptionRoutedEventArgs e)
         {
@@ -1079,19 +1102,6 @@ namespace Radar_Analysis_Program
             double currentValue = e.NewValue;
             double difference = currentValue - _previousValue_check;
 
-            //if (difference > 1000)
-            //{
-            //    drag_move_check = 2;
-            //}
-            //else if (difference < 0)
-            //{
-            //    drag_move_check = 1;
-            //}
-            //else if (difference == 0)
-            //{
-            //    drag_move_check = 0;
-            //}
-
             _previousValue_check = currentValue;
         }
         private void slider_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
@@ -1102,131 +1112,97 @@ namespace Radar_Analysis_Program
         }
         private void slider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
         {
-            if(e.HorizontalChange>0)
-            {
-                System.Console.WriteLine("aaaa");
-            }
-            if (e.HorizontalChange <0)
-            {
-                System.Console.WriteLine("bbb");
-            }
-
-
-
-           
-
             TimeSpan dura = mediaElement.Position; //영상 시간 계산
 
             TimeSpan value_time = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum);
-            
-                if (e.HorizontalChange > 0)   //앞으로 갔을 때 
-                {
-                    int a = 0;
-                    while (a < dataList.Count)
-                    {
-                        try  // number 값이 없을 때   > 왜 number
-                        {
-                            _checktime = dataList[number].Timestamp;             //시작 시간 
-                        }
-                        catch
-                        {
-                            number = 0;
-                            break;
-                        }
 
-                        if (_starttime.Add(value_time) < _checktime)    //  _starttime.add(value_time) = 현재 시간  
-                        {                                               //   _check_time = db 데이터의 시간 값
-                            break;
-                        }
-                        else
-                        {
-                            number++;   // ++할수록 checktime 도 앞으로 커짐   
-                        }
-                        a++;
-                    }
-                    dura = value_time;
-                    dbcomparetime = _starttime.Add(dura).ToString("yyyy-MM-dd HH:mm:ss.fff");
-                    dbcompareDT = _starttime.Add(dura);
-                }
-                else if (e.HorizontalChange < 0)    // 뒤로 갔을 때
+            for (int i = 0; i < 100; i++)
+            {
+                if (Data_Draw.Children.Contains(rectangles[i]))
                 {
-                Clear_this_frame_obj_data();
-                for (int i = 0; i < 100; i++)
-                    Obj_inf[i].Clear();
+                    Data_Draw.Children.Remove(rectangles[i]);
+                    textBoxes[i].Visibility = Visibility.Hidden;
+                }
+                Obj_inf[i].Clear();
+            }
+            Clear_this_frame_obj_data();
+
+            if (e.HorizontalChange > 0)   //앞으로 갔을 때 
+            {
                 int a = 0;
-                    while (a < dataList.Count)
-                    {
-                        try   // number 값이 없을 때 
-                        {
-                            _checktime = dataList[number].Timestamp;
-                        }
-                        catch
-                        {
-                            number = 0;
-                            break;
-                        }
-                        if (_checktime <= _starttime.Add(value_time))  //  _starttime.add(value_time) = 현재 시간  
-                        {                                                //   _check_time = db 데이터의 시간 값
-
-                            //number++;
-                            if (number == -1)
-                            {
-                                number = 0;
-                            }
-                            break;
-                        }
-                        else
-                        {
-                            number--;
-                            if (number >= 0)
-                            {
-                                while (dataList[number].Timestamp != dataList[number + 1].Timestamp)
-                                {
-                                    number--;
-                                }
-                            }
-
-                            //if (number == 0) number = 1;
-                            //;   // --할수록 checktime 도 뒤로 점점 작아짐 
-                        }
-                        a++;
-                    }
-                    dura = value_time;
-                    dbcomparetime = _starttime.Add(dura).ToString("yyyy-MM-dd HH:mm:ss.fff");
-                    dbcompareDT = _starttime.Add(dura);
-                }
-                else
+                while (a < dataList.Count)
                 {
-                // dura = value_time;
+                    try  // number 값이 없을 때   > 왜 number
+                    {
+                        _checktime = dataList[number].Timestamp;             //시작 시간 
+                    }
+                    catch
+                    {
+                        number = 0;
+                        break;
+                    }
+
+                    if (_starttime.Add(value_time) < _checktime)    //  _starttime.add(value_time) = 현재 시간  
+                    {                                               //   _check_time = db 데이터의 시간 값
+                        break;
+                    }
+                    else
+                    {
+                        number++;   // ++할수록 checktime 도 앞으로 커짐   
+                    }
+                    a++;
+                }
+                dura = value_time;
                 dbcomparetime = _starttime.Add(dura).ToString("yyyy-MM-dd HH:mm:ss.fff");
                 dbcompareDT = _starttime.Add(dura);
-                }       // 드래그 안 했을 때
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-
+            }
+            else if (e.HorizontalChange < 0)    // 뒤로 갔을 때
+            {
+                int a = 0;
+                while (a < dataList.Count)
+                {
+                    try   // number 값이 없을 때 
+                    {
+                        _checktime = dataList[number].Timestamp;
+                    }
+                    catch
+                    {
+                        number = 0;
+                        break;
+                    }
+                    if (_checktime <= _starttime.Add(value_time))  //  _starttime.add(value_time) = 현재 시간  
+                    {
+                        if (number == -1)
+                        {
+                            number = 0;
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        number--;
+                        if (number >= 0)
+                        {
+                            while (dataList[number].Timestamp != dataList[number + 1].Timestamp)
+                            {
+                                number--;
+                            }
+                        }
+                    }
+                    a++;
+                }
+                dura = value_time;
+                dbcomparetime = _starttime.Add(dura).ToString("yyyy-MM-dd HH:mm:ss.fff");
+                dbcompareDT = _starttime.Add(dura);
+            }
+            else
+            {
+                dbcomparetime = _starttime.Add(dura).ToString("yyyy-MM-dd HH:mm:ss.fff");
+                dbcompareDT = _starttime.Add(dura);
+            }
             mediaElement.Position = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum);
             mediaElement.Play();
             timer.Start();
-
         }
         #endregion
 
@@ -1279,12 +1255,5 @@ namespace Radar_Analysis_Program
         {
             Update_map();
         }
-
-        public void tt()
-        {
-          
-
-        }
     }
-
 }
