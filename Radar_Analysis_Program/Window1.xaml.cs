@@ -5,10 +5,11 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using System.Text;
 using Microsoft.Win32;
 using MySql.Data.MySqlClient;
 using OpenCvSharp;
-using System.Reflection;
+using System.Runtime.InteropServices;
 namespace Radar_Analysis_Program
 {
     /// <summary>
@@ -65,10 +66,10 @@ namespace Radar_Analysis_Program
         double duration = 0;
         private MySqlConnection conn;
 
-        private float[] Lane_width = new float[6] { 3.3f, 3.3f, 3.3f, 3.3f, 3.3f, 3.3f };
-        private float[] Lane_shift = new float[9] { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-        private float[] Lane_Point = new float[6 + 1] { -9.9f, -6.6f, -3.3f, 0.0f, 3.3f, 6.6f, 9.9f };
-        private float Dist_Lane_gap = 25.0f;
+        private double[] Lane_width = new double[6] { 3.3f, 3.3f, 3.3f, 3.3f, 3.3f, 3.3f };
+        private double[] Lane_shift = new double[9] { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+        private double[] Lane_Point = new double[6 + 1] { -9.9f, -6.6f, -3.3f, 0.0f, 3.3f, 6.6f, 9.9f };
+        private double Dist_Lane_gap = 25.0f;
 
         private MyDataModel[] this_frame_data = new MyDataModel[100];
         private bool[] exist = new bool[100];
@@ -183,7 +184,8 @@ namespace Radar_Analysis_Program
 
             for (int NODE = 0; NODE < 100; NODE++)
                 Obj_inf[NODE] = new LinkedList<MyDataModel>();
-
+            
+            Load_Setting_Value();
             Set_Obj_TextBox();
             Set_map_value();
             AngleShiftText();
@@ -399,6 +401,14 @@ namespace Radar_Analysis_Program
         }
         private void test_code()
         {
+            for (int i = 0; i < 100; i++)
+            {
+                if (exist[i])
+                {
+                    if (this_frame_data[i].Velocity <= 0.0)
+                        this_frame_data[i].Noise = true;
+                }
+            }
         }
         private void Radar_Filter_Setting()
         {
@@ -518,22 +528,38 @@ namespace Radar_Analysis_Program
                     int Y = (int)(Data_Draw.ActualHeight * ((max_long + Dist_Lane_gap - this_frame_data[i].DistLong - (Dist_Lane_gap / 2)) / (max_long + Dist_Lane_gap)));
 
                     textBoxes[i].Text = CheckBox_print(i);
-
-                    Canvas.SetLeft(rectangles[i], X - (15 / 2));
-                    Canvas.SetTop(rectangles[i], Y - 15);
-
-                    Canvas.SetLeft(textBoxes[i], X + 10);
-                    Canvas.SetTop(textBoxes[i], Y - 18);
-
-                    if ((this_frame_data[i].DistLat <= max_lat) && (this_frame_data[i].DistLat >= (-1 * max_lat)))
+                    if (!this_frame_data[i].Noise)
                     {
-                        rectangles[i].Visibility = Visibility.Visible;
-                        textBoxes[i].Visibility = Visibility.Visible;
+                        Canvas.SetLeft(rectangles[i], X - (15 / 2));
+                        Canvas.SetTop(rectangles[i], Y - 15);
+
+                        Canvas.SetLeft(textBoxes[i], X + 10);
+                        Canvas.SetTop(textBoxes[i], Y - 18);
+
+                        if ((this_frame_data[i].DistLat <= max_lat) && (this_frame_data[i].DistLat >= (-1 * max_lat)))
+                        {
+                            rectangles[i].Visibility = Visibility.Visible;
+                            textBoxes[i].Visibility = Visibility.Visible;
+                        }
+                        else
+                        {
+                            rectangles[i].Visibility = Visibility.Hidden;
+                        }
                     }
                     else
                     {
-                        rectangles[i].Visibility = Visibility.Hidden;
                         textBoxes[i].Visibility = Visibility.Hidden;
+                        rectangles[i].StrokeThickness = 3;
+                        rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(100, 100, 100));
+
+                        Canvas.SetLeft(rectangles[i], X - (15 / 2));
+                        Canvas.SetTop(rectangles[i], Y - 15);
+
+                        Canvas.SetLeft(textBoxes[i], X + 10);
+                        Canvas.SetTop(textBoxes[i], Y - 18);
+
+                        textBoxes[i].Visibility = Visibility.Hidden;
+
                     }
                 }
             }
@@ -1259,6 +1285,47 @@ namespace Radar_Analysis_Program
         }
         #endregion
 
+        #region Save Setting
+
+        #region ini 입력 메소드
+        [DllImport("kernel32")]
+        private static extern long WritePrivateProfileString(string section, string key, string val, string filePath);
+        [DllImport("kernel32")]
+        private static extern int GetPrivateProfileString(string section, string key, string def, StringBuilder retVal, int size, string filePath);
+        #endregion
+
+        private void Save_Setting_Value_Click(object sender, RoutedEventArgs e)
+        {
+            WritePrivateProfileString("RADAR", "ANGLE", Angle.ToString(), "./Setting.ini");
+            WritePrivateProfileString("RADAR", "SHIFT", Shift.ToString("F2"), "./Setting.ini");
+            for(int i = 0; i < (int)((max_long / Dist_Lane_gap) + 1); i++)
+                WritePrivateProfileString("RADAR", "LANE_SHIFT" + (i + 1).ToString(), Lane_shift[i].ToString("F2"), "./Setting.ini");
+            for (int i = 0; i < 6; i++)
+                WritePrivateProfileString("RADAR", "LANE_WIDTH" + (i + 1).ToString(), Lane_width[i].ToString("F2"), "./Setting.ini");
+        }
+        private void Load_Setting_Value()
+        {
+            StringBuilder str_value = new StringBuilder();
+            GetPrivateProfileString("RADAR", "ANGLE", "", str_value, 32, "./Setting.ini");
+            if(str_value.Length != 0)
+                Angle = Convert.ToInt32(str_value.ToString());
+            GetPrivateProfileString("RADAR", "SHIFT", "", str_value, 32, "./Setting.ini");
+            if (str_value.Length != 0)
+                Shift = Convert.ToDouble(str_value.ToString());
+            for (int i = 0; i < (int)((max_long / Dist_Lane_gap) + 1); i++)
+            {
+                GetPrivateProfileString("RADAR", "LANE_SHIFT" + (i + 1).ToString(), "", str_value, 32, "./Setting.ini");
+                if (str_value.Length != 0)
+                    Lane_shift[i] = Convert.ToDouble(str_value.ToString());
+            }
+            for (int i = 0; i < 6; i++)
+            {
+                GetPrivateProfileString("RADAR", "LANE_WIDTH" + (i + 1).ToString(), "", str_value, 32, "./Setting.ini");
+                if (str_value.Length != 0)
+                    Lane_width[i] = Convert.ToDouble(str_value.ToString());
+            }
+        }
+        #endregion
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             Update_map();
