@@ -276,8 +276,9 @@
                         <CheckBox  x:Name ="text_rsc" Content ="RCS"  FontSize="12" IsChecked="False" Foreground="White"/>
                         <CheckBox  x:Name ="text_probofexist" Content ="ProbOfExist"  FontSize="12" IsChecked="False" Foreground="White"/>
                         <CheckBox  x:Name ="text_class" Content ="Class"  FontSize="12" IsChecked="False" Foreground="White"/>
-                        <CheckBox  x:Name ="text_zone" Content ="Zone"  FontSize="12" IsChecked="True" Foreground="White"/>
-                        <CheckBox  x:Name ="text_lane" Content ="Lane"  FontSize="12" IsChecked="False" Foreground="White"/>
+                        <CheckBox  x:Name ="text_zone" Content ="Zone"  FontSize="12" IsChecked="False" Foreground="White"/>
+                        <CheckBox  x:Name ="text_length" Content ="Length"  FontSize="12" IsChecked="False" Foreground="White"/>
+                        <CheckBox  x:Name ="text_width" Content ="Width"  FontSize="12" IsChecked="False" Foreground="White"/>
                     </WrapPanel>
                 </ScrollViewer>
 

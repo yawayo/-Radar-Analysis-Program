@@ -194,8 +194,8 @@ namespace Radar_Analysis_Program
         #region Draw Func
         private void Set_Obj_TextBox()
         {
-            checkBoxes = new CheckBox[] { text_time, text_id, text_distlat, text_distlong, text_vrellat, text_vrellong, text_velocity, text_rsc, text_probofexist, text_class, text_zone, text_lane };
-            checkbox_name = new String[] { "Time", "ID", "DistLat", "DistLong", "VrelLat", "VrelLong", "Velocity", "RCS", "ProbOfExist", "Class", "Zone", "Lane" };
+            checkBoxes = new CheckBox[] { text_time, text_id, text_distlat, text_distlong, text_vrellat, text_vrellong, text_velocity, text_rsc, text_probofexist, text_class, text_zone, text_length, text_width };
+            checkbox_name = new String[] { "Time", "ID", "DistLat", "DistLong", "VrelLat", "VrelLong", "Velocity", "RCS", "ProbOfExist", "Class", "Zone", "Length", "Width"};
 
             for (int i = 0; i < 100; i++)
             {
@@ -405,7 +405,10 @@ namespace Radar_Analysis_Program
             {
                 if (exist[i])
                 {
-                    if (this_frame_data[i].Velocity <= 0.0)
+                    if (this_frame_data[i].Velocity <= 3.0)
+                        this_frame_data[i].Noise = true;
+
+                    if (this_frame_data[i].Class == 7)
                         this_frame_data[i].Noise = true;
                 }
             }
@@ -460,8 +463,6 @@ namespace Radar_Analysis_Program
                     {
                         this_frame_data[i].Zone = LUT_img.At<char>(y, x);
                     }
-                    System.Console.WriteLine(this_frame_data[i].DistLat.ToString("F2") + " " + x.ToString() + " " + this_frame_data[i].Zone.ToString());
-
                     if (this_frame_data[i].Zone == 0)
                     {
                         //exist[i] = false;
@@ -530,6 +531,9 @@ namespace Radar_Analysis_Program
                     textBoxes[i].Text = CheckBox_print(i);
                     if (!this_frame_data[i].Noise)
                     {
+                        rectangles[i].StrokeThickness = 15;
+                        rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61));
+
                         Canvas.SetLeft(rectangles[i], X - (15 / 2));
                         Canvas.SetTop(rectangles[i], Y - 15);
 
@@ -544,6 +548,7 @@ namespace Radar_Analysis_Program
                         else
                         {
                             rectangles[i].Visibility = Visibility.Hidden;
+                            textBoxes[i].Visibility = Visibility.Hidden;
                         }
                     }
                     else
@@ -552,14 +557,12 @@ namespace Radar_Analysis_Program
                         rectangles[i].StrokeThickness = 3;
                         rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(100, 100, 100));
 
-                        Canvas.SetLeft(rectangles[i], X - (15 / 2));
-                        Canvas.SetTop(rectangles[i], Y - 15);
-
-                        Canvas.SetLeft(textBoxes[i], X + 10);
-                        Canvas.SetTop(textBoxes[i], Y - 18);
-
-                        textBoxes[i].Visibility = Visibility.Hidden;
-
+                        Canvas.SetLeft(rectangles[i], X - (3 / 2));
+                        Canvas.SetTop(rectangles[i], Y - 3);
+                        if ((this_frame_data[i].DistLat <= max_lat) && (this_frame_data[i].DistLat >= (-1 * max_lat)))
+                            rectangles[i].Visibility = Visibility.Visible;
+                        else
+                            rectangles[i].Visibility = Visibility.Hidden;
                     }
                 }
             }
@@ -754,12 +757,12 @@ namespace Radar_Analysis_Program
                             data.ProbOfExist = (int)reader["PROBOFEXIST"];
 
                             // Extended
-                            data.ArelLong = (double)reader["ARELLAT"];
-                            data.ArelLat = (double)reader["ARELLONG"];
+                            data.ArelLong = (double)reader["ARELLAT"] * 0.01;
+                            data.ArelLat = (double)reader["ARELLONG"] * 0.01;
                             data.Class = (int)reader["CLASS"];
-                            data.OrientationAngle = (double)reader["ORIEMTATIONANGLE"];
-                            data.Length = (double)reader["LENGTH"];
-                            data.Width = (double)reader["WIDTH"];
+                            data.OrientationAngle = (double)reader["ORIEMTATIONANGLE"] * 0.4;
+                            data.Length = (double)reader["LENGTH"] * 0.2;
+                            data.Width = (double)reader["WIDTH"] * 0.2;
 
                             // Other
                             data.Timestamp = (DateTime)reader["TIME"];
@@ -1261,7 +1264,7 @@ namespace Radar_Analysis_Program
         private string CheckBox_print(int index)
         {
             string pprint = "";
-            for (int i = 0; i < 12; i++)
+            for (int i = 0; i < 13; i++)
             {
                 string db_data = "";
                 if (checkBoxes[i].IsChecked == true)
@@ -1273,10 +1276,12 @@ namespace Radar_Analysis_Program
                     else if (i == 4) db_data = this_frame_data[index].VrelLat.ToString("0.0");
                     else if (i == 5) db_data = this_frame_data[index].VrelLong.ToString("0.0");
                     else if (i == 6) db_data = this_frame_data[index].Velocity.ToString("0.0");
-                    else if (i == 7) db_data = this_frame_data[index].RCS.ToString();
+                    else if (i == 7) db_data = this_frame_data[index].RCS.ToString("0.0");
                     else if (i == 8) db_data = this_frame_data[index].ProbOfExist.ToString();
                     else if (i == 9) db_data = this_frame_data[index].Class.ToString();
                     else if (i == 10) db_data = this_frame_data[index].Zone.ToString();
+                    else if (i == 11) db_data = this_frame_data[index].Length.ToString("0.0");
+                    else if (i == 12) db_data = this_frame_data[index].Width.ToString("0.0");
                     pprint += checkbox_name[i] + " = " + db_data + '\n';
                 }
             }
@@ -1326,6 +1331,7 @@ namespace Radar_Analysis_Program
             }
         }
         #endregion
+        
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             Update_map();
