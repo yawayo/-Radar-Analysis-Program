@@ -1413,7 +1413,7 @@ namespace Radar_Analysis_Program
             TimeSpan value_time = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum); // 현재 슬라이드 바 시간
 
 
-            TimeSpan ass = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum - 5000);
+            TimeSpan back_time = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum - 5000);
 
             TimeSpan dura = mediaElement.Position; //영상 시간 계산
 
@@ -1431,7 +1431,7 @@ namespace Radar_Analysis_Program
                     number = 0;
                     break;
                 }
-                if (_checktime <= _starttime.Add(ass))  //  _starttime.add(value_time) = 현재 시간  
+                if (_checktime <= _starttime.Add(back_time))  //  _starttime.add(value_time) = 현재 시간  
                 {
                     if (number == -1)
                     {
@@ -1453,7 +1453,7 @@ namespace Radar_Analysis_Program
                 a++;
             }
 
-            dura = ass;
+            dura = back_time;
             dbcomparetime = _starttime.Add(dura).ToString("yyyy-MM-dd HH:mm:ss.fff");
             dbcompareDT = _starttime.Add(dura);
 
