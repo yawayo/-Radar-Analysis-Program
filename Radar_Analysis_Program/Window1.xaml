@@ -89,6 +89,10 @@
                 <Button x:Name="ShiftUp" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▲" Width="10" Margin="33,2,1,13" Click="ShiftUp_Click"/>
                 <Button x:Name="ShiftDown" x:FieldModifier="private" FontSize="10" Padding="0,-4,0,0" Content="▼" Width="10" Margin="33,12,1,3" Click="ShiftDown_Click"/>
             </Grid>
+            <Label Grid.Row="3" Content="MIN ID" Foreground="White" FontSize="14" FontFamily="KoPub바탕체_Pro Medium" HorizontalAlignment="Center"/>
+            <TextBox Grid.Row="3" x:Name="MINIDText" x:FieldModifier="private" Text="0" Width="50" Height="23" HorizontalAlignment="Center" TextChanged="MINID_Value_Changed" PreviewTextInput="NumberValidationTextBox"/>
+            <Label Grid.Row="4" Content="MAX ID" Foreground="White" FontSize="14" FontFamily="KoPub바탕체_Pro Medium" HorizontalAlignment="Center"/>
+            <TextBox Grid.Row="4" x:Name="MAXIDText" x:FieldModifier="private" Text="100" Width="50" Height="23" HorizontalAlignment="Center" TextChanged="MAXID_Value_Changed" PreviewTextInput="NumberValidationTextBox"/>
             <Button Grid.Row="8" x:Name="Save_Setting_Value_btn" FontSize="16" FontWeight="Bold"  Content="Save" Width="50" Height="23" Click="Save_Setting_Value_Click"/>
         </Grid>
         

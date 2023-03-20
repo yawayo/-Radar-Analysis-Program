@@ -10,6 +10,8 @@ using Microsoft.Win32;
 using MySql.Data.MySqlClient;
 using OpenCvSharp;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
+using System.Windows.Input;
 namespace Radar_Analysis_Program
 {
     /// <summary>
@@ -78,6 +80,8 @@ namespace Radar_Analysis_Program
         public double Shift = 17.40;
         public int Angle = 20;
 
+        private int MINID = 0;
+        private int MAXID = 99;
 
         #region ACTIVE
         public static bool Filter_NofObj_ACTIVE = false;
@@ -529,7 +533,7 @@ namespace Radar_Analysis_Program
                     int Y = (int)(Data_Draw.ActualHeight * ((max_long + Dist_Lane_gap - this_frame_data[i].DistLong - (Dist_Lane_gap / 2)) / (max_long + Dist_Lane_gap)));
 
                     textBoxes[i].Text = CheckBox_print(i);
-                    if (!this_frame_data[i].Noise)
+                    if (!this_frame_data[i].Noise && ((i >= MINID) && (i <= MAXID)))
                     {
                         rectangles[i].StrokeThickness = 15;
                         rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61));
@@ -961,6 +965,46 @@ namespace Radar_Analysis_Program
         }
         #endregion
 
+        #region Set MIN & MAX ID
+        private void MINID_Value_Changed(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                MINID = Convert.ToInt32(MINIDText.Text);
+                if ((MINID < 0) || (MINID > 99))
+                {
+                    MINID = 0;
+                    MINIDText.Text = MINID.ToString();
+                }
+            }
+            catch
+            {
+                MINIDText.Text = (0).ToString();
+            }
+        }
+        private void MAXID_Value_Changed(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                MAXID = Convert.ToInt32(MAXIDText.Text);
+                if ((MAXID < 0) || (MAXID > 99))
+                {
+                    MAXID = 99;
+                    MAXIDText.Text = MAXID.ToString();
+                }
+            }
+            catch
+            {
+                MAXIDText.Text = (99).ToString();
+            }
+        }
+        private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex("[^0-9]+");
+            e.Handled = regex.IsMatch(e.Text);
+        }
+        #endregion
+
         #endregion
 
         #region Set Angle & Shift
@@ -1336,5 +1380,6 @@ namespace Radar_Analysis_Program
         {
             Update_map();
         }
+
     }
 }
