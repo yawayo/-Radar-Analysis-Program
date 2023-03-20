@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UI_test_01"
         mc:Ignorable="d"
-        Title="Window1" Height="900" Width="1600" WindowStyle="None" Visibility="Visible" BorderBrush="Black" WindowStartupLocation="CenterScreen" SizeChanged="Window_SizeChanged" >
+        Title="Window1" Height="900" Width="1600"  Visibility="Visible" BorderBrush="Black" WindowStartupLocation="CenterScreen" SizeChanged="Window_SizeChanged" >
     <Grid x:Name="Main_grid" Background="#FF212528" OpacityMask="#FF212528">
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
@@ -245,6 +245,9 @@
                     </Button>
                     <CheckBox Name="CheckBox"  Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"  IsChecked="True"/>
                 </WrapPanel>
+                <Button x:Name="slow" Content="0.5" HorizontalAlignment="Left" Margin="499,6,0,0" Grid.Row="3" VerticalAlignment="Top" Width="75" Click="slow_Click"/>
+                <Button x:Name="normal" Content="1.0" HorizontalAlignment="Left" Margin="586,6,0,0" Grid.Row="3" VerticalAlignment="Top" Width="74" Click="normal_Click"/>
+                <Button x:Name="back" Content="5초 전" HorizontalAlignment="Left" Margin="413,6,0,0" Grid.Row="3" VerticalAlignment="Top" Width="74" Click="back_Click"/>
             </Grid>
         </Border>
 
@@ -283,6 +286,7 @@
                         <CheckBox  x:Name ="text_zone" Content ="Zone"  FontSize="12" IsChecked="False" Foreground="White"/>
                         <CheckBox  x:Name ="text_length" Content ="Length"  FontSize="12" IsChecked="False" Foreground="White"/>
                         <CheckBox  x:Name ="text_width" Content ="Width"  FontSize="12" IsChecked="False" Foreground="White"/>
+                        <CheckBox  x:Name ="text_DynProp" Content ="DynProp"  FontSize="12" IsChecked="False" Foreground="White"/>
                     </WrapPanel>
                 </ScrollViewer>
 

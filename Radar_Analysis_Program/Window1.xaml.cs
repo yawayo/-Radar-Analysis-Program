@@ -198,8 +198,8 @@ namespace Radar_Analysis_Program
         #region Draw Func
         private void Set_Obj_TextBox()
         {
-            checkBoxes = new CheckBox[] { text_time, text_id, text_distlat, text_distlong, text_vrellat, text_vrellong, text_velocity, text_rsc, text_probofexist, text_class, text_zone, text_length, text_width };
-            checkbox_name = new String[] { "Time", "ID", "DistLat", "DistLong", "VrelLat", "VrelLong", "Velocity", "RCS", "ProbOfExist", "Class", "Zone", "Length", "Width"};
+            checkBoxes = new CheckBox[] { text_time, text_id, text_distlat, text_distlong, text_vrellat, text_vrellong, text_velocity, text_rsc, text_probofexist, text_class, text_zone, text_length, text_width , text_DynProp };
+            checkbox_name = new String[] { "Time", "ID", "DistLat", "DistLong", "VrelLat", "VrelLong", "Velocity", "RCS", "ProbOfExist", "Class", "Zone", "Length", "Width", "DynProp" };
 
             for (int i = 0; i < 100; i++)
             {
@@ -207,6 +207,7 @@ namespace Radar_Analysis_Program
                 textBox.Text = "";
                 textBox.VerticalAlignment = VerticalAlignment.Center;
                 textBox.Margin = new Thickness(10, 0, 0, 0);
+             
                 textBoxes[i] = textBox;
 
                 textBoxes[i].Visibility = Visibility.Hidden;
@@ -417,6 +418,7 @@ namespace Radar_Analysis_Program
                 }
             }
         }
+
         private void Radar_Filter_Setting()
         {
             for (int i = 0; i < 100; i++)
@@ -570,7 +572,7 @@ namespace Radar_Analysis_Program
                     }
                 }
             }
-            textblock1 = dbcomparetime;
+           
         }
         private void Clear_this_frame_obj_data()
         {
@@ -710,15 +712,15 @@ namespace Radar_Analysis_Program
 
 
             dbcompareDT2 = _starttime.Add(dura);
-            textblock6 = dbcompareDT2.ToString("yyyy-MM-dd HH:mm:ss.fff"); //영상 시간 
+           // textblock6 = dbcompareDT2.ToString("yyyy-MM-dd HH:mm:ss.fff"); //영상 시간 
 
             TimeSpan ts = new TimeSpan(0, 0, 0, 0, 300);
             double at = dura.TotalMilliseconds - diff2.TotalMilliseconds;
 
-            textblock7 = at.ToString(); // 시간 차이 
-            textblock5 = dbcompareDT.ToString("yyyy-MM-dd HH:mm:ss.fff"); //db 시간
-            textblock4 = number.ToString();
-            text_str = textblock1 + "\n" + textblock2 + "\n" + textblock3 + "\n" + textblock4 + "\n" + textblock5 + "\n" + textblock6 + "\n" + textblock7;
+          
+            textblock2 = dbcompareDT.ToString("yyyy-MM-dd HH:mm:ss.fff"); //db 시간
+            textblock1 = number.ToString();
+            text_str = textblock1 + "\n" + textblock2;
 
             Data_Text.Text = text_str;
         }
@@ -1308,7 +1310,7 @@ namespace Radar_Analysis_Program
         private string CheckBox_print(int index)
         {
             string pprint = "";
-            for (int i = 0; i < 13; i++)
+            for (int i = 0; i < 14; i++)
             {
                 string db_data = "";
                 if (checkBoxes[i].IsChecked == true)
@@ -1326,6 +1328,7 @@ namespace Radar_Analysis_Program
                     else if (i == 10) db_data = this_frame_data[index].Zone.ToString();
                     else if (i == 11) db_data = this_frame_data[index].Length.ToString("0.0");
                     else if (i == 12) db_data = this_frame_data[index].Width.ToString("0.0");
+                    else if (i == 13) db_data = this_frame_data[index].DynProp.ToString();
                     pprint += checkbox_name[i] + " = " + db_data + '\n';
                 }
             }
@@ -1380,6 +1383,87 @@ namespace Radar_Analysis_Program
         {
             Update_map();
         }
+
+        private void slow_Click(object sender, RoutedEventArgs e)
+        {
+            mediaElement.SpeedRatio = 0.5;
+        }
+
+        private void normal_Click(object sender, RoutedEventArgs e)
+        {
+            mediaElement.SpeedRatio = 1.0;
+        }
+
+        private void back_Click(object sender, RoutedEventArgs e)
+        {
+            mediaElement.Stop();
+            timer.Stop();
+
+            for (int i = 0; i < 100; i++)
+            {
+                if (Data_Draw.Children.Contains(rectangles[i]))
+                {
+                    Data_Draw.Children.Remove(rectangles[i]);
+                    textBoxes[i].Visibility = Visibility.Hidden;
+                }
+                Obj_inf[i].Clear();
+            }
+            Clear_this_frame_obj_data();
+            int a = 0;
+            TimeSpan value_time = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum); // 현재 슬라이드 바 시간
+
+
+            TimeSpan ass = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum - 5000);
+
+            TimeSpan dura = mediaElement.Position; //영상 시간 계산
+
+            dura = dura.Subtract(TimeSpan.FromSeconds(5));
+
+
+            while (a < dataList.Count)
+            {
+                try   // number 값이 없을 때 
+                {
+                    _checktime = dataList[number].Timestamp;
+                }
+                catch
+                {
+                    number = 0;
+                    break;
+                }
+                if (_checktime <= _starttime.Add(ass))  //  _starttime.add(value_time) = 현재 시간  
+                {
+                    if (number == -1)
+                    {
+                        number = 0;
+                    }
+                    break;
+                }
+                else
+                {
+                    number--;
+                    if (number >= 0)
+                    {
+                        while (dataList[number].Timestamp != dataList[number + 1].Timestamp)
+                        {
+                            number--;
+                        }
+                    }
+                }
+                a++;
+            }
+
+            dura = ass;
+            dbcomparetime = _starttime.Add(dura).ToString("yyyy-MM-dd HH:mm:ss.fff");
+            dbcompareDT = _starttime.Add(dura);
+
+
+            mediaElement.Position = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum-5000);
+            mediaElement.Play();
+            timer.Start();
+        }
+
+
 
     }
 }
