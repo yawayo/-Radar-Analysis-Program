@@ -9,9 +9,11 @@ using System.Text;
 using Microsoft.Win32;
 using MySql.Data.MySqlClient;
 using OpenCvSharp;
+using OpenCvSharp.Extensions;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
+
 namespace Radar_Analysis_Program
 {
     /// <summary>
@@ -48,9 +50,7 @@ namespace Radar_Analysis_Program
         int number = 0; // DB  n 번째 
 
         double _previousValue_check = 0; //슬라이더 값 +, -  체크
-        int drag_move_check = 0;
         int speed_check = 0;
-        int drag_check = 0;
 
         string dbcomparetime;
         string text_str = "";
@@ -396,8 +396,12 @@ namespace Radar_Analysis_Program
 
                     Radar_Filter_Setting();
                     radar_RotateShift();
+
+                    Object_Kalman();
+
                     check_zone_index();
                     test_code();
+    
                     save_this_frame_obj_data();
                     draw_this_frame_obj_data();
                     Clear_this_frame_obj_data();
@@ -410,15 +414,26 @@ namespace Radar_Analysis_Program
             {
                 if (exist[i])
                 {
-                    if (this_frame_data[i].Velocity <= 3.0)
+                    if (this_frame_data[i].Velocity <= 3.0 || this_frame_data[i].VrelLat > 13 || this_frame_data[i].VrelLat < -13) //가로 방향 큰 값. 
                         this_frame_data[i].Noise = true;
 
-                    if (this_frame_data[i].Class == 7)
+                    //if (this_frame_data[i].Length <0.8) 
+                    //    this_frame_data[i].Noise = true;
+
+                    //if (this_frame_data[i].Class == 7 && this_frame_data[i].ProbOfExist <= 3)  //확률 낮고 모르는 객체
+                    //    this_frame_data[i].Noise = true;           
+
+                    if (this_frame_data[i].Class == 7 && (this_frame_data[i].VrelLat_rms >= 28 || this_frame_data[i].VrelLong_rms >= 28))  //표준편차 큰 값 제거.
                         this_frame_data[i].Noise = true;
+
+                    if ( this_frame_data[i].DistLat >0 && this_frame_data[i].VrelLong > 0)  //역주행
+                        this_frame_data[i].Noise = true;
+                    if (this_frame_data[i].DistLat <0 && this_frame_data[i].VrelLong < 0)
+                        this_frame_data[i].Noise = true;
+
                 }
             }
         }
-
         private void Radar_Filter_Setting()
         {
             for (int i = 0; i < 100; i++)
@@ -476,7 +491,6 @@ namespace Radar_Analysis_Program
                 }
             }
         }
-
         private void save_this_frame_obj_data()
         {
             for (int i = 0; i < 100; i++)
@@ -511,8 +525,10 @@ namespace Radar_Analysis_Program
                     if (Obj_inf[i].Count != 0)
                     {
                         TimeSpan difTime = dbcompareDT - Obj_inf[i].Last.Value.Timestamp;
+                        
                         if ((difTime.Seconds > 0) || (difTime.Milliseconds > 300))
                         {
+                            
                             Obj_inf[i].Clear();
 
                             if (Data_Draw.Children.Contains(rectangles[i]))
@@ -521,10 +537,110 @@ namespace Radar_Analysis_Program
                                 textBoxes[i].Visibility = Visibility.Hidden;
                             }
                         }
+
                     }
                 }
             }
         }
+
+        double KalmanFilter(double X, double Z, double P_value)
+        {
+
+            double x_next, P_next, x, P, K, Q, R;
+
+            P = P_value;
+            Q = 0.022;
+            R = 0.117;
+
+            x_next = X;
+            P_next = P + Q;
+            K = P_next / (P_next + R);
+            x = x_next + K * (Z - x_next);
+            P = (1 - K) * P_next;
+
+            return x;
+        }
+
+  
+        private void Object_Kalman()
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                if (exist[i])  //부드럽게 하는 보정 부분
+                {
+                    if (Obj_inf[i].Count != 0)
+                    {
+                        double last_data_DistLat = Obj_inf[i].Last.Value.DistLat;
+                        double last_data_DistLong = Obj_inf[i].Last.Value.DistLong;
+
+                        if (Math.Abs(last_data_DistLat - this_frame_data[i].DistLat) < 10 && Math.Abs(last_data_DistLong - this_frame_data[i].DistLong) < 30)
+                        {
+                            this_frame_data[i].DistLat = KalmanFilter(last_data_DistLat, this_frame_data[i].DistLat, 0.0);
+                            this_frame_data[i].DistLong = KalmanFilter(last_data_DistLong, this_frame_data[i].DistLong, 1.0);
+                        }
+                        else   // 거리가 멀어졌으면 같은 ID 다른 객체가 입력됨. 그러므로 삭제   
+                        {    // ( 선형 알고리즘에 의해 가까울 수 밖에 없음. )
+                            if (Obj_inf[i].Count != 0)
+                            {                
+                                Obj_inf[i].Clear();
+
+                                if (Data_Draw.Children.Contains(rectangles[i]))
+                                {
+                                    Data_Draw.Children.Remove(rectangles[i]);
+                                    textBoxes[i].Visibility = Visibility.Hidden;
+                                }
+                            }
+                        }
+
+                    }
+                }
+                else   // 2초 동안 표출하는 부분       //존재하지 않지만  last_data를 이용하여 일정 시간동안 출력 . 
+                { 
+                    if (Obj_inf[i].Count != 0)
+                    {
+                     
+
+                        double last_data_DistLat = Obj_inf[i].Last.Value.DistLat;
+                        double last_data_DistLong = Obj_inf[i].Last.Value.DistLong;
+
+                        TimeSpan difTime = dbcompareDT - Obj_inf[i].Last.Value.Timestamp;
+
+                        if ((difTime.Seconds > 2) || (difTime.Milliseconds > 2000))   // 2초 이후에는 삭제 
+                        {
+
+                            Obj_inf[i].Clear();
+                            if (Data_Draw.Children.Contains(rectangles[i]))
+                            {
+                                Data_Draw.Children.Remove(rectangles[i]);
+                                textBoxes[i].Visibility = Visibility.Hidden;
+                            }
+
+                        }
+
+                        else // 2초 전까지는 출력 
+                        {
+                            if(Obj_inf[i].Count>=2)  // 2개 이상이라면  그 전전 데이터 , 전 데이터를 이용하여 현재 프레임에 출력., 
+                            {
+                                double last_last_data_DistLat = Obj_inf[i].Last.Previous.Value.DistLat;
+                                double last_last_data_DistLong = Obj_inf[i].Last.Previous.Value.DistLong;
+                                Obj_inf[i].Last.Value.DistLat = KalmanFilter(last_last_data_DistLat, last_data_DistLat, 0.0);
+                                Obj_inf[i].Last.Value.DistLong = KalmanFilter(last_last_data_DistLong, last_data_DistLong, 1.0);
+                                Obj_inf[i].Last.Value.Timestamp = dbcompareDT;
+                                exist[i] = true;
+
+                                this_frame_data[i] = Obj_inf[i].Last.Value;
+                            }
+                        }
+                    }
+
+                }
+
+
+
+
+            }
+        }
+
         private void draw_this_frame_obj_data()
         {
             for (int i = 0; i < 100; i++)
@@ -1192,7 +1308,7 @@ namespace Radar_Analysis_Program
         {
             mediaElement.Pause();
             timer.Stop();
-            drag_check = 1;
+           
         }
         private void slider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
         {
@@ -1379,6 +1495,8 @@ namespace Radar_Analysis_Program
         }
         #endregion
         
+
+
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             Update_map();
