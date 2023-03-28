@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
 
+
 namespace Radar_Analysis_Program
 {
     /// <summary>
@@ -26,14 +27,15 @@ namespace Radar_Analysis_Program
         public CheckBox[] checkBoxes;
         public String[] checkbox_name;
 
-        TextBox[] textBoxes = new TextBox[100];
-        Rectangle[] rectangles = new Rectangle[100];
+
+        public const int MAX_NODE = 200;
+
+        TextBox[] textBoxes = new TextBox[MAX_NODE];
+        Rectangle[] rectangles = new Rectangle[MAX_NODE];
         Polyline[] dist_lines = new Polyline[20];
         Grid[] dist_line_texts = new Grid[20];
-        Polyline[] car_lanes = new Polyline[100];
+        Polyline[] car_lanes = new Polyline[MAX_NODE];
         Mat LUT_img = new Mat(new OpenCvSharp.Size(400, 800), MatType.CV_8UC1, 0);
-
-        DateTime[] dates = new DateTime[100];
 
         DateTime _starttime;
         DateTime _checktime;
@@ -73,9 +75,10 @@ namespace Radar_Analysis_Program
         private double[] Lane_Point = new double[6 + 1] { -9.9f, -6.6f, -3.3f, 0.0f, 3.3f, 6.6f, 9.9f };
         private double Dist_Lane_gap = 25.0f;
 
-        private MyDataModel[] this_frame_data = new MyDataModel[100];
-        private bool[] exist = new bool[100];
-        public LinkedList<MyDataModel>[] Obj_inf = new LinkedList<MyDataModel>[100];
+        private MyDataModel[] this_frame_data = new MyDataModel[MAX_NODE];
+        private bool[] exist = new bool[MAX_NODE];
+        private int[] LUT_ID = new int[MAX_NODE];
+        public LinkedList<MyDataModel>[] Obj_inf = new LinkedList<MyDataModel>[MAX_NODE];
 
         public double Shift = 17.40;
         public int Angle = 20;
@@ -173,6 +176,9 @@ namespace Radar_Analysis_Program
             public double Size;
             public int Zone;
             public bool Noise;
+            public bool Virtual;
+
+            public bool Finish_Analyzing;
 
             public object Clone()
             {
@@ -186,8 +192,13 @@ namespace Radar_Analysis_Program
             InitializeComponent();
 
 
-            for (int NODE = 0; NODE < 100; NODE++)
+            for (int NODE = 0; NODE < MAX_NODE; NODE++)
+            {
                 Obj_inf[NODE] = new LinkedList<MyDataModel>();
+                LUT_ID[NODE] = -1;
+                exist[NODE] = false;
+                Obj_inf[NODE].Clear();
+            }
             
             Load_Setting_Value();
             Set_Obj_TextBox();
@@ -201,7 +212,7 @@ namespace Radar_Analysis_Program
             checkBoxes = new CheckBox[] { text_time, text_id, text_distlat, text_distlong, text_vrellat, text_vrellong, text_velocity, text_rsc, text_probofexist, text_class, text_zone, text_length, text_width , text_DynProp };
             checkbox_name = new String[] { "Time", "ID", "DistLat", "DistLong", "VrelLat", "VrelLong", "Velocity", "RCS", "ProbOfExist", "Class", "Zone", "Length", "Width", "DynProp" };
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < MAX_NODE; i++)
             {
                 TextBox textBox = new TextBox();
                 textBox.Text = "";
@@ -397,8 +408,9 @@ namespace Radar_Analysis_Program
                     Radar_Filter_Setting();
                     radar_RotateShift();
 
-                    Object_Kalman();
+                    Check_New_Obj();
 
+                    Object_Kalman();
                     check_zone_index();
                     test_code();
     
@@ -408,35 +420,9 @@ namespace Radar_Analysis_Program
                 }
             }
         }
-        private void test_code()
-        {
-            for (int i = 0; i < 100; i++)
-            {
-                if (exist[i])
-                {
-                    if (this_frame_data[i].Velocity <= 3.0 || this_frame_data[i].VrelLat > 13 || this_frame_data[i].VrelLat < -13) //가로 방향 큰 값. 
-                        this_frame_data[i].Noise = true;
-
-                    //if (this_frame_data[i].Length <0.8) 
-                    //    this_frame_data[i].Noise = true;
-
-                    //if (this_frame_data[i].Class == 7 && this_frame_data[i].ProbOfExist <= 3)  //확률 낮고 모르는 객체
-                    //    this_frame_data[i].Noise = true;           
-
-                    if (this_frame_data[i].Class == 7 && (this_frame_data[i].VrelLat_rms >= 28 || this_frame_data[i].VrelLong_rms >= 28))  //표준편차 큰 값 제거.
-                        this_frame_data[i].Noise = true;
-
-                    if ( this_frame_data[i].DistLat >0 && this_frame_data[i].VrelLong > 0)  //역주행
-                        this_frame_data[i].Noise = true;
-                    if (this_frame_data[i].DistLat <0 && this_frame_data[i].VrelLong < 0)
-                        this_frame_data[i].Noise = true;
-
-                }
-            }
-        }
         private void Radar_Filter_Setting()
         {
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < MAX_NODE; i++)
             {
                 if (exist[i])
                 {
@@ -461,7 +447,7 @@ namespace Radar_Analysis_Program
         private void radar_RotateShift()
         {
             double Radian = Angle * (Math.PI / 180);
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < MAX_NODE; i++)
             {
                 if (exist[i])
                 {
@@ -472,9 +458,138 @@ namespace Radar_Analysis_Program
                 }
             }
         }
+        private void Check_New_Obj()
+        {
+            for (int i = 0; i < MAX_NODE; i++)
+            {
+                if (exist[i])
+                {
+                    if (Obj_inf[i].Count >= 5)
+                    {
+                        this_frame_data[i].Finish_Analyzing = true;
+
+                        MyDataModel First_obj = Obj_inf[i].First.Value;
+                        if (Math.Abs(First_obj.DistLat - this_frame_data[i].DistLat) < 3 && Math.Abs(First_obj.DistLong - this_frame_data[i].DistLong) < 3)
+                        {
+                            this_frame_data[i].Noise = true;
+                        }
+
+                        MyDataModel Last_obj = Obj_inf[i].Last.Value;
+                        if ((Math.Abs(Last_obj.DistLong - this_frame_data[i].DistLong) > 3) || (Math.Abs(Last_obj.DistLat - this_frame_data[i].DistLat) > 3))
+                        {
+                            Obj_inf[i].Clear();
+                            if (Data_Draw.Children.Contains(rectangles[i]))
+                            {
+                                Data_Draw.Children.Remove(rectangles[i]);
+                                textBoxes[i].Visibility = Visibility.Hidden;
+                                this_frame_data[i].Finish_Analyzing = false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        private void test_code()
+        {
+            for (int i = 0; i < MAX_NODE; i++)
+            {
+                if (exist[i])
+                {
+                    /* if (this_frame_data[i].Velocity <= 3.0 || this_frame_data[i].VrelLat > 13 || this_frame_data[i].VrelLat < -13) //가로 방향 큰 값. 
+                         this_frame_data[i].Noise = true;*/
+
+                    //if (this_frame_data[i].Length <0.8) 
+                    //    this_frame_data[i].Noise = true;
+
+                    //if (this_frame_data[i].Class == 7 && this_frame_data[i].ProbOfExist <= 3)  //확률 낮고 모르는 객체
+                    //    this_frame_data[i].Noise = true;           
+
+                    /*if (this_frame_data[i].Class == 7 && (this_frame_data[i].VrelLat_rms >= 28 || this_frame_data[i].VrelLong_rms >= 28))  //표준편차 큰 값 제거.
+                        this_frame_data[i].Noise = true;
+
+                    if ( this_frame_data[i].DistLat > 0 && this_frame_data[i].VrelLong > 0)  //역주행
+                        this_frame_data[i].Noise = true;
+
+                    if (this_frame_data[i].DistLat < 0 && this_frame_data[i].VrelLong < 0)
+                        this_frame_data[i].Noise = true;*/
+
+
+                }
+            }
+        }
+        double KalmanFilter(double X, double Z, double P_value)
+        {
+
+            double x_next, P_next, x, P, K, Q, R;
+
+            P = P_value;
+            Q = 0.022;
+            R = 0.117;
+
+            x_next = X;
+            P_next = P + Q;
+            K = P_next / (P_next + R);
+            x = x_next + K * (Z - x_next);
+            P = (1 - K) * P_next;
+
+            return x;
+        }
+        private void Object_Kalman()
+        {
+            for (int i = 0; i < MAX_NODE; i++)
+            {
+                if (exist[i])  //부드럽게 하는 보정 부분
+                {
+                    if (Obj_inf[i].Count != 0)
+                    {
+                        MyDataModel last_data = Obj_inf[i].Last.Value;
+                        double last_data_DistLat = last_data.DistLat;
+                        double last_data_DistLong = last_data.DistLong;
+
+                        if (Math.Abs(last_data_DistLat - this_frame_data[i].DistLat) < 3 && Math.Abs(last_data_DistLong - this_frame_data[i].DistLong) < 3)
+                        {
+                            this_frame_data[i].DistLat = KalmanFilter(last_data_DistLat, this_frame_data[i].DistLat, 0.0);
+                            this_frame_data[i].DistLong = KalmanFilter(last_data_DistLong, this_frame_data[i].DistLong, 1.0);
+                        }
+                        else   // 거리가 멀어졌으면 같은 ID 다른 객체가 입력됨. 그러므로 삭제   
+                        {    // ( 선형 알고리즘에 의해 가까울 수 밖에 없음. )
+                            if (Obj_inf[i].Count != 0)
+                            {
+                                Obj_inf[i].Clear();
+
+                                if (Data_Draw.Children.Contains(rectangles[i]))
+                                {
+                                    Data_Draw.Children.Remove(rectangles[i]);
+                                    textBoxes[i].Visibility = Visibility.Hidden;
+                                }
+                            }
+                        }
+
+                    }
+                }
+                else
+                {
+                    if (Obj_inf[i].Count >= 2)
+                    {
+                        MyDataModel last_data = (MyDataModel)Obj_inf[i].Last.Value.Clone();
+                        if (last_data.Finish_Analyzing)
+                        {
+                            MyDataModel last_last_data = Obj_inf[i].Last.Previous.Value;
+
+                            last_data.DistLat = KalmanFilter(last_last_data.DistLat, last_data.DistLat, 0.0);
+                            last_data.DistLong = KalmanFilter(last_last_data.DistLong, last_data.DistLong, 1.0);
+                            //last_data.Timestamp = dbcompareDT;
+                            exist[i] = true;
+                            this_frame_data[i] = last_data;
+                            this_frame_data[i].Virtual = true;
+                        }
+                    }
+                }
+            }
+        }
         private void check_zone_index()
         {
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < MAX_NODE; i++)
             {
                 if (exist[i])
                 {
@@ -493,7 +608,7 @@ namespace Radar_Analysis_Program
         }
         private void save_this_frame_obj_data()
         {
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < MAX_NODE; i++)
             {
                 if (exist[i])
                 {
@@ -528,7 +643,6 @@ namespace Radar_Analysis_Program
                         
                         if ((difTime.Seconds > 0) || (difTime.Milliseconds > 300))
                         {
-                            
                             Obj_inf[i].Clear();
 
                             if (Data_Draw.Children.Contains(rectangles[i]))
@@ -540,110 +654,12 @@ namespace Radar_Analysis_Program
 
                     }
                 }
-            }
-        }
-
-        double KalmanFilter(double X, double Z, double P_value)
-        {
-
-            double x_next, P_next, x, P, K, Q, R;
-
-            P = P_value;
-            Q = 0.022;
-            R = 0.117;
-
-            x_next = X;
-            P_next = P + Q;
-            K = P_next / (P_next + R);
-            x = x_next + K * (Z - x_next);
-            P = (1 - K) * P_next;
-
-            return x;
-        }
-
-  
-        private void Object_Kalman()
-        {
-            for (int i = 0; i < 100; i++)
-            {
-                if (exist[i])  //부드럽게 하는 보정 부분
-                {
-                    if (Obj_inf[i].Count != 0)
-                    {
-                        double last_data_DistLat = Obj_inf[i].Last.Value.DistLat;
-                        double last_data_DistLong = Obj_inf[i].Last.Value.DistLong;
-
-                        if (Math.Abs(last_data_DistLat - this_frame_data[i].DistLat) < 10 && Math.Abs(last_data_DistLong - this_frame_data[i].DistLong) < 30)
-                        {
-                            this_frame_data[i].DistLat = KalmanFilter(last_data_DistLat, this_frame_data[i].DistLat, 0.0);
-                            this_frame_data[i].DistLong = KalmanFilter(last_data_DistLong, this_frame_data[i].DistLong, 1.0);
-                        }
-                        else   // 거리가 멀어졌으면 같은 ID 다른 객체가 입력됨. 그러므로 삭제   
-                        {    // ( 선형 알고리즘에 의해 가까울 수 밖에 없음. )
-                            if (Obj_inf[i].Count != 0)
-                            {                
-                                Obj_inf[i].Clear();
-
-                                if (Data_Draw.Children.Contains(rectangles[i]))
-                                {
-                                    Data_Draw.Children.Remove(rectangles[i]);
-                                    textBoxes[i].Visibility = Visibility.Hidden;
-                                }
-                            }
-                        }
-
-                    }
-                }
-                else   // 2초 동안 표출하는 부분       //존재하지 않지만  last_data를 이용하여 일정 시간동안 출력 . 
-                { 
-                    if (Obj_inf[i].Count != 0)
-                    {
-                     
-
-                        double last_data_DistLat = Obj_inf[i].Last.Value.DistLat;
-                        double last_data_DistLong = Obj_inf[i].Last.Value.DistLong;
-
-                        TimeSpan difTime = dbcompareDT - Obj_inf[i].Last.Value.Timestamp;
-
-                        if ((difTime.Seconds > 2) || (difTime.Milliseconds > 2000))   // 2초 이후에는 삭제 
-                        {
-
-                            Obj_inf[i].Clear();
-                            if (Data_Draw.Children.Contains(rectangles[i]))
-                            {
-                                Data_Draw.Children.Remove(rectangles[i]);
-                                textBoxes[i].Visibility = Visibility.Hidden;
-                            }
-
-                        }
-
-                        else // 2초 전까지는 출력 
-                        {
-                            if(Obj_inf[i].Count>=2)  // 2개 이상이라면  그 전전 데이터 , 전 데이터를 이용하여 현재 프레임에 출력., 
-                            {
-                                double last_last_data_DistLat = Obj_inf[i].Last.Previous.Value.DistLat;
-                                double last_last_data_DistLong = Obj_inf[i].Last.Previous.Value.DistLong;
-                                Obj_inf[i].Last.Value.DistLat = KalmanFilter(last_last_data_DistLat, last_data_DistLat, 0.0);
-                                Obj_inf[i].Last.Value.DistLong = KalmanFilter(last_last_data_DistLong, last_data_DistLong, 1.0);
-                                Obj_inf[i].Last.Value.Timestamp = dbcompareDT;
-                                exist[i] = true;
-
-                                this_frame_data[i] = Obj_inf[i].Last.Value;
-                            }
-                        }
-                    }
-
-                }
-
-
-
-
             }
         }
 
         private void draw_this_frame_obj_data()
         {
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < MAX_NODE; i++)
             {
                 if (exist[i])
                 {
@@ -653,12 +669,20 @@ namespace Radar_Analysis_Program
                     textBoxes[i].Text = CheckBox_print(i);
                     if (!this_frame_data[i].Noise && ((i >= MINID) && (i <= MAXID)))
                     {
-                        rectangles[i].StrokeThickness = 15;
-                        rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61));
-
-                        Canvas.SetLeft(rectangles[i], X - (15 / 2));
-                        Canvas.SetTop(rectangles[i], Y - 15);
-
+                        if (this_frame_data[i].Finish_Analyzing)
+                        {
+                            rectangles[i].StrokeThickness = 15;
+                            rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61));
+                            Canvas.SetLeft(rectangles[i], X - (15 / 2));
+                            Canvas.SetTop(rectangles[i], Y - 15);
+                        }
+                        else
+                        {
+                            rectangles[i].StrokeThickness = 8;
+                            rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(50, 50, 50));
+                            Canvas.SetLeft(rectangles[i], X - (8 / 2));
+                            Canvas.SetTop(rectangles[i], Y - 8);
+                        }
                         Canvas.SetLeft(textBoxes[i], X + 10);
                         Canvas.SetTop(textBoxes[i], Y - 18);
 
@@ -692,9 +716,9 @@ namespace Radar_Analysis_Program
         }
         private void Clear_this_frame_obj_data()
         {
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < MAX_NODE; i++)
                 this_frame_data[i] = default(MyDataModel);
-            System.Array.Clear(exist, 0, sizeof(bool) * 100);
+            System.Array.Clear(exist, 0, sizeof(bool) * MAX_NODE);
         }
 
         #region Filter Setting
@@ -1200,7 +1224,7 @@ namespace Radar_Analysis_Program
 
             slider.Maximum = slider.Minimum + durationMs;
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < MAX_NODE; i++)
             {
                 if (Data_Draw.Children.Contains(rectangles[i]))
                 {
@@ -1316,7 +1340,7 @@ namespace Radar_Analysis_Program
 
             TimeSpan value_time = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum);
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < MAX_NODE; i++)
             {
                 if (Data_Draw.Children.Contains(rectangles[i]))
                 {
@@ -1409,7 +1433,7 @@ namespace Radar_Analysis_Program
         #region checkBox
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < MAX_NODE; i++)
             {
                 if (textBoxes[i] != null)
                     textBoxes[i].Visibility = Visibility.Visible;
@@ -1417,7 +1441,7 @@ namespace Radar_Analysis_Program
         }
         private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < MAX_NODE; i++)
             {
                 if (textBoxes[i] != null)
                     textBoxes[i].Visibility = Visibility.Hidden;
@@ -1495,8 +1519,6 @@ namespace Radar_Analysis_Program
         }
         #endregion
         
-
-
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             Update_map();
@@ -1506,18 +1528,16 @@ namespace Radar_Analysis_Program
         {
             mediaElement.SpeedRatio = 0.5;
         }
-
         private void normal_Click(object sender, RoutedEventArgs e)
         {
             mediaElement.SpeedRatio = 1.0;
         }
-
         private void back_Click(object sender, RoutedEventArgs e)
         {
             mediaElement.Stop();
             timer.Stop();
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < MAX_NODE; i++)
             {
                 if (Data_Draw.Children.Contains(rectangles[i]))
                 {
@@ -1530,13 +1550,11 @@ namespace Radar_Analysis_Program
             int a = 0;
             TimeSpan value_time = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum); // 현재 슬라이드 바 시간
 
-
             TimeSpan back_time = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum - 5000);
 
             TimeSpan dura = mediaElement.Position; //영상 시간 계산
 
             dura = dura.Subtract(TimeSpan.FromSeconds(5));
-
 
             while (a < dataList.Count)
             {
@@ -1580,8 +1598,5 @@ namespace Radar_Analysis_Program
             mediaElement.Play();
             timer.Start();
         }
-
-
-
     }
 }
