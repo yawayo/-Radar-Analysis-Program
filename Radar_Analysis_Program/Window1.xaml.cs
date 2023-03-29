@@ -667,25 +667,43 @@ namespace Radar_Analysis_Program
                     int Y = (int)(Data_Draw.ActualHeight * ((max_long + Dist_Lane_gap - this_frame_data[i].DistLong - (Dist_Lane_gap / 2)) / (max_long + Dist_Lane_gap)));
 
                     textBoxes[i].Text = CheckBox_print(i);
-                    if (!this_frame_data[i].Noise && ((i >= MINID) && (i <= MAXID)))
+                    if ((i >= MINID) && (i <= MAXID))
                     {
-                        if (this_frame_data[i].Finish_Analyzing)
+                        if (!this_frame_data[i].Finish_Analyzing)
+                        {
+                            rectangles[i].StrokeThickness = 8;
+                            rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(50, 50, 50));
+                            Canvas.SetLeft(rectangles[i], X - (rectangles[i].StrokeThickness / 2));
+                            Canvas.SetTop(rectangles[i], Y - rectangles[i].StrokeThickness);
+                            Canvas.SetLeft(textBoxes[i], X + 10);
+                            Canvas.SetTop(textBoxes[i], Y - 18);
+                        }
+                        else if(this_frame_data[i].Noise)
+                        {
+                            textBoxes[i].Visibility = Visibility.Hidden;
+                            rectangles[i].StrokeThickness = 3;
+                            rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(100, 100, 100));
+
+                            Canvas.SetLeft(rectangles[i], X - (3 / 2));
+                            Canvas.SetTop(rectangles[i], Y - 3);
+                            if ((this_frame_data[i].DistLat <= max_lat) && (this_frame_data[i].DistLat >= (-1 * max_lat)))
+                                rectangles[i].Visibility = Visibility.Visible;
+                            else
+                                rectangles[i].Visibility = Visibility.Hidden;
+                        }
+                        else if (this_frame_data[i].Virtual)
+                        {
+                        }
+                        else
                         {
                             rectangles[i].StrokeThickness = 15;
                             rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61));
                             Canvas.SetLeft(rectangles[i], X - (15 / 2));
                             Canvas.SetTop(rectangles[i], Y - 15);
-                        }
-                        else
-                        {
-                            rectangles[i].StrokeThickness = 8;
-                            rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(50, 50, 50));
-                            Canvas.SetLeft(rectangles[i], X - (8 / 2));
-                            Canvas.SetTop(rectangles[i], Y - 8);
-                        }
-                        Canvas.SetLeft(textBoxes[i], X + 10);
-                        Canvas.SetTop(textBoxes[i], Y - 18);
+                            Canvas.SetLeft(textBoxes[i], X + 10);
+                            Canvas.SetTop(textBoxes[i], Y - 18);
 
+                        }
                         if ((this_frame_data[i].DistLat <= max_lat) && (this_frame_data[i].DistLat >= (-1 * max_lat)))
                         {
                             rectangles[i].Visibility = Visibility.Visible;
@@ -696,19 +714,6 @@ namespace Radar_Analysis_Program
                             rectangles[i].Visibility = Visibility.Hidden;
                             textBoxes[i].Visibility = Visibility.Hidden;
                         }
-                    }
-                    else
-                    {
-                        textBoxes[i].Visibility = Visibility.Hidden;
-                        rectangles[i].StrokeThickness = 3;
-                        rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(100, 100, 100));
-
-                        Canvas.SetLeft(rectangles[i], X - (3 / 2));
-                        Canvas.SetTop(rectangles[i], Y - 3);
-                        if ((this_frame_data[i].DistLat <= max_lat) && (this_frame_data[i].DistLat >= (-1 * max_lat)))
-                            rectangles[i].Visibility = Visibility.Visible;
-                        else
-                            rectangles[i].Visibility = Visibility.Hidden;
                     }
                 }
             }
