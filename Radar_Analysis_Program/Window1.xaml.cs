@@ -407,13 +407,14 @@ namespace Radar_Analysis_Program
 
                     Radar_Filter_Setting();
                     radar_RotateShift();
-
+                    test_code();
                     Check_New_Obj();
 
+                    Lut();
                     Object_Kalman();
                     check_zone_index();
-                    //Lut();
-                    test_code();
+                   
+          
 
                     save_this_frame_obj_data();
                     draw_this_frame_obj_data();
@@ -424,7 +425,7 @@ namespace Radar_Analysis_Program
         }
         private void Radar_Filter_Setting()
         {
-            for (int i = 0; i < MAX_NODE; i++)
+            for (int i = 0; i < 100; i++)
             {
                 if (exist[i])
                 {
@@ -449,7 +450,7 @@ namespace Radar_Analysis_Program
         private void radar_RotateShift()
         {
             double Radian = Angle * (Math.PI / 180);
-            for (int i = 0; i < MAX_NODE; i++)
+            for (int i = 0; i < 100; i++)
             {
                 if (exist[i])
                 {
@@ -462,7 +463,7 @@ namespace Radar_Analysis_Program
         }
         private void Check_New_Obj()
         {
-            for (int i = 0; i < MAX_NODE; i++)
+            for (int i = 0; i < 100; i++)
             {
                 if (exist[i])
                 {
@@ -470,34 +471,32 @@ namespace Radar_Analysis_Program
                         this_frame_data[i].Noise = true;
 
                     if (Obj_inf[i].Count >= 5)
-                        if (exist[i])
-                            this_frame_data[i].Finish_Analyzing = true;
-
-                    if(this_frame_data[i].Finish_Analyzing)
                     {
-                        MyDataModel First_obj = Obj_inf[i].First.Value;
-                        if (Math.Abs(First_obj.DistLat - this_frame_data[i].DistLat) < 3 && Math.Abs(First_obj.DistLong - this_frame_data[i].DistLong) < 3)
-                        {
-                            this_frame_data[i].Noise = true;
-                        }
+                        this_frame_data[i].Finish_Analyzing = true;
 
-                        MyDataModel Last_obj = Obj_inf[i].Last.Value;
-                        if ((Math.Abs(Last_obj.DistLong - this_frame_data[i].DistLong) > 3) || (Math.Abs(Last_obj.DistLat - this_frame_data[i].DistLat) > 3))
+                        if (this_frame_data[i].Finish_Analyzing)
                         {
-                            exist[i] = false;
-                            Obj_inf[i].Clear();
-                            if (Data_Draw.Children.Contains(rectangles[i]))
+                            MyDataModel First_obj = Obj_inf[i].First.Value;
+                            if (Math.Abs(First_obj.DistLat - this_frame_data[i].DistLat) < 3 && Math.Abs(First_obj.DistLong - this_frame_data[i].DistLong) < 3)
                             {
-                                Data_Draw.Children.Remove(rectangles[i]);
-                                textBoxes[i].Visibility = Visibility.Hidden;
-                                this_frame_data[i].Finish_Analyzing = false;
+                                this_frame_data[i].Noise = true;
+                            }
+
+                            MyDataModel Last_obj = Obj_inf[i].Last.Value;
+                            if ((Math.Abs(Last_obj.DistLong - this_frame_data[i].DistLong) > 3) || (Math.Abs(Last_obj.DistLat - this_frame_data[i].DistLat) > 3))
+                            {
+                                exist[i] = false;
+                                Obj_inf[i].Clear();
+                                if (Data_Draw.Children.Contains(rectangles[i]))
+                                {
+                                    Data_Draw.Children.Remove(rectangles[i]);
+                                    textBoxes[i].Visibility = Visibility.Hidden;
+                                    this_frame_data[i].Finish_Analyzing = false;
+                                }
                             }
                         }
                     }
-                        
-                   
-
-
+                          
                 }
             }
         }
@@ -506,27 +505,27 @@ namespace Radar_Analysis_Program
 
         private void test_code()
         {
-            for (int i = 0; i < MAX_NODE; i++)
+            for (int i = 0; i < 100; i++)
             {
                 if (exist[i])
                 {
-                    /* if (this_frame_data[i].Velocity <= 3.0 || this_frame_data[i].VrelLat > 13 || this_frame_data[i].VrelLat < -13) //가로 방향 큰 값. 
-                         this_frame_data[i].Noise = true;
+                    if (this_frame_data[i].Velocity <= 3.0 || this_frame_data[i].VrelLat > 13 || this_frame_data[i].VrelLat < -13) //가로 방향 큰 값. 
+                        this_frame_data[i].Noise = true;
 
-                    if (this_frame_data[i].Length <0.8) 
+                    if (this_frame_data[i].Length < 0.8)
                         this_frame_data[i].Noise = true;
 
                     if (this_frame_data[i].Class == 7 && this_frame_data[i].ProbOfExist <= 3)  //확률 낮고 모르는 객체
-                        this_frame_data[i].Noise = true;           
+                        this_frame_data[i].Noise = true;
 
                     if (this_frame_data[i].Class == 7 && (this_frame_data[i].VrelLat_rms >= 28 || this_frame_data[i].VrelLong_rms >= 28))  //표준편차 큰 값 제거.
                         this_frame_data[i].Noise = true;
 
-                    if ( this_frame_data[i].DistLat > 0 && this_frame_data[i].VrelLong > 0)  //역주행
+                    if (this_frame_data[i].DistLat > 0 && this_frame_data[i].VrelLong > 0)  //역주행
                         this_frame_data[i].Noise = true;
 
                     if (this_frame_data[i].DistLat < 0 && this_frame_data[i].VrelLong < 0)
-                        this_frame_data[i].Noise = true;*/
+                        this_frame_data[i].Noise = true;
                 }
             }
         }
@@ -538,27 +537,32 @@ namespace Radar_Analysis_Program
                 {
                     for (int i = 0; i < 100; i++)
                     {
-                        if (exist[i] && exist[j])
+                        if (exist[i] && exist[j] && !this_frame_data[i].Noise)
                         {
-                            if (Math.Abs(Obj_inf[j].Last.Value.DistLat - this_frame_data[i].DistLat) < 1 && Math.Abs(Obj_inf[j].Last.Value.DistLong - this_frame_data[i].DistLong) < 10 && j - i != 100)
+                            if(Obj_inf[j].Count>0)
                             {
-
-                                Obj_inf[i] = new LinkedList<MyDataModel>(Obj_inf[j]);
-
-
-                                System.Console.WriteLine("aaaaaaaaaaa");
-
-                                Obj_inf[j].Clear();
-                                if (Data_Draw.Children.Contains(rectangles[j]))
+                                if (Math.Abs(Obj_inf[j].Last.Value.DistLat - this_frame_data[i].DistLat) < 1 && Math.Abs(Obj_inf[j].Last.Value.DistLong - this_frame_data[i].DistLong) < 10 && j - i != 100)
                                 {
-                                    Data_Draw.Children.Remove(rectangles[j]);
-                                    rectangles[j] = null;
-                                    textBoxes[j].Visibility = Visibility.Hidden;
+
+                                    Obj_inf[i] = new LinkedList<MyDataModel>(Obj_inf[j]);
+
+
+                                    System.Console.WriteLine(j+"에서"+i+"로 변함");
+ 
+
+                                     Obj_inf[j].Clear();
+                                    if (Data_Draw.Children.Contains(rectangles[j]))
+                                    {
+                                        Data_Draw.Children.Remove(rectangles[j]);
+                                        rectangles[j] = null;
+                                        textBoxes[j].Visibility = Visibility.Hidden;
+                                    }
+                                    exist[j] = false;
+
+
                                 }
-                                exist[j] = false;
-
-
                             }
+                            
                         }
                     }
                 }
@@ -571,7 +575,7 @@ namespace Radar_Analysis_Program
 
             P = P_value;
             Q = 0.022;
-            R = 0.117;
+            R = 0.617;  // 측정 잡음 공분산 높을 수록  보정
 
             x_next = X;
             P_next = P + Q;
@@ -583,60 +587,131 @@ namespace Radar_Analysis_Program
         }
         private void Object_Kalman()
         {
-            for (int i = 0; i < MAX_NODE; i++)
+            for (int i = 0; i < 200; i++)
             {
                 if (exist[i])  //부드럽게 하는 보정 부분
                 {
+
                     if (Obj_inf[i].Count != 0)
                     {
-                        MyDataModel last_data = Obj_inf[i].Last.Value;
-                        double last_data_DistLat = last_data.DistLat;
-                        double last_data_DistLong = last_data.DistLong;
-
-                        if (Math.Abs(last_data_DistLat - this_frame_data[i].DistLat) < 3 && Math.Abs(last_data_DistLong - this_frame_data[i].DistLong) < 3)
+                        double last_data_DistLat = Obj_inf[i].Last.Value.DistLat;
+                        double last_data_DistLong = Obj_inf[i].Last.Value.DistLong;
+                        double last_last_data_DistLat;
+                        double last_last_data_DistLong;
+                        if (Obj_inf[i].Count >= 2)
                         {
-                            this_frame_data[i].DistLat = KalmanFilter(last_data_DistLat, this_frame_data[i].DistLat, 0.0);
-                            this_frame_data[i].DistLong = KalmanFilter(last_data_DistLong, this_frame_data[i].DistLong, 1.0);
-                        }
-                        else   // 거리가 멀어졌으면 같은 ID 다른 객체가 입력됨. 그러므로 삭제   
-                        {    // ( 선형 알고리즘에 의해 가까울 수 밖에 없음. )
-                            if (Obj_inf[i].Count != 0)
-                            {
-                                Obj_inf[i].Clear();
+                            last_last_data_DistLat = Obj_inf[i].Last.Previous.Value.DistLat;
+                            last_last_data_DistLong = Obj_inf[i].Last.Previous.Value.DistLong;
 
-                                if (Data_Draw.Children.Contains(rectangles[i]))
-                                {
-                                    Data_Draw.Children.Remove(rectangles[i]);
-                                    textBoxes[i].Visibility = Visibility.Hidden;
-                                }
+                        }
+                        else
+                        {
+                            last_last_data_DistLat = Obj_inf[i].Last.Value.DistLat;
+                            last_last_data_DistLong = Obj_inf[i].Last.Value.DistLong;
+                        }
+
+
+                        if (i < 100)               ///////////////좌우 칼만필터
+                        {
+                            if (Math.Abs(last_data_DistLat - this_frame_data[i].DistLat) < 10 && Math.Abs(last_data_DistLong - this_frame_data[i].DistLong) < 30)
+                            {
+                                this_frame_data[i].DistLat = KalmanFilter(last_data_DistLat, this_frame_data[i].DistLat, 0.0);
+                                this_frame_data[i].DistLong = KalmanFilter(last_data_DistLong, this_frame_data[i].DistLong, 1.0);
                             }
+                            else   // 거리가 멀어졌으면 같은 id 다른 객체가 입력됨. 그러므로 삭제   
+                            {    // ( 선형 알고리즘에 의해 가까울 수 밖에 없음. )
+                                 // 멀어지기 전에 있던 데이터 보간 시작.               ////////////////// 보간 생성 부분. 
+
+                                if (Obj_inf[i].Count >= 2 && Obj_inf[i + 100].Count == 0)
+                                {
+                                    int merge_id = 100;
+                                    while (true)
+                                    {
+                                        if (Obj_inf[i + merge_id].Count == 0)
+                                        {
+                                            Obj_inf[i + merge_id] = new LinkedList<MyDataModel>(Obj_inf[i]);
+                                            // system.console.writeline("{0}", Obj_inf[i + merge_id].last.value.id);
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            merge_id++;
+                                        }
+                                    }
+                                    int change_id = i + merge_id;
+
+                                    exist[change_id] = true;
+                                    //this_frame_data[change_id] = Obj_inf[change_id].last.value;
+
+                                    this_frame_data[change_id] = (MyDataModel)Obj_inf[change_id].Last.Value.Clone();
+
+                                    this_frame_data[change_id].Timestamp = Obj_inf[change_id].Last.Value.Timestamp;
+                                    this_frame_data[change_id].DistLat = KalmanFilter(last_last_data_DistLat, last_data_DistLat, 0.0);
+                                    this_frame_data[change_id].DistLong = KalmanFilter(last_last_data_DistLong, last_data_DistLong, 1.0);
+
+                                }
+
+                            }
+                        }
+                        else if (i >= 100 && Obj_inf[i].Count >= 2)   //보간하는 칼만필터 
+                        {
+                            this_frame_data[i] = (MyDataModel)Obj_inf[i].Last.Value.Clone();
+
+                            this_frame_data[i].Timestamp = Obj_inf[i].Last.Value.Timestamp;
+                            this_frame_data[i].DistLat = KalmanFilter(last_last_data_DistLat, last_data_DistLat, 0.0);
+                            this_frame_data[i].DistLong = KalmanFilter(last_last_data_DistLong, 3.2 * last_data_DistLong - 2.2 * last_last_data_DistLong, 1.0);
+
                         }
 
                     }
                 }
-                else
+                else if (exist[i] == false && i < 100)   // 2초 동안 표출하는 부분       //존재하지 않지만  last_data를 이용하여 일정 시간동안 출력 . 
                 {
-                    if (Obj_inf[i].Count >= 2)
+                    if (Obj_inf[i] != null)
                     {
-                        MyDataModel last_data = (MyDataModel)Obj_inf[i].Last.Value.Clone();
-                        if (last_data.Finish_Analyzing)
+                        if (Obj_inf[i].Count >= 2 && Obj_inf[i + 100].Count == 0)
                         {
-                            MyDataModel last_last_data = Obj_inf[i].Last.Previous.Value;
+                            int merge_id = 100;
+                            while (true)
+                            {
+                                if (Obj_inf[i + merge_id].Count == 0)
+                                {
+                                    Obj_inf[i + merge_id] = new LinkedList<MyDataModel>(Obj_inf[i]);
+                                    //System.Console.WriteLine("{0}", Obj_inf[i + merge_id].Last.Value.ID);
+                                    break;
+                                }
+                                else
+                                {
+                                    merge_id++;
+                                }
 
-                            last_data.DistLat = KalmanFilter(last_last_data.DistLat, last_data.DistLat, 0.0);
-                            last_data.DistLong = KalmanFilter(last_last_data.DistLong, last_data.DistLong, 1.0);
-                            //last_data.Timestamp = dbcompareDT;
-                            exist[i] = true;
-                            this_frame_data[i] = last_data;
-                            this_frame_data[i].Virtual = true;
+                            }
+                            double last_data_DistLat = Obj_inf[i].Last.Value.DistLat;
+                            double last_data_DistLong = Obj_inf[i].Last.Value.DistLong;
+
+                            double last_last_data_DistLat = Obj_inf[i].Last.Previous.Value.DistLat;
+                            double last_last_data_DistLong = Obj_inf[i].Last.Previous.Value.DistLong;
+
+                            int change_id = i + merge_id;
+
+                            exist[change_id] = true;
+
+                            this_frame_data[change_id] = (MyDataModel)Obj_inf[change_id].Last.Value.Clone();
+
+                            this_frame_data[change_id].Timestamp = Obj_inf[change_id].Last.Value.Timestamp;
+                            this_frame_data[change_id].DistLat = KalmanFilter(last_last_data_DistLat, last_data_DistLat, 0.0);
+                            this_frame_data[change_id].DistLong = KalmanFilter(last_last_data_DistLong, last_data_DistLong, 1.0);
+
                         }
+
                     }
                 }
             }
+
         }
         private void check_zone_index()
         {
-            for (int i = 0; i < MAX_NODE; i++)
+            for (int i = 0; i < 100; i++)
             {
                 if (exist[i])
                 {
@@ -655,19 +730,22 @@ namespace Radar_Analysis_Program
         }
         private void save_this_frame_obj_data()
         {
-            for (int i = 0; i < MAX_NODE; i++)
+            for (int i = 0; i < 200; i++)
             {
-                if (exist[i])
+                if (exist[i] && !this_frame_data[i].Noise)
                 {
                     if (Obj_inf[i].Count == 0)
                     {
-                        Rectangle rect = new Rectangle
+                        if (rectangles[i] == null)
                         {
-                            Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61)),
-                            StrokeThickness = 15
-                        };
-                        rect.Tag = i;
-                        rectangles[i] = rect;
+                            Rectangle rect = new Rectangle
+                            {
+                                Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61)),
+                                StrokeThickness = 15
+                            };
+                            rect.Tag = i;
+                            rectangles[i] = rect;
+                        }
 
                         if (!Data_Draw.Children.Contains(rectangles[i]))
                         {
@@ -678,29 +756,79 @@ namespace Radar_Analysis_Program
                                 textBoxes[i].Visibility = Visibility.Hidden;
                         }
                     }
+                    else if (Obj_inf[i].Count != 0 && i >= 100)
+                    {
+                        if (rectangles[i] == null)
+                        {
+                            Rectangle rect = new Rectangle
+                            {
+                                Stroke = new SolidColorBrush(Color.FromRgb(255, 0, 0)),
+                                StrokeThickness = 15
+                            };
+                            rect.Tag = i;
+                            rectangles[i] = rect;
+                        }
+
+
+                        if (!Data_Draw.Children.Contains(rectangles[i]))
+                        {
+                            Data_Draw.Children.Add(rectangles[i]);
+                            if (CheckBox.IsChecked == true)
+                                textBoxes[i].Visibility = Visibility.Visible;
+                            else
+                                textBoxes[i].Visibility = Visibility.Hidden;
+                        }
+                    }
+                    else if (Obj_inf[i].Count != 0 && i < 100)
+                    {
+                        if (rectangles[i] == null)
+                        {
+                            Rectangle rect = new Rectangle
+                            {
+                                Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61)),
+                                StrokeThickness = 15
+                            };
+                            rect.Tag = i;
+                            rectangles[i] = rect;
+                        }
+
+
+                        if (!Data_Draw.Children.Contains(rectangles[i]))
+                        {
+                            Data_Draw.Children.Add(rectangles[i]);
+                            if (CheckBox.IsChecked == true)
+                                textBoxes[i].Visibility = Visibility.Visible;
+                            else
+                                textBoxes[i].Visibility = Visibility.Hidden;
+                        }
+                    }
+
+
                     Obj_inf[i].AddLast(this_frame_data[i]);
                     if (Obj_inf[i].Count >= 100)
                         Obj_inf[i].RemoveFirst();
                 }
-                else
-                {
-                    if (Obj_inf[i].Count != 0)
-                    {
-                        TimeSpan difTime = dbcompareDT - Obj_inf[i].Last.Value.Timestamp;
 
-                        if ((difTime.Seconds > 0) || (difTime.Milliseconds > 300))
-                        {
-                            Obj_inf[i].Clear();
+                //else
+                //{
+                //    if (Obj_inf[i].Count != 0)
+                //    {
+                //        TimeSpan difTime = dbcompareDT - Obj_inf[i].Last.Value.Timestamp;
 
-                            if (Data_Draw.Children.Contains(rectangles[i]))
-                            {
-                                Data_Draw.Children.Remove(rectangles[i]);
-                                textBoxes[i].Visibility = Visibility.Hidden;
-                            }
-                        }
+                //        if ((difTime.Seconds > 0) || (difTime.Milliseconds > 300))
+                //        {
+                //            Obj_inf[i].Clear();
 
-                    }
-                }
+                //            if (Data_Draw.Children.Contains(rectangles[i]))
+                //            {
+                //                Data_Draw.Children.Remove(rectangles[i]);
+                //                textBoxes[i].Visibility = Visibility.Hidden;
+                //            }
+                //        }
+
+                //    }
+                //}
+
             }
         }
         private void draw_this_frame_obj_data()
@@ -804,7 +932,7 @@ namespace Radar_Analysis_Program
         {
             for (int i = 0; i < MAX_NODE; i++)
                 this_frame_data[i] = default(MyDataModel);
-            System.Array.Clear(exist, 0, sizeof(bool) * MAX_NODE);
+            System.Array.Clear(exist, 0, sizeof(bool) * 100);
         }
 
         #region Filter Setting
@@ -1411,7 +1539,7 @@ namespace Radar_Analysis_Program
         }
         private void slow_Click(object sender, RoutedEventArgs e)
         {
-            mediaElement.SpeedRatio = 0.5;
+            mediaElement.SpeedRatio = 0.2;
         }
         private void normal_Click(object sender, RoutedEventArgs e)
         {
@@ -1430,6 +1558,11 @@ namespace Radar_Analysis_Program
                     textBoxes[i].Visibility = Visibility.Hidden;
                 }
                 Obj_inf[i].Clear();
+            }
+
+            for (int i = 100; i < 200; i++)
+            {
+                exist[i] = false;
             }
             Clear_this_frame_obj_data();
             int a = 0;
@@ -1517,6 +1650,11 @@ namespace Radar_Analysis_Program
                     textBoxes[i].Visibility = Visibility.Hidden;
                 }
                 Obj_inf[i].Clear();
+            }
+
+            for (int i = 100; i < 200; i++)
+            {
+                exist[i] = false;
             }
             Clear_this_frame_obj_data();
 
