@@ -412,7 +412,7 @@ namespace Radar_Analysis_Program
 
                     Object_Kalman();
                     check_zone_index();
-                    Lut();
+                    //Lut();
                     test_code();
 
                     save_this_frame_obj_data();
@@ -473,26 +473,37 @@ namespace Radar_Analysis_Program
                         if (exist[i])
                             this_frame_data[i].Finish_Analyzing = true;
 
-                    MyDataModel First_obj = Obj_inf[i].First.Value;
-                    if (Math.Abs(First_obj.DistLat - this_frame_data[i].DistLat) < 3 && Math.Abs(First_obj.DistLong - this_frame_data[i].DistLong) < 3)
+                    if(this_frame_data[i].Finish_Analyzing)
                     {
-                        this_frame_data[i].Noise = true;
-                    }
-
-                    MyDataModel Last_obj = Obj_inf[i].Last.Value;
-                    if ((Math.Abs(Last_obj.DistLong - this_frame_data[i].DistLong) > 3) || (Math.Abs(Last_obj.DistLat - this_frame_data[i].DistLat) > 3))
-                    {
-                        Obj_inf[i].Clear();
-                        if (Data_Draw.Children.Contains(rectangles[i]))
+                        MyDataModel First_obj = Obj_inf[i].First.Value;
+                        if (Math.Abs(First_obj.DistLat - this_frame_data[i].DistLat) < 3 && Math.Abs(First_obj.DistLong - this_frame_data[i].DistLong) < 3)
                         {
-                            Data_Draw.Children.Remove(rectangles[i]);
-                            textBoxes[i].Visibility = Visibility.Hidden;
-                            this_frame_data[i].Finish_Analyzing = false;
+                            this_frame_data[i].Noise = true;
+                        }
+
+                        MyDataModel Last_obj = Obj_inf[i].Last.Value;
+                        if ((Math.Abs(Last_obj.DistLong - this_frame_data[i].DistLong) > 3) || (Math.Abs(Last_obj.DistLat - this_frame_data[i].DistLat) > 3))
+                        {
+                            exist[i] = false;
+                            Obj_inf[i].Clear();
+                            if (Data_Draw.Children.Contains(rectangles[i]))
+                            {
+                                Data_Draw.Children.Remove(rectangles[i]);
+                                textBoxes[i].Visibility = Visibility.Hidden;
+                                this_frame_data[i].Finish_Analyzing = false;
+                            }
                         }
                     }
+                        
+                   
+
+
                 }
             }
         }
+
+
+
         private void test_code()
         {
             for (int i = 0; i < MAX_NODE; i++)
