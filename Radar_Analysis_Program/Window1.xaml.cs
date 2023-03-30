@@ -412,12 +412,12 @@ namespace Radar_Analysis_Program
 
                     Object_Kalman();
                     check_zone_index();
-                    Lut();
-                    test_code();
+                    //Lut();
+                    //test_code();
 
                     save_this_frame_obj_data();
                     draw_this_frame_obj_data();
-                    delete();
+                    //delete();
                     Clear_this_frame_obj_data();
                 }
             }
@@ -476,7 +476,7 @@ namespace Radar_Analysis_Program
                             this_frame_data[i].Noise = true;
                         }
                         MyDataModel Last_obj = Obj_inf[i].Last.Value;
-                        if ((Math.Abs(Last_obj.DistLong - this_frame_data[i].DistLong) > 3) || (Math.Abs(Last_obj.DistLat - this_frame_data[i].DistLat) > 3))
+                        if ((Math.Abs(Last_obj.DistLong - this_frame_data[i].DistLong) > 30) || (Math.Abs(Last_obj.DistLat - this_frame_data[i].DistLat) > 30))
                         {
                             Obj_inf[i].Clear();
                             if (Data_Draw.Children.Contains(rectangles[i]))
@@ -524,7 +524,7 @@ namespace Radar_Analysis_Program
                 {
                     for (int i = 0; i < 100; i++)
                     {
-                        if (exist[i] && exist[j])
+                        if (exist[i] && exist[j] && (Obj_inf[i].Count != 0) && (Obj_inf[j].Count != 0))
                         {
                             if (Math.Abs(Obj_inf[j].Last.Value.DistLat - this_frame_data[i].DistLat) < 1 && Math.Abs(Obj_inf[j].Last.Value.DistLong - this_frame_data[i].DistLong) < 10 && j - i != 100)
                             {
@@ -676,7 +676,7 @@ namespace Radar_Analysis_Program
                             {
                                 if (Obj_inf[i + merge_id].Count == 0)
                                 {
-                                    Obj_inf[i + merge_id] = new LinkedList<MyDataModel>(Obj_inf[i]);
+                                    //Obj_inf[i + merge_id] = new LinkedList<MyDataModel>(Obj_inf[i]);
                                     //System.Console.WriteLine("{0}", Obj_inf[i + merge_id].Last.Value.ID);
                                     break;
                                 }
@@ -696,12 +696,11 @@ namespace Radar_Analysis_Program
 
                             exist[change_id] = true;
 
-                            this_frame_data[change_id] = (MyDataModel)Obj_inf[change_id].Last.Value.Clone();
+                            this_frame_data[change_id] = (MyDataModel)Obj_inf[i].Last.Value.Clone();
 
-                            this_frame_data[change_id].Timestamp = Obj_inf[change_id].Last.Value.Timestamp;
+                            //this_frame_data[change_id].Timestamp = Obj_inf[change_id].Last.Value.Timestamp;
                             this_frame_data[change_id].DistLat = KalmanFilter(last_last_data_DistLat, last_data_DistLat, 0.0);
                             this_frame_data[change_id].DistLong = KalmanFilter(last_last_data_DistLong, last_data_DistLong, 1.0);
-
                         }
                     }
                 }
@@ -778,32 +777,77 @@ namespace Radar_Analysis_Program
         }
         private void draw_this_frame_obj_data()
         {
-            for (int i = 0; i < 200; i++)
+            for (int i = 0; i < MAX_NODE; i++)
             {
-                if (exist[i] && !this_frame_data[i].Noise && rectangles[i] != null)
+                if (exist[i])
                 {
-
                     int X = (int)((Data_Draw.ActualWidth / 2) + (Data_Draw.ActualWidth / (max_lat * 2)) * (-1 * this_frame_data[i].DistLat));
                     int Y = (int)(Data_Draw.ActualHeight * ((max_long + Dist_Lane_gap - this_frame_data[i].DistLong - (Dist_Lane_gap / 2)) / (max_long + Dist_Lane_gap)));
 
-                    textBoxes[i].Text = i + CheckBox_print(i);
-
-                    rectangles[i].StrokeThickness = 15;
-                    rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61));
-                    if (i >= 100)
+                    textBoxes[i].Text = CheckBox_print(i);
+                    if ((i >= MINID) && (i <= MAXID) && (this_frame_data[i].DistLat <= max_lat) && (this_frame_data[i].DistLat >= (-1 * max_lat)))
                     {
-                        rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(255, 0, 0));
+                        if (!this_frame_data[i].Finish_Analyzing)
+                        {
+                            rectangles[i].StrokeThickness = 8;
+                            rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(50, 50, 50));
 
+                            Canvas.SetLeft(rectangles[i], X - (rectangles[i].StrokeThickness / 2));
+                            Canvas.SetTop(rectangles[i], Y - rectangles[i].StrokeThickness);
+                            Canvas.SetLeft(textBoxes[i], X + 10);
+                            Canvas.SetTop(textBoxes[i], Y - 18);
+
+                            rectangles[i].Visibility = Visibility.Visible;
+                            textBoxes[i].Visibility = Visibility.Hidden;
+                        }
+                        else if (this_frame_data[i].Noise)
+                        {
+                            rectangles[i].StrokeThickness = 3;
+                            rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(100, 100, 100));
+
+                            Canvas.SetLeft(rectangles[i], X - (rectangles[i].StrokeThickness / 2));
+                            Canvas.SetTop(rectangles[i], Y - rectangles[i].StrokeThickness);
+
+                            rectangles[i].Visibility = Visibility.Visible;
+                            textBoxes[i].Visibility = Visibility.Hidden;
+                        }
+                        else if (this_frame_data[i].Virtual)
+                        {
+                        }
+                        else if (this_frame_data[i].Zone == 0)
+                        {
+                            rectangles[i].StrokeThickness = 8;
+                            rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61));
+                            Canvas.SetLeft(rectangles[i], X - (rectangles[i].StrokeThickness / 2));
+                            Canvas.SetTop(rectangles[i], Y - rectangles[i].StrokeThickness);
+                            Canvas.SetLeft(textBoxes[i], X + 10);
+                            Canvas.SetTop(textBoxes[i], Y - 18);
+
+                            rectangles[i].Visibility = Visibility.Visible;
+                            textBoxes[i].Visibility = Visibility.Visible;
+                        }
+                        else
+                        {
+                            rectangles[i].StrokeThickness = 15;
+                            rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61));
+                            Canvas.SetLeft(rectangles[i], X - (rectangles[i].StrokeThickness / 2));
+                            Canvas.SetTop(rectangles[i], Y - rectangles[i].StrokeThickness);
+                            Canvas.SetLeft(textBoxes[i], X + 10);
+                            Canvas.SetTop(textBoxes[i], Y - 18);
+
+                            rectangles[i].Visibility = Visibility.Visible;
+                            textBoxes[i].Visibility = Visibility.Visible;
+                        }
+                        if (textBoxes[i].Text == "")
+                            textBoxes[i].Visibility = Visibility.Hidden;
                     }
-
-                    Canvas.SetLeft(rectangles[i], X - (15 / 2));
-                    Canvas.SetTop(rectangles[i], Y - 15);
-
-                    Canvas.SetLeft(textBoxes[i], X + 10);
-                    Canvas.SetTop(textBoxes[i], Y - 18);
+                    else
+                    {
+                        rectangles[i].Visibility = Visibility.Hidden;
+                        textBoxes[i].Visibility = Visibility.Hidden;
+                    }
                 }
             }
-
         }
         private void delete()     // 들어오지 않는 데이터 정리,      0보다 크면 보간 데이터 이므로 3초까지 봐줌 .
         {
@@ -816,9 +860,6 @@ namespace Radar_Analysis_Program
                         if (Obj_inf[i].Count != 0)
                         {
                             TimeSpan difTime = dbcompareDT - Obj_inf[i].Last.Value.Timestamp;
-
-                            //System.Console.WriteLine(difTime);
-
 
                             if (difTime.Milliseconds > 300)
                             {
@@ -836,9 +877,6 @@ namespace Radar_Analysis_Program
                 }
 
             }
-
-
-
             for (int i = 100; i < 200; i++)
             {
                 if (exist[i])
