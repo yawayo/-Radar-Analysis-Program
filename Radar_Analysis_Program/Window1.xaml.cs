@@ -450,6 +450,19 @@ namespace Radar_Analysis_Program
                 textBoxes[index].Visibility = Visibility.Hidden;
             }
         }
+        private void clear_Obj_data()
+        {
+            for (int i = 0; i < MAX_NODE; i++)
+            {
+                if (Data_Draw.Children.Contains(rectangles[i]))
+                {
+                    Data_Draw.Children.Remove(rectangles[i]);
+                    textBoxes[i].Visibility = Visibility.Hidden;
+                }
+                Obj_inf[i].Clear();
+            }
+            Clear_this_frame_obj_data();
+        }
         private void Radar_Filter_Setting()
         {
             for (int i = 0; i < MAX_NODE; i++)
@@ -490,7 +503,7 @@ namespace Radar_Analysis_Program
         }
         private void Check_New_Obj()
         {
-            for (int i = 0; i < MAX_NODE; i++)
+            for (int i = 0; i < MAX_NODE / 2; i++)
             {
                 if (exist[i])
                 {
@@ -617,47 +630,25 @@ namespace Radar_Analysis_Program
                 {
                     if (Obj_inf[i].Count >= 2)
                     {
-                        if ((Obj_inf[i].Last.Value.Zone != 0) && (!Obj_inf[i].Last.Value.Noise))
+                        if ((Obj_inf[i].Last.Value.Zone != 0) && (!Obj_inf[i].Last.Value.Noise) && Obj_inf[i].Last.Value.Finish_Analyzing)
                         {
                             TimeSpan difTime = dbcompareDT - Obj_inf[i].Last.Value.Timestamp;
-                            if (difTime.Seconds >= 3)
+                            if (difTime.Seconds < 3)
                             {
-                                remove_Obj_data(i);
-                            }
-                            else
-                            {
-                                double last_data_DistLat = Obj_inf[i].Last.Value.DistLat;
-                                double last_data_DistLong = Obj_inf[i].Last.Value.DistLong;
-                                double last_last_data_DistLat = Obj_inf[i].Last.Previous.Value.DistLat;
-                                double last_last_data_DistLong = Obj_inf[i].Last.Previous.Value.DistLong;
-
-                                exist[i] = true;
-                                this_frame_data[i] = (MyDataModel)Obj_inf[i].Last.Value.Clone();
-                                this_frame_data[i].DistLat = last_data_DistLat;// kalmanFilter(last_last_data_DistLat, last_data_DistLat, 0.0);
-                                this_frame_data[i].DistLong = kalmanFilter(last_last_data_DistLong, 3.2 * last_data_DistLong - 2.2 * last_last_data_DistLong, 1.0);
-                                this_frame_data[i].Virtual = true;
-                            }
-                            /*if (i < 100)
-                            {
-                                int merge_id = 100;
-                                while (merge_id < MAX_NODE)
+                                if (i < MAX_NODE / 2)
                                 {
-                                    if (Obj_inf[merge_id].Count == 0)
+                                    int merge_id = 100;
+                                    while (merge_id < MAX_NODE)
                                     {
-                                        insert_Obj_data(merge_id);
-                                        Obj_inf[merge_id] = new LinkedList<MyDataModel>(Obj_inf[i]);
-                                        remove_Obj_data(i);
-                                        break;
+                                        if (Obj_inf[merge_id].Count == 0)
+                                        {
+                                            insert_Obj_data(merge_id);
+                                            Obj_inf[merge_id] = new LinkedList<MyDataModel>(Obj_inf[i]);
+                                            remove_Obj_data(i);
+                                            break;
+                                        }
+                                        merge_id++;
                                     }
-                                    merge_id++;
-                                }
-                            }
-                            else
-                            {
-                                TimeSpan difTime = dbcompareDT - Obj_inf[i].Last.Value.Timestamp;
-                                if (difTime.Seconds >= 3)
-                                {
-
                                 }
                                 else
                                 {
@@ -672,8 +663,12 @@ namespace Radar_Analysis_Program
                                     this_frame_data[i].DistLong = kalmanFilter(last_last_data_DistLong, 3.2 * last_data_DistLong - 2.2 * last_last_data_DistLong, 1.0);
                                     this_frame_data[i].Virtual = true;
                                 }
-                            }*/
+                            }
                         }
+                    }
+                    else
+                    {
+                        remove_Obj_data(i);
                     }
                 }
             }
@@ -1481,6 +1476,8 @@ namespace Radar_Analysis_Program
         #region btn
         private void btnPlay_Click(object sender, RoutedEventArgs e)
         {
+            //clear_Obj_data();
+
             if (speed_check == 0)
             {
                 timer.Interval = TimeSpan.FromMilliseconds(0.1);
@@ -1574,24 +1571,10 @@ namespace Radar_Analysis_Program
             mediaElement.Stop();
             timer.Stop();
 
-            for (int i = 0; i < 200; i++)
-            {
-                if (Data_Draw.Children.Contains(rectangles[i]))
-                {
-                    Data_Draw.Children.Remove(rectangles[i]);
-                    textBoxes[i].Visibility = Visibility.Hidden;
-                }
-                Obj_inf[i].Clear();
-            }
+            clear_Obj_data();
 
-            for (int i = 100; i < 200; i++)
-            {
-                exist[i] = false;
-            }
-            Clear_this_frame_obj_data();
             int a = 0;
             TimeSpan value_time = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum); // 현재 슬라이드 바 시간
-
 
             TimeSpan back_time = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum - 3000);
 
