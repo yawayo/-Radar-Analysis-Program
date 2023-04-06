@@ -176,6 +176,8 @@ namespace Radar_Analysis_Program
             public int Zone;
             public bool Noise;
             public bool Virtual;
+            public bool Merging;
+            public bool Merged;
 
             public bool Finish_Analyzing;
 
@@ -209,8 +211,8 @@ namespace Radar_Analysis_Program
         #region Draw Func
         private void Set_Obj_TextBox()
         {
-            checkBoxes = new CheckBox[] { text_time, text_id, text_distlat, text_distlong, text_vrellat, text_vrellong, text_velocity, text_rsc, text_probofexist, text_class, text_zone, text_length, text_width, text_DynProp };
-            checkbox_name = new String[] { "Time", "ID", "DistLat", "DistLong", "VrelLat", "VrelLong", "Velocity", "RCS", "ProbOfExist", "Class", "Zone", "Length", "Width", "DynProp" };
+            checkBoxes = new CheckBox[] { text_time, text_id, text_distlat, text_distlong, text_vrellat, text_vrellong, text_velocity, text_rsc, text_probofexist, text_class, text_zone, text_length, text_width, text_DynProp, text_ObjCount };
+            checkbox_name = new String[] { "Time", "ID", "DistLat", "DistLong", "VrelLat", "VrelLong", "Velocity", "RCS", "ProbOfExist", "Class", "Zone", "Length", "Width", "DynProp", "Count" };
 
             for (int i = 0; i < MAX_NODE; i++)
             {
@@ -406,19 +408,19 @@ namespace Radar_Analysis_Program
                     number++;
 
                     Radar_Filter_Setting();
-                    radar_RotateShift();
+                    Radar_RotateShift();
                     test_code();
                     Check_New_Obj();
 
-                    Lut();
+                    //Lut();
                     Object_Kalman();
-                    check_zone_index();
-                   
-          
+                    Check_zone_index();
 
-                    save_this_frame_obj_data();
-                    draw_this_frame_obj_data();
-                    delete();
+                    //Merge_Obj();
+
+                    Save_this_frame_obj_data();
+                    Draw_this_frame_obj_data();
+                    //delete();
                     Clear_this_frame_obj_data();
                 }
             }
@@ -472,7 +474,7 @@ namespace Radar_Analysis_Program
                 }
             }
         }
-        private void radar_RotateShift()
+        private void Radar_RotateShift()
         {
             double Radian = Angle * (Math.PI / 180);
             for (int i = 0; i < MAX_NODE; i++)
@@ -504,8 +506,21 @@ namespace Radar_Analysis_Program
                             }
                         }
                         MyDataModel Last_obj = Obj_inf[i].Last.Value;
-                        if ((Math.Abs(Last_obj.DistLong - this_frame_data[i].DistLong) > 50) || (Math.Abs(Last_obj.DistLat - this_frame_data[i].DistLat) > 50))
+                        if (((Math.Abs(Last_obj.DistLong - this_frame_data[i].DistLong) > 50) || (Math.Abs(Last_obj.DistLat - this_frame_data[i].DistLat) > 10)) ||
+                            ((Math.Abs(Last_obj.VrelLat - this_frame_data[i].VrelLat) > 10) || (Math.Abs(Last_obj.VrelLong - this_frame_data[i].VrelLong) > 10)))
                         {
+                            int merge_id = 100;
+                            while (merge_id < MAX_NODE)
+                            {
+                                if (Obj_inf[merge_id].Count == 0)
+                                {
+                                    insert_Obj_data(merge_id);
+                                    Obj_inf[merge_id] = new LinkedList<MyDataModel>(Obj_inf[i]);
+                                    remove_Obj_data(i);
+                                    break;
+                                }
+                                merge_id++;
+                            }
                             remove_Obj_data(i);
                         }
                     }
@@ -551,21 +566,6 @@ namespace Radar_Analysis_Program
                             if (Math.Abs(Obj_inf[j].Last.Value.DistLat - this_frame_data[i].DistLat) < 3 && Math.Abs(Obj_inf[j].Last.Value.DistLong - this_frame_data[i].DistLong) < 10 && j - i != 100)
                             {
                                 Obj_inf[i] = new LinkedList<MyDataModel>(Obj_inf[j]);
-
-                                System.Console.WriteLine("a : " + Obj_inf[j].Last.Value.DistLong.ToString());
-                                System.Console.WriteLine("b : " + Obj_inf[i].Last.Value.DistLong.ToString());
-
-                                Obj_inf[j].Last.Value.DistLong = 0.0;
-
-                                System.Console.WriteLine("c : " + Obj_inf[i].Last.Value.DistLong.ToString());
-                                System.Console.WriteLine("d : " + Obj_inf[i].Last.Value.DistLong.ToString());
-
-                                Obj_inf[j].Last.Value.DistLong = 100.0;
-                                Obj_inf[i].Last.Value.DistLong = 0.0;
-
-                                System.Console.WriteLine("e : " + Obj_inf[i].Last.Value.DistLong.ToString());
-                                System.Console.WriteLine("f : " + Obj_inf[i].Last.Value.DistLong.ToString());
-
                                 remove_Obj_data(j);
                                 exist[j] = false;
                             }
@@ -574,7 +574,7 @@ namespace Radar_Analysis_Program
                 }
             }
         }
-        double KalmanFilter(double X, double Z, double P_value)
+        double kalmanFilter(double X, double Z, double P_value)
         {
 
             double x_next, P_next, x, P, K, Q, R;
@@ -606,101 +606,79 @@ namespace Radar_Analysis_Program
                         double last_last_data_DistLat = Obj_inf[i].Last.Previous.Value.DistLat;
                         double last_last_data_DistLong = Obj_inf[i].Last.Previous.Value.DistLong;
 
-                        if (Math.Abs(last_data_DistLat - this_frame_data[i].DistLat) < 3 && Math.Abs(last_data_DistLong - this_frame_data[i].DistLong) < 3)
+                        //if (Math.Abs(last_data_DistLat - this_frame_data[i].DistLat) < 10 && Math.Abs(last_data_DistLong - this_frame_data[i].DistLong) < 30)
                         {
-                            if (Math.Abs(last_data_DistLat - this_frame_data[i].DistLat) < 10 && Math.Abs(last_data_DistLong - this_frame_data[i].DistLong) < 30)
-                            {
-                                this_frame_data[i].DistLat = KalmanFilter(last_data_DistLat, this_frame_data[i].DistLat, 0.0);
-                                this_frame_data[i].DistLong = KalmanFilter(last_data_DistLong, this_frame_data[i].DistLong, 1.0);
-                            }
-                            else
-                            { 
-                                if (Obj_inf[i].Count >= 2 && Obj_inf[i + 100].Count == 0)
-                                {
-                                    int merge_id = 100;
-                                    while (true)
-                                    {
-                                        if (Obj_inf[i + merge_id].Count == 0)
-                                        {
-                                            Obj_inf[i + merge_id] = new LinkedList<MyDataModel>(Obj_inf[i]);
-                                            break;
-                                        }
-                                        else
-                                        {
-                                            merge_id++;
-                                        }
-                                    }
-                                    int change_id = i + merge_id;
-
-                                    exist[change_id] = true;
-                                    //this_frame_data[change_id] = Obj_inf[change_id].last.value;
-
-                                    this_frame_data[change_id] = (MyDataModel)Obj_inf[change_id].Last.Value.Clone();
-
-                                    this_frame_data[change_id].Timestamp = Obj_inf[change_id].Last.Value.Timestamp;
-                                    this_frame_data[change_id].DistLat = KalmanFilter(last_last_data_DistLat, last_data_DistLat, 0.0);
-                                    this_frame_data[change_id].DistLong = KalmanFilter(last_last_data_DistLong, last_data_DistLong, 1.0);
-                                }
-                            }
-                        }
-                        else if (i >= 100 && Obj_inf[i].Count >= 2)   //보간하는 칼만필터 
-                        {
-                            this_frame_data[i] = (MyDataModel)Obj_inf[i].Last.Value.Clone();
-                            //this_frame_data[i] = Obj_inf[i].Last.Value;
-
-
-                            this_frame_data[i].Timestamp = Obj_inf[i].Last.Value.Timestamp;
-                            this_frame_data[i].DistLat = KalmanFilter(last_last_data_DistLat, last_data_DistLat, 0.0);
-                            // System.Console.WriteLine("{0}", this_frame_data[i].DistLat);
-                            this_frame_data[i].DistLong = KalmanFilter(last_last_data_DistLong, 3.2 * last_data_DistLong - 2.2 * last_last_data_DistLong, 1.0);
-
-                            //System.Console.WriteLine("a,{0}", last_data_DistLong);
-                            //System.Console.WriteLine("b,{0}", last_last_data_DistLong);
-                            //System.Console.WriteLine("c,{0}", this_frame_data[i].DistLong);
+                            this_frame_data[i].DistLat = kalmanFilter(last_data_DistLat, this_frame_data[i].DistLat, 0.0);
+                            this_frame_data[i].DistLong = kalmanFilter(last_data_DistLong, this_frame_data[i].DistLong, 1.0);
                         }
                     }
                 }
-                else if (exist[i] == false && i < 100)
+                else
                 {
-                    if (Obj_inf[i] != null && i < 100)
+                    if (Obj_inf[i].Count >= 2)
                     {
-                        if (Obj_inf[i].Count >= 2 && Obj_inf[i + 100].Count == 0)
+                        if ((Obj_inf[i].Last.Value.Zone != 0) && (!Obj_inf[i].Last.Value.Noise))
                         {
-                            int merge_id = 100;
-                            while (true)
+                            TimeSpan difTime = dbcompareDT - Obj_inf[i].Last.Value.Timestamp;
+                            if (difTime.Seconds >= 3)
                             {
-                                if (Obj_inf[i + merge_id].Count == 0)
+                                remove_Obj_data(i);
+                            }
+                            else
+                            {
+                                double last_data_DistLat = Obj_inf[i].Last.Value.DistLat;
+                                double last_data_DistLong = Obj_inf[i].Last.Value.DistLong;
+                                double last_last_data_DistLat = Obj_inf[i].Last.Previous.Value.DistLat;
+                                double last_last_data_DistLong = Obj_inf[i].Last.Previous.Value.DistLong;
+
+                                exist[i] = true;
+                                this_frame_data[i] = (MyDataModel)Obj_inf[i].Last.Value.Clone();
+                                this_frame_data[i].DistLat = last_data_DistLat;// kalmanFilter(last_last_data_DistLat, last_data_DistLat, 0.0);
+                                this_frame_data[i].DistLong = kalmanFilter(last_last_data_DistLong, 3.2 * last_data_DistLong - 2.2 * last_last_data_DistLong, 1.0);
+                                this_frame_data[i].Virtual = true;
+                            }
+                            /*if (i < 100)
+                            {
+                                int merge_id = 100;
+                                while (merge_id < MAX_NODE)
                                 {
-                                    break;
+                                    if (Obj_inf[merge_id].Count == 0)
+                                    {
+                                        insert_Obj_data(merge_id);
+                                        Obj_inf[merge_id] = new LinkedList<MyDataModel>(Obj_inf[i]);
+                                        remove_Obj_data(i);
+                                        break;
+                                    }
+                                    merge_id++;
+                                }
+                            }
+                            else
+                            {
+                                TimeSpan difTime = dbcompareDT - Obj_inf[i].Last.Value.Timestamp;
+                                if (difTime.Seconds >= 3)
+                                {
+
                                 }
                                 else
                                 {
-                                    merge_id++;
+                                    double last_data_DistLat = Obj_inf[i].Last.Value.DistLat;
+                                    double last_data_DistLong = Obj_inf[i].Last.Value.DistLong;
+                                    double last_last_data_DistLat = Obj_inf[i].Last.Previous.Value.DistLat;
+                                    double last_last_data_DistLong = Obj_inf[i].Last.Previous.Value.DistLong;
+
+                                    exist[i] = true;
+                                    this_frame_data[i] = (MyDataModel)Obj_inf[i].Last.Value.Clone();
+                                    this_frame_data[i].DistLat = last_data_DistLat;// kalmanFilter(last_last_data_DistLat, last_data_DistLat, 0.0);
+                                    this_frame_data[i].DistLong = kalmanFilter(last_last_data_DistLong, 3.2 * last_data_DistLong - 2.2 * last_last_data_DistLong, 1.0);
+                                    this_frame_data[i].Virtual = true;
                                 }
-
-                            }
-                            double last_data_DistLat = Obj_inf[i].Last.Value.DistLat;
-                            double last_data_DistLong = Obj_inf[i].Last.Value.DistLong;
-
-                            double last_last_data_DistLat = Obj_inf[i].Last.Previous.Value.DistLat;
-                            double last_last_data_DistLong = Obj_inf[i].Last.Previous.Value.DistLong;
-
-                            int change_id = i + merge_id;
-
-                            exist[change_id] = true;
-
-                            this_frame_data[change_id] = (MyDataModel)Obj_inf[i].Last.Value.Clone();
-
-                            this_frame_data[change_id].DistLat = KalmanFilter(last_last_data_DistLat, last_data_DistLat, 0.0);
-                            this_frame_data[change_id].DistLong = KalmanFilter(last_last_data_DistLong, last_data_DistLong, 1.0);
+                            }*/
                         }
-
                     }
                 }
             }
-
         }
-        private void check_zone_index()
+        private void Check_zone_index()
         {
             for (int i = 0; i < MAX_NODE; i++)
             {
@@ -712,6 +690,9 @@ namespace Radar_Analysis_Program
                     {
                         this_frame_data[i].Zone = LUT_img.At<char>(y, x);
                     }
+                    else
+                        this_frame_data[i].Zone = 0;
+
                     if (this_frame_data[i].Zone == 0)
                     {
                         //exist[i] = false;
@@ -719,7 +700,58 @@ namespace Radar_Analysis_Program
                 }
             }
         }
-        private void save_this_frame_obj_data()
+        private void Merge_Obj()
+        {
+            double DistLatgap, DistLonggap, Velocity_gap;
+
+            int i = 0;
+            for (int n = 0; n < 2; n++)
+            {
+                for (i = 0; i < MAX_NODE; i++)
+                {
+                    if (exist[i] && !this_frame_data[i].Merged && !this_frame_data[i].Noise)
+                    {
+                        if (Obj_inf[i].Count > 0)
+                        {
+                            this_frame_data[i].Merged = Obj_inf[i].Last.Value.Merged;
+                            this_frame_data[i].Merging = Obj_inf[i].Last.Value.Merging;
+                        }
+
+                        int j = 0;
+                        for (j = i; j < MAX_NODE; j++)
+                        {
+                            if (exist[j] && !this_frame_data[j].Merged && !this_frame_data[j].Noise)
+                            {
+                                if (i != j)
+                                {
+                                    DistLatgap = Math.Abs(this_frame_data[i].DistLat - this_frame_data[j].DistLat);
+                                    DistLonggap = Math.Abs(this_frame_data[i].DistLong - this_frame_data[j].DistLong);
+                                    Velocity_gap = Math.Abs(this_frame_data[i].Velocity - this_frame_data[j].Velocity);
+
+                                    if ((DistLatgap <= 1.5) && (DistLonggap <= 12.0) && (Velocity_gap <= 1.0))
+                                    {
+                                        if ((this_frame_data[i].Length <= 4.4) || (this_frame_data[j].Length <= 4.4))
+                                        {
+                                            /* if ((Obj_inf[i].Count < 100) && (Obj_inf[i].Count <= Obj_inf[j].Count))
+                                             {
+                                                 this_frame_data[i].Merged = true;
+                                                 this_frame_data[j].Merging = true;
+                                             }
+                                             else if ((Obj_inf[j].Count < 100) && (Obj_inf[j].Count <= Obj_inf[i].Count))
+                                             {
+                                                 this_frame_data[j].Merged = true;
+                                                 this_frame_data[i].Merging = true;
+                                             }*/
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        private void Save_this_frame_obj_data()
         {
             for (int i = 0; i < MAX_NODE; i++)
             {
@@ -729,17 +761,9 @@ namespace Radar_Analysis_Program
                     {
                         insert_Obj_data(i);
                     }
-                    /*else if (Obj_inf[i].Count != 0 && i >= 100)
-                    {
-                        insert_Obj_data(i);
-                    }
-                    else if (Obj_inf[i].Count != 0 && i < 100)
-                    {
-                        insert_Obj_data(i);
-                    }*/
                     Obj_inf[i].AddLast(this_frame_data[i]);
-                    if (Obj_inf[i].Count >= 100)
-                        Obj_inf[i].RemoveFirst();
+                    /*if (Obj_inf[i].Count >= 100)
+                        Obj_inf[i].RemoveFirst();*/
                 }
                 else
                 {
@@ -755,7 +779,7 @@ namespace Radar_Analysis_Program
 
             }
         }
-        private void draw_this_frame_obj_data()
+        private void Draw_this_frame_obj_data()
         {
             for (int i = 0; i < MAX_NODE; i++)
             {
@@ -791,8 +815,41 @@ namespace Radar_Analysis_Program
                             rectangles[i].Visibility = Visibility.Visible;
                             textBoxes[i].Visibility = Visibility.Hidden;
                         }
+                        else if (this_frame_data[i].Merging)
+                        {
+                            rectangles[i].StrokeThickness = 20;
+                            rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61));
+
+                            Canvas.SetLeft(rectangles[i], X - (rectangles[i].StrokeThickness / 2));
+                            Canvas.SetTop(rectangles[i], Y - rectangles[i].StrokeThickness);
+                            Canvas.SetLeft(textBoxes[i], X + 10);
+                            Canvas.SetTop(textBoxes[i], Y - 18);
+
+                            rectangles[i].Visibility = Visibility.Visible;
+                            textBoxes[i].Visibility = Visibility.Visible;
+                        }
+                        else if (this_frame_data[i].Merged)
+                        {
+                            rectangles[i].StrokeThickness = 8;
+                            rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(255, 255, 0));
+
+                            Canvas.SetLeft(rectangles[i], X - (rectangles[i].StrokeThickness / 2));
+                            Canvas.SetTop(rectangles[i], Y - rectangles[i].StrokeThickness);
+
+                            rectangles[i].Visibility = Visibility.Visible;
+                            textBoxes[i].Visibility = Visibility.Hidden;
+                        }
                         else if (this_frame_data[i].Virtual)
                         {
+                            rectangles[i].StrokeThickness = 15;
+                            rectangles[i].Stroke = new SolidColorBrush(Color.FromArgb(100, 244, 143, 61));
+                            Canvas.SetLeft(rectangles[i], X - (rectangles[i].StrokeThickness / 2));
+                            Canvas.SetTop(rectangles[i], Y - rectangles[i].StrokeThickness);
+                            Canvas.SetLeft(textBoxes[i], X + 10);
+                            Canvas.SetTop(textBoxes[i], Y - 18);
+
+                            rectangles[i].Visibility = Visibility.Visible;
+                            textBoxes[i].Visibility = Visibility.Visible;
                         }
                         else if (this_frame_data[i].Zone == 0)
                         {
@@ -818,14 +875,18 @@ namespace Radar_Analysis_Program
                             rectangles[i].Visibility = Visibility.Visible;
                             textBoxes[i].Visibility = Visibility.Visible;
                         }
-                        if (textBoxes[i].Text == "")
-                            textBoxes[i].Visibility = Visibility.Hidden;
                     }
                     else
                     {
                         rectangles[i].Visibility = Visibility.Hidden;
                         textBoxes[i].Visibility = Visibility.Hidden;
                     }
+                    if (textBoxes[i].Text == "")
+                        textBoxes[i].Visibility = Visibility.Hidden;
+                }
+                else
+                {
+                    textBoxes[i].Visibility = Visibility.Hidden;
                 }
             }
         }
@@ -1281,7 +1342,7 @@ namespace Radar_Analysis_Program
             try
             {
                 MINID = Convert.ToInt32(MINIDText.Text);
-                if ((MINID < 0) || (MINID > 99))
+                if ((MINID < 0) || (MINID >= MAX_NODE))
                 {
                     MINID = 0;
                     MINIDText.Text = MINID.ToString();
@@ -1297,15 +1358,15 @@ namespace Radar_Analysis_Program
             try
             {
                 MAXID = Convert.ToInt32(MAXIDText.Text);
-                if ((MAXID < 0) || (MAXID > 99))
+                if ((MAXID < 0) || (MAXID >= MAX_NODE))
                 {
-                    MAXID = 99;
+                    MAXID = MAX_NODE - 1;
                     MAXIDText.Text = MAXID.ToString();
                 }
             }
             catch
             {
-                MAXIDText.Text = (99).ToString();
+                MAXIDText.Text = (MAX_NODE - 1).ToString();
             }
         }
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
@@ -1493,11 +1554,20 @@ namespace Radar_Analysis_Program
         }
         private void slow_Click(object sender, RoutedEventArgs e)
         {
-            mediaElement.SpeedRatio = 0.2;
+            if (mediaElement.SpeedRatio >= 0.2)
+                mediaElement.SpeedRatio -= 0.1;
+            Play_Speed.Content = mediaElement.SpeedRatio.ToString("x 0.0");
         }
         private void normal_Click(object sender, RoutedEventArgs e)
         {
             mediaElement.SpeedRatio = 1.0;
+            Play_Speed.Content = mediaElement.SpeedRatio.ToString("x 0.0");
+        }
+        private void quick_Click(object sender, RoutedEventArgs e)
+        {
+            if (mediaElement.SpeedRatio <= 2.0)
+                mediaElement.SpeedRatio += 0.1;
+            Play_Speed.Content = mediaElement.SpeedRatio.ToString("x 0.0");
         }
         private void back_Click(object sender, RoutedEventArgs e)
         {
@@ -1523,11 +1593,11 @@ namespace Radar_Analysis_Program
             TimeSpan value_time = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum); // 현재 슬라이드 바 시간
 
 
-            TimeSpan back_time = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum - 5000);
+            TimeSpan back_time = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum - 3000);
 
             TimeSpan dura = mediaElement.Position; //영상 시간 계산
 
-            dura = dura.Subtract(TimeSpan.FromSeconds(5));
+            dura = dura.Subtract(TimeSpan.FromSeconds(3));
 
 
             while (a < dataList.Count)
@@ -1568,7 +1638,7 @@ namespace Radar_Analysis_Program
             dbcompareDT = _starttime.Add(dura);
 
 
-            mediaElement.Position = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum - 5000);
+            mediaElement.Position = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum - 3000);
             mediaElement.Play();
             timer.Start();
         }
@@ -1588,7 +1658,6 @@ namespace Radar_Analysis_Program
         {
             mediaElement.Pause();
             timer.Stop();
-
         }
         private void slider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
         {
@@ -1711,7 +1780,7 @@ namespace Radar_Analysis_Program
         private string CheckBox_print(int index)
         {
             string pprint = "";
-            for (int i = 0; i < 14; i++)
+            for (int i = 0; i < 15; i++)
             {
                 string db_data = "";
                 if (checkBoxes[i].IsChecked == true)
@@ -1730,6 +1799,7 @@ namespace Radar_Analysis_Program
                     else if (i == 11) db_data = this_frame_data[index].Length.ToString("0.0");
                     else if (i == 12) db_data = this_frame_data[index].Width.ToString("0.0");
                     else if (i == 13) db_data = this_frame_data[index].DynProp.ToString();
+                    else if (i == 14) db_data = Obj_inf[index].Count.ToString();
                     pprint += checkbox_name[i] + " = " + db_data + '\n';
                 }
             }

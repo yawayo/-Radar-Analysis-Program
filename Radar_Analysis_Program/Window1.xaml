@@ -92,7 +92,7 @@
             <Label Grid.Row="3" Content="MIN ID" Foreground="White" FontSize="14" FontFamily="KoPub바탕체_Pro Medium" HorizontalAlignment="Center"/>
             <TextBox Grid.Row="3" x:Name="MINIDText" x:FieldModifier="private" Text="0" Width="50" Height="23" HorizontalAlignment="Center" TextChanged="MINID_Value_Changed" PreviewTextInput="NumberValidationTextBox"/>
             <Label Grid.Row="4" Content="MAX ID" Foreground="White" FontSize="14" FontFamily="KoPub바탕체_Pro Medium" HorizontalAlignment="Center"/>
-            <TextBox Grid.Row="4" x:Name="MAXIDText" x:FieldModifier="private" Text="100" Width="50" Height="23" HorizontalAlignment="Center" TextChanged="MAXID_Value_Changed" PreviewTextInput="NumberValidationTextBox"/>
+            <TextBox Grid.Row="4" x:Name="MAXIDText" x:FieldModifier="private" Text="200" Width="50" Height="23" HorizontalAlignment="Center" TextChanged="MAXID_Value_Changed" PreviewTextInput="NumberValidationTextBox"/>
             <CheckBox Grid.Row="7" x:Name ="apply_algorithm" Content="Agrt" FontSize="14" IsChecked="False" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Click="Save_Setting_Value_Click"/>
             <Button Grid.Row="8" x:Name="Save_Setting_Value_btn" FontSize="16" FontWeight="Bold"  Content="Save" Width="50" Height="23" Click="Save_Setting_Value_Click"/>
         </Grid>
@@ -220,6 +220,7 @@
                 </Grid.RowDefinitions>
 
                 <Label Grid.Row="0" Content="Camera" FontFamily="KoPub바탕체_Pro Medium" Foreground="#FFF48F3D" FontSize="25"></Label>
+                <Label x:Name="Play_Speed" Grid.Row="0" Content="x 1.0" FontFamily="KoPub바탕체_Pro Medium" Foreground="White" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="15"></Label>
 
                 <MediaElement Grid.Row ="1" Name="mediaElement"  LoadedBehavior="Manual" Unloaded="btnStop_Click" MediaOpened="mediaElement_MediaOpened"
                       MediaEnded="mediaElement_MediaEnded" MediaFailed="mediaElement_MediaFailed" ScrubbingEnabled="True"  />
@@ -245,10 +246,11 @@
                         </Canvas>
                     </Button>
                     <CheckBox Name="CheckBox"  Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"  IsChecked="True"/>
+                    <Button x:Name="slow" Content="Slow" HorizontalAlignment="Left" VerticalAlignment="Top" Width="74" Click="slow_Click"/>
+                    <Button x:Name="normal" Content="1.0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="74" Click="normal_Click"/>
+                    <Button x:Name="quick" Content="Quick" HorizontalAlignment="Left" VerticalAlignment="Top" Width="74" Click="quick_Click"/>
+                    <Button x:Name="back" Content="5초 전" HorizontalAlignment="Left" VerticalAlignment="Top" Width="74" Click="back_Click"/>
                 </WrapPanel>
-                <Button x:Name="slow" Content="0.5" HorizontalAlignment="Left" Margin="499,6,0,0" Grid.Row="3" VerticalAlignment="Top" Width="75" Click="slow_Click"/>
-                <Button x:Name="normal" Content="1.0" HorizontalAlignment="Left" Margin="586,6,0,0" Grid.Row="3" VerticalAlignment="Top" Width="74" Click="normal_Click"/>
-                <Button x:Name="back" Content="5초 전" HorizontalAlignment="Left" Margin="413,6,0,0" Grid.Row="3" VerticalAlignment="Top" Width="74" Click="back_Click"/>
             </Grid>
         </Border>
 
@@ -288,6 +290,7 @@
                         <CheckBox  x:Name ="text_length" Content ="Length"  FontSize="12" IsChecked="False" Foreground="White"/>
                         <CheckBox  x:Name ="text_width" Content ="Width"  FontSize="12" IsChecked="False" Foreground="White"/>
                         <CheckBox  x:Name ="text_DynProp" Content ="DynProp"  FontSize="12" IsChecked="False" Foreground="White"/>
+                        <CheckBox  x:Name ="text_ObjCount" Content ="Count"  FontSize="12" IsChecked="False" Foreground="White"/>
                     </WrapPanel>
                 </ScrollViewer>
 
