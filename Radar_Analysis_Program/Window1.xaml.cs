@@ -206,6 +206,8 @@ namespace Radar_Analysis_Program
             Set_Obj_TextBox();
             Set_map_value();
             AngleShiftText();
+
+            draw_play_btn();
         }
 
         #region Draw Func
@@ -1061,7 +1063,6 @@ namespace Radar_Analysis_Program
 
         void TimerTickHandler(object sender, EventArgs e)
         {
-
             double positionMs = mediaElement.Position.TotalMilliseconds;
             slider.Value = slider.Minimum + positionMs;
 
@@ -1440,31 +1441,18 @@ namespace Radar_Analysis_Program
             duration = durationMs;
             total_time = _starttime.AddMilliseconds(duration);
             secondtime = total_time.ToString("yyyy-MM-dd HH:mm:ss.fff");
-            //
-            //System.Console.WriteLine(secondtime);
-
             db_connect(conn, firsttime, secondtime);
 
             slider.Maximum = slider.Minimum + durationMs;
 
-            for (int i = 0; i < 100; i++)
-            {
-                if (Data_Draw.Children.Contains(rectangles[i]))
-                {
-                    Data_Draw.Children.Remove(rectangles[i]);
-                    textBoxes[i].Visibility = Visibility.Hidden;
-                }
-                Obj_inf[i].Clear();
-            }
-            Clear_this_frame_obj_data();
+            clear_Obj_data();
         }
         private void mediaElement_MediaEnded(object sender, RoutedEventArgs e)
         {
-            mediaElement.Stop();
+            mediaElement.LoadedBehavior = MediaState.Stop;
             timer.Stop();
-
             number = 0;
-
+            draw_play_btn();
         }
         private void mediaElement_MediaFailed(object sender, ExceptionRoutedEventArgs e)
         {
@@ -1474,33 +1462,81 @@ namespace Radar_Analysis_Program
         #endregion
 
         #region btn
+        private void draw_play_btn()
+        {
+            Polygon polygon = new Polygon();
+            polygon.Fill = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+            System.Windows.Point Point1 = new System.Windows.Point(5, 5);
+            System.Windows.Point Point2 = new System.Windows.Point(5, 25);
+            System.Windows.Point Point3 = new System.Windows.Point(25, 15);
+            PointCollection myPointCollection = new PointCollection();
+            myPointCollection.Add(Point1);
+            myPointCollection.Add(Point2);
+            myPointCollection.Add(Point3);
+            polygon.Points = myPointCollection;
+
+            btnPlay_canvas.Children.Clear();
+            btnPlay_canvas.Children.Add(polygon);
+        }
+        private void draw_pause_btn()
+        {
+            Polygon polygon1 = new Polygon();
+            polygon1.Fill = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+            System.Windows.Point Point1_1 = new System.Windows.Point(6, 5);
+            System.Windows.Point Point1_2 = new System.Windows.Point(13, 5);
+            System.Windows.Point Point1_3 = new System.Windows.Point(13, 25);
+            System.Windows.Point Point1_4 = new System.Windows.Point(6, 25);
+            PointCollection myPointCollection1 = new PointCollection();
+            myPointCollection1.Add(Point1_1);
+            myPointCollection1.Add(Point1_2);
+            myPointCollection1.Add(Point1_3);
+            myPointCollection1.Add(Point1_4);
+            polygon1.Points = myPointCollection1;
+
+
+            Polygon polygon2 = new Polygon();
+            polygon2.Fill = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+            System.Windows.Point Point2_1 = new System.Windows.Point(17, 5);
+            System.Windows.Point Point2_2 = new System.Windows.Point(24, 5);
+            System.Windows.Point Point2_3 = new System.Windows.Point(24, 25);
+            System.Windows.Point Point2_4 = new System.Windows.Point(17, 25);
+            PointCollection myPointCollection2 = new PointCollection();
+            myPointCollection2.Add(Point2_1);
+            myPointCollection2.Add(Point2_2);
+            myPointCollection2.Add(Point2_3);
+            myPointCollection2.Add(Point2_4);
+            polygon2.Points = myPointCollection2;
+
+            btnPlay_canvas.Children.Clear();
+            btnPlay_canvas.Children.Add(polygon1);
+            btnPlay_canvas.Children.Add(polygon2);
+        }
         private void btnPlay_Click(object sender, RoutedEventArgs e)
         {
-            //clear_Obj_data();
-
-            if (speed_check == 0)
+            if (mediaElement.HasVideo)
             {
-                timer.Interval = TimeSpan.FromMilliseconds(0.1);
-                timer.Tick += TimerTickHandler;
-                speed_check++;
-            }
+                if (mediaElement.LoadedBehavior == MediaState.Pause || mediaElement.LoadedBehavior == MediaState.Stop)
+                {
+                    draw_pause_btn();
+                    if (number == 0)
+                        clear_Obj_data();
 
-            mediaElement.LoadedBehavior = MediaState.Manual;
-            mediaElement.Play();
-            timer.Start();
-        }
-        private void btnStop_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                mediaElement.Pause();
-                timer.Stop();
+                    if (speed_check == 0)
+                    {
+                        timer.Interval = TimeSpan.FromMilliseconds(0.1);
+                        timer.Tick += TimerTickHandler;
+                        speed_check++;
+                    }
+                    mediaElement.LoadedBehavior = MediaState.Play;
+                    timer.Start();
+                }
+                else if (mediaElement.LoadedBehavior == MediaState.Play)
+                {
+                    draw_play_btn();
+                    mediaElement.LoadedBehavior = MediaState.Pause;
+                    timer.Stop();
+                }
             }
-            catch
-            {
-
-            }
-
         }
         private void BtnSelectFile_Click(object sender, RoutedEventArgs e)
         {
@@ -1519,15 +1555,11 @@ namespace Radar_Analysis_Program
                 // MediaElement에 선택한 파일 설정
                 mediaElement.Source = new Uri(filePath);
             }
-            //double totalDuration;
-            mediaElement.Pause();
-            //totalDuration = mediaElement.NaturalDuration.TimestampSpan.TotalMilliseconds;
+            mediaElement.LoadedBehavior = MediaState.Pause;
 
             string filepp = dlg.FileName;
 
             string _start = System.IO.Path.GetFileNameWithoutExtension(filepp);
-
-
 
             if (DateTime.TryParseExact(_start, "yyyy-MM-dd HH-mm-ss", null, System.Globalization.DateTimeStyles.None, out _starttime))
             {
@@ -1540,14 +1572,8 @@ namespace Radar_Analysis_Program
 
             slider.Minimum = _starttime.Ticks;
 
-            //total_time = _starttime.AddMilliseconds(totalDuration);
-
             firsttime = _starttime.ToString("yyyy-MM-dd HH:mm:ss.fff");
             secondtime = total_time.ToString("yyyy-MM-dd HH:mm:ss.fff");
-            // System.Console.WriteLine(firsttime);
-            // System.Console.WriteLine(secondtime);
-            // System.Console.WriteLine(total_time);
-
         }
         private void slow_Click(object sender, RoutedEventArgs e)
         {
@@ -1568,7 +1594,7 @@ namespace Radar_Analysis_Program
         }
         private void back_Click(object sender, RoutedEventArgs e)
         {
-            mediaElement.Stop();
+            mediaElement.LoadedBehavior = MediaState.Stop;
             timer.Stop();
 
             clear_Obj_data();
@@ -1622,7 +1648,7 @@ namespace Radar_Analysis_Program
 
 
             mediaElement.Position = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum - 3000);
-            mediaElement.Play();
+            mediaElement.LoadedBehavior = MediaState.Play;
             timer.Start();
         }
         #endregion
@@ -1639,7 +1665,7 @@ namespace Radar_Analysis_Program
         }
         private void slider_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
         {
-            mediaElement.Pause();
+            mediaElement.LoadedBehavior = MediaState.Pause;
             timer.Stop();
         }
         private void slider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
@@ -1648,21 +1674,7 @@ namespace Radar_Analysis_Program
 
             TimeSpan value_time = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum);
 
-            for (int i = 0; i < 200; i++)
-            {
-                if (Data_Draw.Children.Contains(rectangles[i]))
-                {
-                    Data_Draw.Children.Remove(rectangles[i]);
-                    textBoxes[i].Visibility = Visibility.Hidden;
-                }
-                Obj_inf[i].Clear();
-            }
-
-            for (int i = 100; i < 200; i++)
-            {
-                exist[i] = false;
-            }
-            Clear_this_frame_obj_data();
+            clear_Obj_data();
 
             if (e.HorizontalChange > 0)   //앞으로 갔을 때 
             {
@@ -1738,7 +1750,7 @@ namespace Radar_Analysis_Program
                 dbcompareDT = _starttime.Add(dura);
             }
             mediaElement.Position = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum);
-            mediaElement.Play();
+            mediaElement.LoadedBehavior = MediaState.Play;
             timer.Start();
         }
         #endregion

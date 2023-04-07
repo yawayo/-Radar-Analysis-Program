@@ -222,21 +222,15 @@
                 <Label Grid.Row="0" Content="Camera" FontFamily="KoPub바탕체_Pro Medium" Foreground="#FFF48F3D" FontSize="25"></Label>
                 <Label x:Name="Play_Speed" Grid.Row="0" Content="x 1.0" FontFamily="KoPub바탕체_Pro Medium" Foreground="White" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="15"></Label>
 
-                <MediaElement Grid.Row ="1" Name="mediaElement"  LoadedBehavior="Manual" Unloaded="btnStop_Click" MediaOpened="mediaElement_MediaOpened"
+                <MediaElement Grid.Row ="1" Name="mediaElement"  LoadedBehavior="Pause" MediaOpened="mediaElement_MediaOpened"
                       MediaEnded="mediaElement_MediaEnded" MediaFailed="mediaElement_MediaFailed" ScrubbingEnabled="True"  />
 
                 <Slider  Grid.Row="2" Name="slider" HorizontalAlignment="Center" VerticalAlignment="Center" TickFrequency="1" Thumb.DragStarted="slider_DragStarted" Thumb.DragCompleted="slider_DragCompleted" Height="20" Width="500" ValueChanged="slider_ValueChanged" />
 
                 <WrapPanel HorizontalAlignment="Center"  Grid.Row="3">
                     <Button Name="btnPlay"  FontFamily="KoPub바탕체_Pro Medium" Click="btnPlay_Click">
-                        <Canvas Height="30" Width="30">
-                            <Polygon Points="5,5 5,25 25,15" Stroke="Black" Fill="Black" />
-                        </Canvas>
-                    </Button>
-                    <Button Name="btnStop" FontFamily="KoPub바탕체_Pro Medium"  Click="btnStop_Click" >
-                        <Canvas Height="30" Width="30">
-                            <Rectangle Canvas.Left="6" Canvas.Top="5" Width="7" Height="20" Fill="Black"  />
-                            <Rectangle Canvas.Left="17" Canvas.Top="5" Width="7" Height="20" Fill="Black"  />
+                        <Canvas Name="btnPlay_canvas" Height="30" Width="30">
+                            <!--<Polygon Points="5,5 5,25 25,15" Stroke="Black" Fill="Black" />-->
                         </Canvas>
                     </Button>
                     <Button x:Name="btnSelectFile"  FontFamily="KoPub바탕체_Pro Medium" Click= "BtnSelectFile_Click" >
