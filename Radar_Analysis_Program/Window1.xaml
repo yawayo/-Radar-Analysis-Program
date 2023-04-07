@@ -228,12 +228,12 @@
                 <Slider  Grid.Row="2" Name="slider" HorizontalAlignment="Center" VerticalAlignment="Center" TickFrequency="1" Thumb.DragStarted="slider_DragStarted" Thumb.DragCompleted="slider_DragCompleted" Height="20" Width="500" ValueChanged="slider_ValueChanged" />
 
                 <WrapPanel HorizontalAlignment="Center"  Grid.Row="3">
-                    <Button Name="btnPlay"  FontFamily="KoPub바탕체_Pro Medium" Click="btnPlay_Click">
+                    <Button Name="btnPlay"  FontFamily="KoPub바탕체_Pro Medium" Click="btnPlay_Click" TabIndex="1">
                         <Canvas Name="btnPlay_canvas" Height="30" Width="30">
                             <!--<Polygon Points="5,5 5,25 25,15" Stroke="Black" Fill="Black" />-->
                         </Canvas>
                     </Button>
-                    <Button x:Name="btnSelectFile"  FontFamily="KoPub바탕체_Pro Medium" Click= "BtnSelectFile_Click" >
+                    <Button x:Name="btnSelectFile"  FontFamily="KoPub바탕체_Pro Medium" Click= "BtnSelectFile_Click"  TabIndex="0">
                         <Canvas Height="30" Width="30">
                             <Polygon Points="3,5 3,25 27,25 27,8 15,8 13,5" Stroke="Black" Fill="Black" />
                             <Line X1="7" Y1="11" X2="28" Y2="11" Stroke="#DDDDDDFF"/>
