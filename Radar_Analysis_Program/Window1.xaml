@@ -230,7 +230,6 @@
                 <WrapPanel HorizontalAlignment="Center"  Grid.Row="3">
                     <Button Name="btnPlay"  FontFamily="KoPub바탕체_Pro Medium" Click="btnPlay_Click" TabIndex="1">
                         <Canvas Name="btnPlay_canvas" Height="30" Width="30">
-                            <!--<Polygon Points="5,5 5,25 25,15" Stroke="Black" Fill="Black" />-->
                         </Canvas>
                     </Button>
                     <Button x:Name="btnSelectFile"  FontFamily="KoPub바탕체_Pro Medium" Click= "BtnSelectFile_Click"  TabIndex="0">
@@ -284,7 +283,7 @@
                         <CheckBox  x:Name ="text_length" Content ="Length"  FontSize="12" IsChecked="False" Foreground="White"/>
                         <CheckBox  x:Name ="text_width" Content ="Width"  FontSize="12" IsChecked="False" Foreground="White"/>
                         <CheckBox  x:Name ="text_DynProp" Content ="DynProp"  FontSize="12" IsChecked="False" Foreground="White"/>
-                        <CheckBox  x:Name ="text_ObjCount" Content ="Count"  FontSize="12" IsChecked="False" Foreground="White"/>
+                        <CheckBox  x:Name ="text_ObjCount" Content ="Size"  FontSize="12" IsChecked="False" Foreground="White"/>
                     </WrapPanel>
                 </ScrollViewer>
 

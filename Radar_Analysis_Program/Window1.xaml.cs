@@ -214,7 +214,7 @@ namespace Radar_Analysis_Program
         private void Set_Obj_TextBox()
         {
             checkBoxes = new CheckBox[] { text_time, text_id, text_distlat, text_distlong, text_vrellat, text_vrellong, text_velocity, text_rsc, text_probofexist, text_class, text_zone, text_length, text_width, text_DynProp, text_ObjCount };
-            checkbox_name = new String[] { "Time", "ID", "DistLat", "DistLong", "VrelLat", "VrelLong", "Velocity", "RCS", "ProbOfExist", "Class", "Zone", "Length", "Width", "DynProp", "Count" };
+            checkbox_name = new String[] { "Time", "ID", "DistLat", "DistLong", "VrelLat", "VrelLong", "Velocity", "RCS", "ProbOfExist", "Class", "Zone", "Length", "Width", "DynProp", "Size" };
 
             for (int i = 0; i < MAX_NODE; i++)
             {
@@ -415,7 +415,7 @@ namespace Radar_Analysis_Program
                     Check_New_Obj();
 
                     //Lut();
-                    Object_Kalman();
+                    //Object_Kalman();
                     Check_zone_index();
 
                     //Merge_Obj();
@@ -632,7 +632,7 @@ namespace Radar_Analysis_Program
                 {
                     if (Obj_inf[i].Count >= 2)
                     {
-                        if ((Obj_inf[i].Last.Value.Zone != 0) && (!Obj_inf[i].Last.Value.Noise) && Obj_inf[i].Last.Value.Finish_Analyzing)
+                        if ((Obj_inf[i].Last.Value.Zone != 0) && !Obj_inf[i].Last.Value.Noise && Obj_inf[i].Last.Value.Finish_Analyzing)
                         {
                             TimeSpan difTime = dbcompareDT - Obj_inf[i].Last.Value.Timestamp;
                             if (difTime.Seconds < 3)
@@ -668,10 +668,6 @@ namespace Radar_Analysis_Program
                             }
                         }
                     }
-                    else
-                    {
-                        remove_Obj_data(i);
-                    }
                 }
             }
         }
@@ -702,45 +698,96 @@ namespace Radar_Analysis_Program
             double DistLatgap, DistLonggap, Velocity_gap;
 
             int i = 0;
-            for (int n = 0; n < 2; n++)
+            for (i = 0; i < MAX_NODE; i++)
             {
-                for (i = 0; i < MAX_NODE; i++)
+                if (exist[i] && !this_frame_data[i].Merged && !this_frame_data[i].Noise && this_frame_data[i].Finish_Analyzing)
                 {
-                    if (exist[i] && !this_frame_data[i].Merged && !this_frame_data[i].Noise)
+                    if (Obj_inf[i].Count > 0)
                     {
-                        if (Obj_inf[i].Count > 0)
-                        {
-                            this_frame_data[i].Merged = Obj_inf[i].Last.Value.Merged;
-                            this_frame_data[i].Merging = Obj_inf[i].Last.Value.Merging;
-                        }
+                        this_frame_data[i].Merged = Obj_inf[i].Last.Value.Merged;
+                        this_frame_data[i].Merging = Obj_inf[i].Last.Value.Merging;
+                    }
 
-                        int j = 0;
-                        for (j = i; j < MAX_NODE; j++)
+                    int j = 0;
+                    for (j = i; j < MAX_NODE; j++)
+                    {
+                        if (exist[j] && !this_frame_data[j].Merged && !this_frame_data[j].Noise && this_frame_data[j].Finish_Analyzing)
                         {
-                            if (exist[j] && !this_frame_data[j].Merged && !this_frame_data[j].Noise)
+                            if (i != j)
                             {
-                                if (i != j)
-                                {
-                                    DistLatgap = Math.Abs(this_frame_data[i].DistLat - this_frame_data[j].DistLat);
-                                    DistLonggap = Math.Abs(this_frame_data[i].DistLong - this_frame_data[j].DistLong);
-                                    Velocity_gap = Math.Abs(this_frame_data[i].Velocity - this_frame_data[j].Velocity);
+                                DistLatgap = Math.Abs(this_frame_data[i].DistLat - this_frame_data[j].DistLat);
+                                DistLonggap = Math.Abs(this_frame_data[i].DistLong - this_frame_data[j].DistLong);
+                                Velocity_gap = Math.Abs(this_frame_data[i].Velocity - this_frame_data[j].Velocity);
 
-                                    if ((DistLatgap <= 1.5) && (DistLonggap <= 12.0) && (Velocity_gap <= 1.0))
+                                if ((DistLatgap <= 1.5) && (DistLonggap <= 12.0) && (Velocity_gap <= 1.0))
+                                {
+                                    if (this_frame_data[i].Virtual != this_frame_data[j].Virtual)
                                     {
-                                        if ((this_frame_data[i].Length <= 4.4) || (this_frame_data[j].Length <= 4.4))
+                                        if (this_frame_data[i].Virtual)
                                         {
-                                            /* if ((Obj_inf[i].Count < 100) && (Obj_inf[i].Count <= Obj_inf[j].Count))
-                                             {
-                                                 this_frame_data[i].Merged = true;
-                                                 this_frame_data[j].Merging = true;
-                                             }
-                                             else if ((Obj_inf[j].Count < 100) && (Obj_inf[j].Count <= Obj_inf[i].Count))
-                                             {
-                                                 this_frame_data[j].Merged = true;
-                                                 this_frame_data[i].Merging = true;
-                                             }*/
+                                            if (Obj_inf[j].Count != 0)
+                                            {
+                                                foreach (MyDataModel item in Obj_inf[j])
+                                                    Obj_inf[i].AddLast(item);
+                                            }
+                                            remove_Obj_data(j);
+                                            Obj_inf[j] = new LinkedList<MyDataModel>(Obj_inf[i]);
+                                        }
+                                        else
+                                        {
+                                            if (Obj_inf[i].Count != 0)
+                                            {
+                                                foreach (MyDataModel item in Obj_inf[i])
+                                                    Obj_inf[j].AddLast(item);
+                                            }
+                                            remove_Obj_data(i);
+                                            Obj_inf[i] = new LinkedList<MyDataModel>(Obj_inf[j]);
                                         }
                                     }
+                                    else if(this_frame_data[i].Virtual && this_frame_data[j].Virtual)
+                                    {
+
+                                    }
+                                    else if ((this_frame_data[i].Length <= 4.4) || (this_frame_data[j].Length <= 4.4))
+                                    {
+                                        if (Obj_inf[i].Count <= Obj_inf[j].Count)
+                                        {
+                                            this_frame_data[i].Merged = true;
+                                            this_frame_data[j].Merging = true;
+                                        }
+                                        else if (Obj_inf[j].Count <= Obj_inf[i].Count)
+                                        {
+                                            this_frame_data[j].Merged = true;
+                                            this_frame_data[i].Merging = true;
+                                        }
+                                    }
+                                }
+                                else if ((DistLatgap <= 3) && (DistLonggap <= 10.0) && (Velocity_gap <= 3.0))
+                                {
+                                    /*if (this_frame_data[i].Virtual != this_frame_data[j].Virtual)
+                                    {
+                                        if (this_frame_data[i].Virtual)
+                                        {
+                                            if (Obj_inf[j].Count != 0)
+                                            {
+                                                foreach (MyDataModel item in Obj_inf[j])
+                                                    Obj_inf[i].AddLast(item);
+                                            }
+                                            remove_Obj_data(j);
+                                            Obj_inf[j] = new LinkedList<MyDataModel>(Obj_inf[i]);
+
+                                        }
+                                        else
+                                        {
+                                            if (Obj_inf[i].Count != 0)
+                                            {
+                                                foreach (MyDataModel item in Obj_inf[i])
+                                                    Obj_inf[j].AddLast(item);
+                                            }
+                                            remove_Obj_data(i);
+                                            Obj_inf[i] = new LinkedList<MyDataModel>(Obj_inf[j]);
+                                        }
+                                    }*/
                                 }
                             }
                         }
@@ -1794,7 +1841,7 @@ namespace Radar_Analysis_Program
                     else if (i == 11) db_data = this_frame_data[index].Length.ToString("0.0");
                     else if (i == 12) db_data = this_frame_data[index].Width.ToString("0.0");
                     else if (i == 13) db_data = this_frame_data[index].DynProp.ToString();
-                    else if (i == 14) db_data = Obj_inf[index].Count.ToString();
+                    else if (i == 14) db_data = (this_frame_data[index].Length * this_frame_data[index].Width).ToString("0.0");//Obj_inf[index].Count.ToString();
                     pprint += checkbox_name[i] + " = " + db_data + '\n';
                 }
             }
