@@ -415,7 +415,8 @@ namespace Radar_Analysis_Program
                     Check_New_Obj();
 
                     //Lut();
-                    //Object_Kalman();
+                    if((bool)apply_algorithm.IsChecked)
+                        Object_Kalman();
                     Check_zone_index();
 
                     //Merge_Obj();
