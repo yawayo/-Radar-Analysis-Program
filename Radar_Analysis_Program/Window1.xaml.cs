@@ -397,17 +397,29 @@ namespace Radar_Analysis_Program
                 {
                     while (!((number + 1 >= dataList.Count) || (dataList[number].Timestamp != dataList[number + 1].Timestamp)))
                     {
-                        this_frame_data[dataList[number].ID] = (MyDataModel)dataList[number].Clone();
-                        exist[dataList[number].ID] = true;
+                        if ((MINID <= dataList[number].ID) && (MAXID >= dataList[number].ID))
+                        {
+                            this_frame_data[dataList[number].ID] = (MyDataModel)dataList[number].Clone();
+                            exist[dataList[number].ID] = true;
+                            
+                        }
                         number++;
                     }
                     this_frame_data[dataList[number].ID] = (MyDataModel)dataList[number].Clone();
-                    exist[dataList[number].ID] = true;
+                    if ((MINID <= dataList[number].ID) && (MAXID >= dataList[number].ID))
+                    {
+                        exist[dataList[number].ID] = true;
+                    }
+                    // MIN MAX
                     number++;
+
 
                     Radar_Filter_Setting();
                     radar_RotateShift();
                     test_code();
+                    // 현재 테스트 
+
+
                     Check_New_Obj();
 
                     Lut();
@@ -429,21 +441,21 @@ namespace Radar_Analysis_Program
             {
                 if (exist[i])
                 {
-                    Filter_Nofobj(i);
-                    Filter_Distance(i);
-                    Filter_Azimuth(i);
-                    Filter_VrelOncome(i);
-                    Filter_VrelDepart(i);
-                    Filter_RCS(i);
-                    Filter_Lifetime(i);
-                    Filter_Size(i);
-                    Filter_ProbExists(i);
-                    Filter_X(i);
-                    Filter_Y(i);
-                    Filter_VYRightLeft(i);
-                    Filter_VXOncome(i);
-                    Filter_VYLeftRight(i);
-                    Filter_VXDepart(i);
+                    //Filter_Nofobj(i);
+                    //Filter_Distance(i);
+                    //Filter_Azimuth(i);
+                    //Filter_VrelOncome(i);
+                    //Filter_VrelDepart(i);
+                    //Filter_RCS(i);
+                    //Filter_Lifetime(i);
+                    //Filter_Size(i);
+                    //Filter_ProbExists(i);
+                    //Filter_X(i);
+                    //Filter_Y(i);
+                    //Filter_VYRightLeft(i);
+                    //Filter_VXOncome(i);
+                    //Filter_VYLeftRight(i);
+                    //Filter_VXDepart(i);
                 }
             }
         }
@@ -512,8 +524,8 @@ namespace Radar_Analysis_Program
                     if (this_frame_data[i].Velocity <= 3.0 || this_frame_data[i].VrelLat > 13 || this_frame_data[i].VrelLat < -13) //가로 방향 큰 값. 
                         this_frame_data[i].Noise = true;
 
-                    if (this_frame_data[i].Length < 0.8)
-                        this_frame_data[i].Noise = true;
+                    //if (this_frame_data[i].Length < 0.8)
+                    //    this_frame_data[i].Noise = true;
 
                     if (this_frame_data[i].Class == 7 && this_frame_data[i].ProbOfExist <= 3)  //확률 낮고 모르는 객체
                         this_frame_data[i].Noise = true;
@@ -568,14 +580,35 @@ namespace Radar_Analysis_Program
                 }
             }
         }
+        //double KalmanFilter(double X, double Z, double P_value)
+        //{
+        //    double x_next, P_next, x, P, K, Q, R;
+
+        //    //P = P_value;
+        //    //Q = 0.022;
+        //    //R = 0.617;  // 측정 잡음 공분산 높을 수록  보정
+
+
+        //    P = P_value;
+        //    Q = 0.005;
+        //    R = 0.1;  // 측정 잡음 공분산 높을 수록  보정
+
+        //    x_next = X;
+        //    P_next = P + Q;
+        //    K = P_next / (P_next + R);
+        //    x = x_next + K * (Z - x_next);
+        //    P = (1 - K) * P_next;
+
+        //    return x;
+        //}
 
         double KalmanFilter(double X, double Z, double P_value)
         {
             double x_next, P_next, x, P, K, Q, R;
 
-            P = P_value;
-            Q = 0.022;
-            R = 0.617;  // 측정 잡음 공분산 높을 수록  보정
+            P = P_value;  // 초기 상태 추정 오차 공분산
+            Q = 0.001;    // Adjust Q based on your preference
+            R = 0.1;
 
             x_next = X;
             P_next = P + Q;
@@ -585,6 +618,24 @@ namespace Radar_Analysis_Program
 
             return x;
         }
+
+        double KalmanFilter2(double X, double Z, double P_value)
+        {
+            double x_next, P_next, x, P, K, Q, R;
+
+            P = P_value;  // 초기 상태 추정 오차 공분산
+            Q = 0.001;    // Adjust Q based on your preference
+            R = 0.1;
+
+            x_next = X;
+            P_next = P + Q;
+            K = P_next / (P_next + R);
+            x = x_next + K * (Z - x_next);
+            P = (1 - K) * P_next;
+
+            return x;
+        }
+
         private void Object_Kalman()
         {
             for (int i = 0; i < 200; i++)
@@ -616,7 +667,7 @@ namespace Radar_Analysis_Program
                             if (Math.Abs(last_data_DistLat - this_frame_data[i].DistLat) < 10 && Math.Abs(last_data_DistLong - this_frame_data[i].DistLong) < 30)
                             {
                                 this_frame_data[i].DistLat = KalmanFilter(last_data_DistLat, this_frame_data[i].DistLat, 0.0);
-                                this_frame_data[i].DistLong = KalmanFilter(last_data_DistLong, this_frame_data[i].DistLong, 1.0);
+                                this_frame_data[i].DistLong = KalmanFilter2(last_data_DistLong, this_frame_data[i].DistLong, 1.0);
                             }
                             else   // 거리가 멀어졌으면 같은 id 다른 객체가 입력됨. 그러므로 삭제   
                             {    // ( 선형 알고리즘에 의해 가까울 수 밖에 없음. )
@@ -647,7 +698,7 @@ namespace Radar_Analysis_Program
 
                                     this_frame_data[change_id].Timestamp = Obj_inf[change_id].Last.Value.Timestamp;
                                     this_frame_data[change_id].DistLat = KalmanFilter(last_last_data_DistLat, last_data_DistLat, 0.0);
-                                    this_frame_data[change_id].DistLong = KalmanFilter(last_last_data_DistLong, last_data_DistLong, 1.0);
+                                    this_frame_data[change_id].DistLong = KalmanFilter2(last_last_data_DistLong, last_data_DistLong, 1.0);
 
                                 }
 
@@ -659,7 +710,7 @@ namespace Radar_Analysis_Program
 
                             this_frame_data[i].Timestamp = Obj_inf[i].Last.Value.Timestamp;
                             this_frame_data[i].DistLat = KalmanFilter(last_last_data_DistLat, last_data_DistLat, 0.0);
-                            this_frame_data[i].DistLong = KalmanFilter(last_last_data_DistLong, 3.2 * last_data_DistLong - 2.2 * last_last_data_DistLong, 1.0);
+                            this_frame_data[i].DistLong = KalmanFilter2(last_last_data_DistLong, 3.2 * last_data_DistLong - 2.2 * last_last_data_DistLong, 1.0);
 
                         }
 
@@ -700,7 +751,7 @@ namespace Radar_Analysis_Program
 
                             this_frame_data[change_id].Timestamp = Obj_inf[change_id].Last.Value.Timestamp;
                             this_frame_data[change_id].DistLat = KalmanFilter(last_last_data_DistLat, last_data_DistLat, 0.0);
-                            this_frame_data[change_id].DistLong = KalmanFilter(last_last_data_DistLong, last_data_DistLong, 1.0);
+                            this_frame_data[change_id].DistLong = KalmanFilter2(last_last_data_DistLong, last_data_DistLong, 1.0);
 
                         }
 
@@ -809,25 +860,25 @@ namespace Radar_Analysis_Program
                         Obj_inf[i].RemoveFirst();
                 }
 
-                //else
-                //{
-                //    if (Obj_inf[i].Count != 0)
-                //    {
-                //        TimeSpan difTime = dbcompareDT - Obj_inf[i].Last.Value.Timestamp;
+                else
+                {
+                    if (Obj_inf[i].Count != 0)
+                    {
+                        TimeSpan difTime = dbcompareDT - Obj_inf[i].Last.Value.Timestamp;
 
-                //        if ((difTime.Seconds > 0) || (difTime.Milliseconds > 300))
-                //        {
-                //            Obj_inf[i].Clear();
+                        if ((difTime.Seconds > 0) || (difTime.Milliseconds > 300))
+                        {
+                            Obj_inf[i].Clear();
 
-                //            if (Data_Draw.Children.Contains(rectangles[i]))
-                //            {
-                //                Data_Draw.Children.Remove(rectangles[i]);
-                //                textBoxes[i].Visibility = Visibility.Hidden;
-                //            }
-                //        }
+                            if (Data_Draw.Children.Contains(rectangles[i]))
+                            {
+                                Data_Draw.Children.Remove(rectangles[i]);
+                                textBoxes[i].Visibility = Visibility.Hidden;
+                            }
+                        }
 
-                //    }
-                //}
+                    }
+                }
 
             }
         }
@@ -872,7 +923,7 @@ namespace Radar_Analysis_Program
                         {
                             TimeSpan difTime = dbcompareDT - Obj_inf[i].Last.Value.Timestamp;
 
-                            //System.Console.WriteLine(difTime);
+                            System.Console.WriteLine(difTime);
 
 
                             if (difTime.Milliseconds > 300)
@@ -888,6 +939,7 @@ namespace Radar_Analysis_Program
                             }
                         }
                     }
+
                 }
 
             }
@@ -906,7 +958,8 @@ namespace Radar_Analysis_Program
 
 
 
-                            if ((difTime.Seconds > 2) || (difTime.Milliseconds > 2000))
+                            //if ((difTime.Seconds > 2) || (difTime.Milliseconds > 2000))
+                            if (difTime.Milliseconds > 100)
                             {
                                 Obj_inf[i].Clear();
 
@@ -1085,7 +1138,7 @@ namespace Radar_Analysis_Program
             try
             {
                 connection.Open();
-                string query = "SELECT * FROM real_data where time BETWEEN" + "'" + first + "'" + "AND" + "'" + second + "'" + ";";
+                string query = "SELECT * FROM test_1128_gc where time BETWEEN" + "'" + first + "'" + "AND" + "'" + second + "'" + ";";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, connection))
                 {
@@ -1127,7 +1180,7 @@ namespace Radar_Analysis_Program
                             // Other
                             data.Timestamp = (DateTime)reader["TIME"];
                             data.Distance = Math.Sqrt(Math.Pow(data.DistLat, 2) + Math.Pow(data.DistLong, 2));
-                            data.Velocity = Math.Sqrt(Math.Pow(data.VrelLat, 2) + Math.Pow(data.VrelLong, 2));
+                            data.Velocity = 3.6*Math.Sqrt(Math.Pow(data.VrelLat, 2) + Math.Pow(data.VrelLong, 2));
                             data.Size = data.Length * data.Width;
                             data.Zone = 0;
 

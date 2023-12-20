@@ -4,11 +4,11 @@
 winexe
 C#
 .cs
-C:\Users\hbrain\Desktop\레이더 분석 프로그램\Radar-Analysis-Program\Radar_Analysis_Program\obj\Debug\
+C:\Users\hbrain\Desktop\레이더 분석 프로그램\Radar-Analysis-Program\Radar_Analysis_Program\obj\Release\
 Radar_Analysis_Program
 none
 false
-DEBUG;TRACE
+TRACE
 C:\Users\hbrain\Desktop\레이더 분석 프로그램\Radar-Analysis-Program\Radar_Analysis_Program\App.xaml
 32094228831
 
@@ -16,5 +16,5 @@ C:\Users\hbrain\Desktop\레이더 분석 프로그램\Radar-Analysis-Program\Rad
 231611262076
 fSetting.xaml;MainWindow.xaml;Window1.xaml;
 
-False
+True
 
