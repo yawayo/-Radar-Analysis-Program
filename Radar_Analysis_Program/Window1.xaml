@@ -93,10 +93,10 @@
             <TextBox Grid.Row="3" x:Name="MINIDText" x:FieldModifier="private" Text="0" Width="50" Height="23" HorizontalAlignment="Center" TextChanged="MINID_Value_Changed" PreviewTextInput="NumberValidationTextBox"/>
             <Label Grid.Row="4" Content="MAX ID" Foreground="White" FontSize="14" FontFamily="KoPub바탕체_Pro Medium" HorizontalAlignment="Center"/>
             <TextBox Grid.Row="4" x:Name="MAXIDText" x:FieldModifier="private" Text="200" Width="50" Height="23" HorizontalAlignment="Center" TextChanged="MAXID_Value_Changed" PreviewTextInput="NumberValidationTextBox"/>
-            <CheckBox Grid.Row="7" x:Name ="apply_algorithm" Content="Kalman" FontSize="12" IsChecked="False" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <CheckBox Grid.Row="7" x:Name ="apply_algorithm" Content="Kalman" FontSize="12" IsChecked="True" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,25"/>
             <Button Grid.Row="8" x:Name="Save_Setting_Value_btn" FontSize="16" FontWeight="Bold"  Content="Save" Width="50" Height="23" Click="Save_Setting_Value_Click"/>
         </Grid>
-        
+
         <Border Grid.Row="2" Grid.Column="1" Grid.RowSpan="2" BorderBrush="White" BorderThickness="1">
             <Grid x:Name="grid" Background="#00000000" >
                 <Grid.RowDefinitions>
@@ -283,7 +283,8 @@
                         <CheckBox  x:Name ="text_length" Content ="Length"  FontSize="12" IsChecked="False" Foreground="White"/>
                         <CheckBox  x:Name ="text_width" Content ="Width"  FontSize="12" IsChecked="False" Foreground="White"/>
                         <CheckBox  x:Name ="text_DynProp" Content ="DynProp"  FontSize="12" IsChecked="False" Foreground="White"/>
-                        <CheckBox  x:Name ="text_ObjCount" Content ="Size"  FontSize="12" IsChecked="False" Foreground="White"/>
+                        <CheckBox  x:Name ="text_ObjSize" Content ="Size"  FontSize="12" IsChecked="False" Foreground="White"/>
+                        <CheckBox  x:Name ="text_ObjCount" Content ="Count"  FontSize="12" IsChecked="False" Foreground="White"/>
                     </WrapPanel>
                 </ScrollViewer>
 

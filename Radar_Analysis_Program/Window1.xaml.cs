@@ -31,6 +31,7 @@ namespace Radar_Analysis_Program
 
         TextBox[] textBoxes = new TextBox[MAX_NODE];
         Rectangle[] rectangles = new Rectangle[MAX_NODE];
+        Polyline[] merge_line = new Polyline[MAX_NODE];
         Polyline[] dist_lines = new Polyline[20];
         Grid[] dist_line_texts = new Grid[20];
         Polyline[] car_lanes = new Polyline[MAX_NODE];
@@ -177,7 +178,7 @@ namespace Radar_Analysis_Program
             public bool Noise;
             public bool Virtual;
             public bool Merging;
-            public bool Merged;
+            public int Merged;
 
             public bool Finish_Analyzing;
 
@@ -213,8 +214,8 @@ namespace Radar_Analysis_Program
         #region Draw Func
         private void Set_Obj_TextBox()
         {
-            checkBoxes = new CheckBox[] { text_time, text_id, text_distlat, text_distlong, text_vrellat, text_vrellong, text_velocity, text_rsc, text_probofexist, text_class, text_zone, text_length, text_width, text_DynProp, text_ObjCount };
-            checkbox_name = new String[] { "Time", "ID", "DistLat", "DistLong", "VrelLat", "VrelLong", "Velocity", "RCS", "ProbOfExist", "Class", "Zone", "Length", "Width", "DynProp", "Size" };
+            checkBoxes = new CheckBox[] { text_time, text_id, text_distlat, text_distlong, text_vrellat, text_vrellong, text_velocity, text_rsc, text_probofexist, text_class, text_zone, text_length, text_width, text_DynProp, text_ObjSize, text_ObjCount };
+            checkbox_name = new String[] { "Time", "ID", "DistLat", "DistLong", "VrelLat", "VrelLong", "Velocity", "RCS", "ProbOfExist", "Class", "Zone", "Length", "Width", "DynProp", "Size", "Count" };
 
             for (int i = 0; i < MAX_NODE; i++)
             {
@@ -413,17 +414,15 @@ namespace Radar_Analysis_Program
                     Radar_RotateShift();
                     test_code();
                     Check_New_Obj();
-
-                    //Lut();
                     if((bool)apply_algorithm.IsChecked)
                         Object_Kalman();
+
                     Check_zone_index();
 
-                    //Merge_Obj();
+                    Merge_Obj();
 
                     Save_this_frame_obj_data();
                     Draw_this_frame_obj_data();
-                    //delete();
                     Clear_this_frame_obj_data();
                 }
             }
@@ -433,11 +432,23 @@ namespace Radar_Analysis_Program
             Rectangle rect = new Rectangle
             {
                 Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61)),
-                StrokeThickness = 15
+                StrokeThickness = 0
             };
             rect.Tag = index;
             rectangles[index] = rect;
             Data_Draw.Children.Add(rectangles[index]);
+
+            Polyline line = new Polyline();
+            line.Points = new PointCollection()
+            {
+                new System.Windows.Point(0, 0),
+                new System.Windows.Point(0, 0)
+            };
+            line.Stroke = Brushes.Yellow;
+            line.StrokeThickness = 1;
+            line.Visibility = Visibility.Hidden;
+            merge_line[index] = line;
+            Data_Draw.Children.Add(merge_line[index]);
 
             if (CheckBox.IsChecked == true)
                 textBoxes[index].Visibility = Visibility.Visible;
@@ -452,6 +463,8 @@ namespace Radar_Analysis_Program
                 Data_Draw.Children.Remove(rectangles[index]);
                 textBoxes[index].Visibility = Visibility.Hidden;
             }
+            if (Data_Draw.Children.Contains(merge_line[index]))
+                Data_Draw.Children.Remove(merge_line[index]);
         }
         private void clear_Obj_data()
         {
@@ -462,6 +475,8 @@ namespace Radar_Analysis_Program
                     Data_Draw.Children.Remove(rectangles[i]);
                     textBoxes[i].Visibility = Visibility.Hidden;
                 }
+                if (Data_Draw.Children.Contains(merge_line[i]))
+                    Data_Draw.Children.Remove(merge_line[i]);
                 Obj_inf[i].Clear();
             }
             Clear_this_frame_obj_data();
@@ -510,21 +525,23 @@ namespace Radar_Analysis_Program
             {
                 if (exist[i])
                 {
-                    if (Obj_inf[i].Count != 0)
+                    if (Obj_inf[i].Count >= 10)
                     {
-                        if (Obj_inf[i].Count >= 5)
+                        this_frame_data[i].Finish_Analyzing = true;
+                        MyDataModel First_obj = Obj_inf[i].First.Value;
+                        float dif_Dist = (float)Math.Sqrt(Math.Pow(this_frame_data[i].DistLong - First_obj.DistLong, 2) + Math.Pow(this_frame_data[i].DistLat - First_obj.DistLat, 2));
+                        if (dif_Dist < 5)
                         {
-                            this_frame_data[i].Finish_Analyzing = true;
-                            MyDataModel First_obj = Obj_inf[i].First.Value;
-                            if (Math.Abs(First_obj.DistLat - this_frame_data[i].DistLat) < 3 && Math.Abs(First_obj.DistLong - this_frame_data[i].DistLong) < 3)
-                            {
-                                this_frame_data[i].Noise = true;
-                            }
+                            this_frame_data[i].Noise = true;
                         }
+                    }
+                    if(Obj_inf[i].Count != 0)
+                    {
                         MyDataModel Last_obj = Obj_inf[i].Last.Value;
-                        if (((Math.Abs(Last_obj.DistLong - this_frame_data[i].DistLong) > 50) || (Math.Abs(Last_obj.DistLat - this_frame_data[i].DistLat) > 10)) ||
-                            ((Math.Abs(Last_obj.VrelLat - this_frame_data[i].VrelLat) > 10) || (Math.Abs(Last_obj.VrelLong - this_frame_data[i].VrelLong) > 10)))
+                        float dif_Dist = (float)Math.Sqrt(Math.Pow(this_frame_data[i].DistLong - Last_obj.DistLong, 2) + Math.Pow(this_frame_data[i].DistLat - Last_obj.DistLat, 2));
+                        if (dif_Dist > 10)
                         {
+                            this_frame_data[i].Finish_Analyzing = false;
                             int merge_id = 100;
                             while (merge_id < MAX_NODE)
                             {
@@ -537,7 +554,6 @@ namespace Radar_Analysis_Program
                                 }
                                 merge_id++;
                             }
-                            remove_Obj_data(i);
                         }
                     }
                 }
@@ -566,27 +582,10 @@ namespace Radar_Analysis_Program
 
                     if (this_frame_data[i].DistLat < 0 && this_frame_data[i].VrelLong < 0)
                         this_frame_data[i].Noise = true;
-                }
-            }
-        }
-        private void Lut()
-        {
-            for (int j = 100; j < MAX_NODE; j++)
-            {
-                if (exist[j])
-                {
-                    for (int i = 0; i < 100; i++)
-                    {
-                        if (exist[i] && exist[j])
-                        {
-                            if (Math.Abs(Obj_inf[j].Last.Value.DistLat - this_frame_data[i].DistLat) < 3 && Math.Abs(Obj_inf[j].Last.Value.DistLong - this_frame_data[i].DistLong) < 10 && j - i != 100)
-                            {
-                                Obj_inf[i] = new LinkedList<MyDataModel>(Obj_inf[j]);
-                                remove_Obj_data(j);
-                                exist[j] = false;
-                            }
-                        }
-                    }
+
+
+                    if (this_frame_data[i].DistLong > 100.0)
+                        this_frame_data[i].Noise = true;
                 }
             }
         }
@@ -615,18 +614,13 @@ namespace Radar_Analysis_Program
             {
                 if (exist[i])  //부드럽게 하는 보정 부분
                 {
-                    if (Obj_inf[i].Count >= 2)
+                    if (this_frame_data[i].Finish_Analyzing)
                     {
                         double last_data_DistLat = Obj_inf[i].Last.Value.DistLat;
                         double last_data_DistLong = Obj_inf[i].Last.Value.DistLong;
-                        double last_last_data_DistLat = Obj_inf[i].Last.Previous.Value.DistLat;
-                        double last_last_data_DistLong = Obj_inf[i].Last.Previous.Value.DistLong;
 
-                        //if (Math.Abs(last_data_DistLat - this_frame_data[i].DistLat) < 10 && Math.Abs(last_data_DistLong - this_frame_data[i].DistLong) < 30)
-                        {
-                            this_frame_data[i].DistLat = kalmanFilter(last_data_DistLat, this_frame_data[i].DistLat, 0.0);
-                            this_frame_data[i].DistLong = kalmanFilter(last_data_DistLong, this_frame_data[i].DistLong, 1.0);
-                        }
+                        this_frame_data[i].DistLat = kalmanFilter(last_data_DistLat, this_frame_data[i].DistLat, 0.0);
+                        this_frame_data[i].DistLong = kalmanFilter(last_data_DistLong, this_frame_data[i].DistLong, 1.0);
                     }
                 }
                 else
@@ -696,56 +690,63 @@ namespace Radar_Analysis_Program
         }
         private void Merge_Obj()
         {
-            double DistLatgap, DistLonggap, Velocity_gap;
-
-            int i = 0;
-            for (i = 0; i < MAX_NODE; i++)
+            for (int i = 0; i < MAX_NODE; i++)
             {
-                if (exist[i] && !this_frame_data[i].Merged && !this_frame_data[i].Noise && this_frame_data[i].Finish_Analyzing)
+                if (exist[i] && (Obj_inf[i].Count > 0))
                 {
-                    if (Obj_inf[i].Count > 0)
+                    if (Obj_inf[i].Last.Value.Merged != 0)
                     {
-                        this_frame_data[i].Merged = Obj_inf[i].Last.Value.Merged;
-                        this_frame_data[i].Merging = Obj_inf[i].Last.Value.Merging;
-                    }
-
-                    int j = 0;
-                    for (j = i; j < MAX_NODE; j++)
-                    {
-                        if (exist[j] && !this_frame_data[j].Merged && !this_frame_data[j].Noise && this_frame_data[j].Finish_Analyzing)
+                        if (Obj_inf[Obj_inf[i].Last.Value.Merged - 1].Count != 0)
                         {
-                            if (i != j)
-                            {
-                                DistLatgap = Math.Abs(this_frame_data[i].DistLat - this_frame_data[j].DistLat);
-                                DistLonggap = Math.Abs(this_frame_data[i].DistLong - this_frame_data[j].DistLong);
-                                Velocity_gap = Math.Abs(this_frame_data[i].Velocity - this_frame_data[j].Velocity);
+                            this_frame_data[i].Merged = Obj_inf[i].Last.Value.Merged;
+                        }
+                        else
+                        {
+                            this_frame_data[i].Merged = i + 1;
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < MAX_NODE - 1; i++)
+            {
+                if (exist[i] && (this_frame_data[i].Merged == 0) && !this_frame_data[i].Noise && this_frame_data[i].Finish_Analyzing)
+                {
+                    double DistLatgap, DistLonggap, Distgap, Velocity_gap;
+                    double min_Distgap = 1000;
 
-                                if ((DistLatgap <= 1.5) && (DistLonggap <= 12.0) && (Velocity_gap <= 1.0))
+                    for (int j = i + 1; j < MAX_NODE; j++)
+                    {
+                        if (exist[j] && (this_frame_data[j].Merged == 0) && !this_frame_data[j].Noise && this_frame_data[j].Finish_Analyzing)
+                        {
+                            DistLatgap = Math.Abs(this_frame_data[i].DistLat - this_frame_data[j].DistLat);
+                            DistLonggap = Math.Abs(this_frame_data[i].DistLong - this_frame_data[j].DistLong);
+                            Distgap = Math.Sqrt(Math.Pow(DistLatgap, 2) + Math.Pow(DistLonggap, 2));
+                            Velocity_gap = Math.Abs(this_frame_data[i].Velocity - this_frame_data[j].Velocity);
+
+                            if ((DistLatgap <= 3) && (DistLonggap <= 12.0)  && (Velocity_gap <= 3.0))
+                            {
+                                if ((DistLatgap <= 1.5) && (DistLonggap <= 10.0) && (Velocity_gap <= 1.0))
                                 {
                                     if (this_frame_data[i].Virtual != this_frame_data[j].Virtual)
                                     {
                                         if (this_frame_data[i].Virtual)
                                         {
-                                            if (Obj_inf[j].Count != 0)
-                                            {
-                                                foreach (MyDataModel item in Obj_inf[j])
-                                                    Obj_inf[i].AddLast(item);
-                                            }
                                             remove_Obj_data(j);
+                                            insert_Obj_data(j);
                                             Obj_inf[j] = new LinkedList<MyDataModel>(Obj_inf[i]);
+                                            remove_Obj_data(i);
+                                            exist[i] = false;
                                         }
                                         else
                                         {
-                                            if (Obj_inf[i].Count != 0)
-                                            {
-                                                foreach (MyDataModel item in Obj_inf[i])
-                                                    Obj_inf[j].AddLast(item);
-                                            }
                                             remove_Obj_data(i);
+                                            insert_Obj_data(i);
                                             Obj_inf[i] = new LinkedList<MyDataModel>(Obj_inf[j]);
+                                            remove_Obj_data(j);
+                                            exist[j] = false;
                                         }
                                     }
-                                    else if(this_frame_data[i].Virtual && this_frame_data[j].Virtual)
+                                    else if (this_frame_data[i].Virtual && this_frame_data[j].Virtual)
                                     {
 
                                     }
@@ -753,42 +754,45 @@ namespace Radar_Analysis_Program
                                     {
                                         if (Obj_inf[i].Count <= Obj_inf[j].Count)
                                         {
-                                            this_frame_data[i].Merged = true;
-                                            this_frame_data[j].Merging = true;
+                                            if (min_Distgap > Distgap)
+                                            {
+                                                this_frame_data[i].Merged = j + 1;
+                                                this_frame_data[j].Merging = true;
+                                                min_Distgap = Distgap;
+                                            }
                                         }
                                         else if (Obj_inf[j].Count <= Obj_inf[i].Count)
                                         {
-                                            this_frame_data[j].Merged = true;
-                                            this_frame_data[i].Merging = true;
+                                            if (min_Distgap > Distgap)
+                                            {
+                                                this_frame_data[j].Merged = i + 1;
+                                                this_frame_data[i].Merging = true;
+                                                min_Distgap = Distgap;
+                                            }
                                         }
                                     }
                                 }
-                                else if ((DistLatgap <= 3) && (DistLonggap <= 10.0) && (Velocity_gap <= 3.0))
+                                else
                                 {
-                                    /*if (this_frame_data[i].Virtual != this_frame_data[j].Virtual)
+                                    if (this_frame_data[i].Virtual != this_frame_data[j].Virtual)
                                     {
                                         if (this_frame_data[i].Virtual)
                                         {
-                                            if (Obj_inf[j].Count != 0)
-                                            {
-                                                foreach (MyDataModel item in Obj_inf[j])
-                                                    Obj_inf[i].AddLast(item);
-                                            }
                                             remove_Obj_data(j);
+                                            insert_Obj_data(j);
                                             Obj_inf[j] = new LinkedList<MyDataModel>(Obj_inf[i]);
-
+                                            remove_Obj_data(i);
+                                            exist[i] = false;
                                         }
                                         else
                                         {
-                                            if (Obj_inf[i].Count != 0)
-                                            {
-                                                foreach (MyDataModel item in Obj_inf[i])
-                                                    Obj_inf[j].AddLast(item);
-                                            }
                                             remove_Obj_data(i);
+                                            insert_Obj_data(i);
                                             Obj_inf[i] = new LinkedList<MyDataModel>(Obj_inf[j]);
+                                            remove_Obj_data(j);
+                                            exist[j] = false;
                                         }
-                                    }*/
+                                    }
                                 }
                             }
                         }
@@ -807,8 +811,8 @@ namespace Radar_Analysis_Program
                         insert_Obj_data(i);
                     }
                     Obj_inf[i].AddLast(this_frame_data[i]);
-                    /*if (Obj_inf[i].Count >= 100)
-                        Obj_inf[i].RemoveFirst();*/
+                    if (Obj_inf[i].Count >= 100)
+                        Obj_inf[i].RemoveFirst();
                 }
                 else
                 {
@@ -824,8 +828,13 @@ namespace Radar_Analysis_Program
 
             }
         }
+
         private void Draw_this_frame_obj_data()
         {
+            int size_XL = 23;
+            int size_L = 15;
+            int size_M = 8;
+            int size_S = 3;
             for (int i = 0; i < MAX_NODE; i++)
             {
                 if (exist[i])
@@ -838,87 +847,79 @@ namespace Radar_Analysis_Program
                     {
                         if (!this_frame_data[i].Finish_Analyzing)
                         {
-                            rectangles[i].StrokeThickness = 8;
-                            rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(50, 50, 50));
-
-                            Canvas.SetLeft(rectangles[i], X - (rectangles[i].StrokeThickness / 2));
-                            Canvas.SetTop(rectangles[i], Y - rectangles[i].StrokeThickness);
-                            Canvas.SetLeft(textBoxes[i], X + 10);
-                            Canvas.SetTop(textBoxes[i], Y - 18);
+                            rectangles[i].StrokeThickness = size_S;
+                            rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(100, 100, 100));
 
                             rectangles[i].Visibility = Visibility.Visible;
                             textBoxes[i].Visibility = Visibility.Hidden;
                         }
                         else if (this_frame_data[i].Noise)
                         {
-                            rectangles[i].StrokeThickness = 3;
-                            rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(100, 100, 100));
-
-                            Canvas.SetLeft(rectangles[i], X - (rectangles[i].StrokeThickness / 2));
-                            Canvas.SetTop(rectangles[i], Y - rectangles[i].StrokeThickness);
+                            rectangles[i].StrokeThickness = size_S;
+                            rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(50, 50, 50));
 
                             rectangles[i].Visibility = Visibility.Visible;
                             textBoxes[i].Visibility = Visibility.Hidden;
                         }
-                        else if (this_frame_data[i].Merging)
+                        else if (this_frame_data[i].Merged != 0)
                         {
-                            rectangles[i].StrokeThickness = 20;
-                            rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61));
-
-                            Canvas.SetLeft(rectangles[i], X - (rectangles[i].StrokeThickness / 2));
-                            Canvas.SetTop(rectangles[i], Y - rectangles[i].StrokeThickness);
-                            Canvas.SetLeft(textBoxes[i], X + 10);
-                            Canvas.SetTop(textBoxes[i], Y - 18);
+                            rectangles[i].StrokeThickness = size_M;
+                            rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(255, 255, 0));
 
                             rectangles[i].Visibility = Visibility.Visible;
                             textBoxes[i].Visibility = Visibility.Visible;
                         }
-                        else if (this_frame_data[i].Merged)
-                        {
-                            rectangles[i].StrokeThickness = 8;
-                            rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(255, 255, 0));
-
-                            Canvas.SetLeft(rectangles[i], X - (rectangles[i].StrokeThickness / 2));
-                            Canvas.SetTop(rectangles[i], Y - rectangles[i].StrokeThickness);
-
-                            rectangles[i].Visibility = Visibility.Visible;
-                            textBoxes[i].Visibility = Visibility.Hidden;
-                        }
                         else if (this_frame_data[i].Virtual)
                         {
-                            rectangles[i].StrokeThickness = 15;
+                            rectangles[i].StrokeThickness = size_L;
                             rectangles[i].Stroke = new SolidColorBrush(Color.FromArgb(100, 244, 143, 61));
-                            Canvas.SetLeft(rectangles[i], X - (rectangles[i].StrokeThickness / 2));
-                            Canvas.SetTop(rectangles[i], Y - rectangles[i].StrokeThickness);
-                            Canvas.SetLeft(textBoxes[i], X + 10);
-                            Canvas.SetTop(textBoxes[i], Y - 18);
 
                             rectangles[i].Visibility = Visibility.Visible;
                             textBoxes[i].Visibility = Visibility.Visible;
                         }
                         else if (this_frame_data[i].Zone == 0)
                         {
-                            rectangles[i].StrokeThickness = 8;
+                            rectangles[i].StrokeThickness = size_M;
                             rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61));
-                            Canvas.SetLeft(rectangles[i], X - (rectangles[i].StrokeThickness / 2));
-                            Canvas.SetTop(rectangles[i], Y - rectangles[i].StrokeThickness);
-                            Canvas.SetLeft(textBoxes[i], X + 10);
-                            Canvas.SetTop(textBoxes[i], Y - 18);
+
+                            rectangles[i].Visibility = Visibility.Visible;
+                            textBoxes[i].Visibility = Visibility.Hidden;
+                        }
+                        else
+                        {
+                            rectangles[i].StrokeThickness = size_L;
+                            rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61));
 
                             rectangles[i].Visibility = Visibility.Visible;
                             textBoxes[i].Visibility = Visibility.Visible;
                         }
+                        Canvas.SetLeft(rectangles[i], X - (rectangles[i].StrokeThickness / 2));
+                        Canvas.SetTop(rectangles[i], Y - rectangles[i].StrokeThickness);
+                        Canvas.SetLeft(textBoxes[i], X + 10);
+                        Canvas.SetTop(textBoxes[i], Y - 18);
+
+                        if (this_frame_data[i].Merged != 0)
+                        {
+                            if (exist[this_frame_data[i].Merged - 1])
+                            {
+                                int X2 = (int)((Data_Draw.ActualWidth / 2) + (Data_Draw.ActualWidth / (max_lat * 2)) * (-1 * this_frame_data[this_frame_data[i].Merged - 1].DistLat));
+                                int Y2 = (int)(Data_Draw.ActualHeight * ((max_long + Dist_Lane_gap - this_frame_data[this_frame_data[i].Merged - 1].DistLong - (Dist_Lane_gap / 2)) / (max_long + Dist_Lane_gap)));
+
+
+                                merge_line[i].Points[0] = new System.Windows.Point(X, Y);
+                                merge_line[i].Points[1] = new System.Windows.Point(X2, Y2);
+                                Canvas.SetLeft(merge_line[i], 0);
+                                Canvas.SetTop(merge_line[i], 0);
+                                merge_line[i].Visibility = Visibility.Visible;
+                            }
+                            else
+                            {
+                                merge_line[i].Visibility = Visibility.Hidden;
+                            }
+                        }
                         else
                         {
-                            rectangles[i].StrokeThickness = 15;
-                            rectangles[i].Stroke = new SolidColorBrush(Color.FromRgb(244, 143, 61));
-                            Canvas.SetLeft(rectangles[i], X - (rectangles[i].StrokeThickness / 2));
-                            Canvas.SetTop(rectangles[i], Y - rectangles[i].StrokeThickness);
-                            Canvas.SetLeft(textBoxes[i], X + 10);
-                            Canvas.SetTop(textBoxes[i], Y - 18);
-
-                            rectangles[i].Visibility = Visibility.Visible;
-                            textBoxes[i].Visibility = Visibility.Visible;
+                            merge_line[i].Visibility = Visibility.Hidden;
                         }
                     }
                     else
@@ -932,59 +933,6 @@ namespace Radar_Analysis_Program
                 else
                 {
                     textBoxes[i].Visibility = Visibility.Hidden;
-                }
-            }
-        }
-        private void delete()     // 들어오지 않는 데이터 정리,      0보다 크면 보간 데이터 이므로 3초까지 봐줌 .
-        {
-            for (int i = 0; i < 100; i++)
-            {
-                if (exist[i])
-                {
-                    if (Obj_inf[i] != null)
-                    {
-                        if (Obj_inf[i].Count != 0)
-                        {
-                            TimeSpan difTime = dbcompareDT - Obj_inf[i].Last.Value.Timestamp;
-
-                            if (difTime.Milliseconds > 300)
-                            {
-                                Obj_inf[i].Clear();
-                                if (Data_Draw.Children.Contains(rectangles[i]))
-                                {
-                                    Data_Draw.Children.Remove(rectangles[i]);
-                                    rectangles[i] = null;
-                                    textBoxes[i].Visibility = Visibility.Hidden;
-                                }
-                            }
-                        }
-                    }
-                }
-
-            }
-            for (int i = 100; i < MAX_NODE; i++)
-            {
-                if (exist[i])
-                {
-                    if (Obj_inf[i] != null)
-                    {
-                        if (Obj_inf[i].Count != 0)
-                        {
-                            TimeSpan difTime = dbcompareDT - Obj_inf[i].Last.Value.Timestamp;
-
-                            if ((difTime.Seconds > 2) || (difTime.Milliseconds > 2000))
-                            {
-                                Obj_inf[i].Clear();
-                                if (Data_Draw.Children.Contains(rectangles[i]))
-                                {
-                                    Data_Draw.Children.Remove(rectangles[i]);
-                                    rectangles[i] = null;
-                                    textBoxes[i].Visibility = Visibility.Hidden;
-                                }
-                                exist[i] = false;
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -1144,7 +1092,7 @@ namespace Radar_Analysis_Program
             try
             {
                 connection.Open();
-                string query = "SELECT * FROM real_data where time BETWEEN" + "'" + first + "'" + "AND" + "'" + second + "'" + ";";
+                string query = "SELECT * FROM test_1128_gc where time BETWEEN" + "'" + first + "'" + "AND" + "'" + second + "'" + ";";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, connection))
                 {
@@ -1799,6 +1747,7 @@ namespace Radar_Analysis_Program
             }
             mediaElement.Position = TimeSpan.FromMilliseconds(slider.Value - slider.Minimum);
             mediaElement.LoadedBehavior = MediaState.Play;
+            draw_pause_btn();
             timer.Start();
         }
         #endregion
@@ -1823,13 +1772,13 @@ namespace Radar_Analysis_Program
         private string CheckBox_print(int index)
         {
             string pprint = "";
-            for (int i = 0; i < 15; i++)
+            for (int i = 0; i < 16; i++)
             {
                 string db_data = "";
                 if (checkBoxes[i].IsChecked == true)
                 {
                     if (i == 0) db_data = this_frame_data[index].Timestamp.ToString();
-                    else if (i == 1) db_data = this_frame_data[index].ID.ToString();
+                    else if (i == 1) db_data = index.ToString();//this_frame_data[index].ID.ToString();
                     else if (i == 2) db_data = this_frame_data[index].DistLat.ToString("0.0");
                     else if (i == 3) db_data = this_frame_data[index].DistLong.ToString("0.0");
                     else if (i == 4) db_data = this_frame_data[index].VrelLat.ToString("0.0");
@@ -1841,8 +1790,10 @@ namespace Radar_Analysis_Program
                     else if (i == 10) db_data = this_frame_data[index].Zone.ToString();
                     else if (i == 11) db_data = this_frame_data[index].Length.ToString("0.0");
                     else if (i == 12) db_data = this_frame_data[index].Width.ToString("0.0");
-                    else if (i == 13) db_data = this_frame_data[index].DynProp.ToString();
-                    else if (i == 14) db_data = (this_frame_data[index].Length * this_frame_data[index].Width).ToString("0.0");//Obj_inf[index].Count.ToString();
+                    //else if (i == 13) db_data = this_frame_data[index].DynProp.ToString();
+                    else if (i == 13) db_data = this_frame_data[index].Merged.ToString();
+                    else if (i == 14) db_data = (this_frame_data[index].Length * this_frame_data[index].Width).ToString("0.0");
+                    else if (i == 15) db_data = Obj_inf[index].Count.ToString();
                     pprint += checkbox_name[i] + " = " + db_data + '\n';
                 }
             }
