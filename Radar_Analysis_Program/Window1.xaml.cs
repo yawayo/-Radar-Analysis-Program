@@ -1144,7 +1144,7 @@ namespace Radar_Analysis_Program
             try
             {
                 connection.Open();
-                string query = "SELECT * FROM real_data where time BETWEEN" + "'" + first + "'" + "AND" + "'" + second + "'" + ";";
+                string query = "SELECT * FROM test_gc_1128 where time BETWEEN" + "'" + first + "'" + "AND" + "'" + second + "'" + ";";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, connection))
                 {
